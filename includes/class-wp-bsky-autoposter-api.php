@@ -172,6 +172,7 @@ class WP_BSky_AutoPoster_API {
             'repo' => $this->session['did'],
             'collection' => 'app.bsky.feed.post',
             'record' => array(
+                '$type' => 'app.bsky.feed.post',
                 'text' => $message,
                 'createdAt' => gmdate('c'),
                 'langs' => array('en'),
@@ -181,8 +182,9 @@ class WP_BSky_AutoPoster_API {
         // Add embed if we have preview data
         if (!empty($preview_data['uri'])) {
             $embed = array(
-                'type' => 'app.bsky.embed.external',
+                '$type' => 'app.bsky.embed.external',
                 'external' => array(
+                    '$type' => 'app.bsky.embed.external#external',
                     'uri' => $preview_data['uri'],
                     'title' => $preview_data['title'],
                     'description' => $preview_data['description'],
