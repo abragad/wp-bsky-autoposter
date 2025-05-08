@@ -141,6 +141,9 @@ class WP_BSky_AutoPoster_API {
         $image_ref = null;
         if (!empty($preview_data['thumb'])) {
             $image_ref = $this->upload_image($preview_data['thumb']);
+            if ($image_ref) {
+                $this->log_success('Successfully uploaded image for post: ' . $preview_data['uri']);
+            }
         }
 
         // Prepare the post data
@@ -195,11 +198,42 @@ class WP_BSky_AutoPoster_API {
 
         $body = json_decode(wp_remote_retrieve_body($response), true);
         if (isset($body['uri'])) {
+            $this->log_success('Successfully posted to Bluesky: ' . $body['uri']);
             return true;
         }
 
         $this->log_error('Failed to post to Bluesky: Invalid response from API');
         return false;
+    }
+
+    /**
+     * Get the log file path.
+     *
+     * @since    1.0.0
+     * @return   string    The path to the log file.
+     */
+    private function get_log_file_path() {
+        $upload_dir = wp_upload_dir();
+        return $upload_dir['basedir'] . '/wp-bsky-autoposter.log';
+    }
+
+    /**
+     * Write a message to the log file.
+     *
+     * @since    1.0.0
+     * @param    string    $message    The message to log.
+     * @param    string    $type       The type of message (error/success).
+     */
+    private function write_log($message, $type = 'info') {
+        $log_file = $this->get_log_file_path();
+        $timestamp = current_time('Y-m-d H:i:s');
+        $log_message = sprintf("[%s] [%s] %s\n", $timestamp, strtoupper($type), $message);
+        
+        // Create the uploads directory if it doesn't exist
+        wp_mkdir_p(dirname($log_file));
+        
+        // Write to the log file
+        file_put_contents($log_file, $log_message, FILE_APPEND);
     }
 
     /**
@@ -209,8 +243,16 @@ class WP_BSky_AutoPoster_API {
      * @param    string    $message    The error message.
      */
     private function log_error($message) {
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('Bluesky AutoPoster: ' . $message);
-        }
+        $this->write_log($message, 'error');
+    }
+
+    /**
+     * Log a success message.
+     *
+     * @since    1.0.0
+     * @param    string    $message    The success message.
+     */
+    private function log_success($message) {
+        $this->write_log($message, 'success');
     }
 } 
