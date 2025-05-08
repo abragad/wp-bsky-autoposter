@@ -45,6 +45,9 @@ class WP_BSky_AutoPoster_API {
      * @return   bool      True if authentication was successful.
      */
     public function authenticate($handle, $password) {
+        // Ensure handle doesn't have @ prefix
+        $handle = ltrim($handle, '@');
+
         $response = wp_remote_post($this->api_endpoint . 'com.atproto.server.createSession', array(
             'headers' => array(
                 'Content-Type' => 'application/json',
@@ -69,6 +72,7 @@ class WP_BSky_AutoPoster_API {
                 'did' => $body['did'],
             );
             update_option('wp_bsky_autoposter_session', $this->session);
+            $this->log_success('Successfully authenticated with Bluesky as ' . $handle);
             return true;
         }
 

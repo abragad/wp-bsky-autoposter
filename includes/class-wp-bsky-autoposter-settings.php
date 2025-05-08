@@ -140,7 +140,7 @@ class WP_BSky_AutoPoster_Settings {
         <input type="text" id="bluesky_handle" name="wp_bsky_autoposter_settings[bluesky_handle]" 
                value="<?php echo esc_attr($value); ?>" class="regular-text">
         <p class="description">
-            <?php _e('Enter your Bluesky handle (e.g., @username.bsky.social) or DID.', 'wp-bsky-autoposter'); ?>
+            <?php _e('Enter your Bluesky handle (e.g., username.bsky.social) or DID. The @ symbol is optional.', 'wp-bsky-autoposter'); ?>
         </p>
         <?php
     }
@@ -267,11 +267,14 @@ class WP_BSky_AutoPoster_Settings {
 
         // Validate Bluesky handle
         $valid['bluesky_handle'] = sanitize_text_field($input['bluesky_handle']);
-        if (!empty($valid['bluesky_handle']) && !preg_match('/^(@[a-zA-Z0-9.-]+|did:[a-zA-Z0-9:]+)$/', $valid['bluesky_handle'])) {
+        // Remove @ if present
+        $valid['bluesky_handle'] = ltrim($valid['bluesky_handle'], '@');
+        
+        if (!empty($valid['bluesky_handle']) && !preg_match('/^([a-zA-Z0-9.-]+|did:[a-zA-Z0-9:]+)$/', $valid['bluesky_handle'])) {
             add_settings_error(
                 'wp_bsky_autoposter_settings',
                 'invalid_handle',
-                __('Invalid Bluesky handle format.', 'wp-bsky-autoposter')
+                __('Invalid Bluesky handle format. Please enter a valid handle (e.g., username.bsky.social) or DID.', 'wp-bsky-autoposter')
             );
         }
 
@@ -313,6 +316,9 @@ class WP_BSky_AutoPoster_Settings {
         if (empty($handle) || empty($password)) {
             wp_send_json_error(array('message' => __('Please enter both Bluesky handle and app password.', 'wp-bsky-autoposter')));
         }
+
+        // Remove @ if present
+        $handle = ltrim($handle, '@');
 
         // Test connection
         $api = new WP_BSky_AutoPoster_API();
