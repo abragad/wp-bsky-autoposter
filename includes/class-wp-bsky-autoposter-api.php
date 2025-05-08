@@ -81,6 +81,82 @@ class WP_BSky_AutoPoster_API {
     }
 
     /**
+     * Refresh the authentication token.
+     *
+     * @since    1.0.0
+     * @return   bool    True if token refresh was successful.
+     */
+    private function refresh_token() {
+        if (empty($this->session) || empty($this->session['refreshJwt'])) {
+            return false;
+        }
+
+        $response = wp_remote_post($this->api_endpoint . 'com.atproto.server.refreshSession', array(
+            'headers' => array(
+                'Authorization' => 'Bearer ' . $this->session['refreshJwt'],
+                'Content-Type' => 'application/json',
+            ),
+        ));
+
+        if (is_wp_error($response)) {
+            $this->log_error('Token refresh failed: ' . $response->get_error_message());
+            return false;
+        }
+
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+        if (isset($body['accessJwt'])) {
+            $this->session['accessJwt'] = $body['accessJwt'];
+            $this->session['refreshJwt'] = $body['refreshJwt'];
+            update_option('wp_bsky_autoposter_session', $this->session);
+            $this->log_success('Successfully refreshed authentication token');
+            return true;
+        }
+
+        $this->log_error('Token refresh failed: Invalid response from Bluesky API');
+        return false;
+    }
+
+    /**
+     * Make an authenticated request to the Bluesky API.
+     *
+     * @since    1.0.0
+     * @param    string    $endpoint    The API endpoint.
+     * @param    array     $args        The request arguments.
+     * @return   array|WP_Error    The response or WP_Error on failure.
+     */
+    private function make_request($endpoint, $args = array()) {
+        if (empty($this->session)) {
+            $settings = get_option('wp_bsky_autoposter_settings');
+            if (!$this->authenticate($settings['bluesky_handle'], $settings['app_password'])) {
+                return new WP_Error('auth_failed', 'Authentication failed');
+            }
+        }
+
+        // Add authorization header
+        $args['headers'] = array_merge(
+            isset($args['headers']) ? $args['headers'] : array(),
+            array('Authorization' => 'Bearer ' . $this->session['accessJwt'])
+        );
+
+        $response = wp_remote_post($this->api_endpoint . $endpoint, $args);
+
+        // Check for expired token
+        if (!is_wp_error($response)) {
+            $body = json_decode(wp_remote_retrieve_body($response), true);
+            if (isset($body['error']) && $body['error'] === 'ExpiredToken') {
+                // Try to refresh the token
+                if ($this->refresh_token()) {
+                    // Retry the request with the new token
+                    $args['headers']['Authorization'] = 'Bearer ' . $this->session['accessJwt'];
+                    $response = wp_remote_post($this->api_endpoint . $endpoint, $args);
+                }
+            }
+        }
+
+        return $response;
+    }
+
+    /**
      * Upload an image to Bluesky.
      *
      * @since    1.0.0
@@ -103,9 +179,8 @@ class WP_BSky_AutoPoster_API {
         $image_type = wp_remote_retrieve_header($image_data, 'content-type');
 
         // Upload to Bluesky
-        $response = wp_remote_post($this->api_endpoint . 'com.atproto.repo.uploadBlob', array(
+        $response = $this->make_request('com.atproto.repo.uploadBlob', array(
             'headers' => array(
-                'Authorization' => 'Bearer ' . $this->session['accessJwt'],
                 'Content-Type' => $image_type,
             ),
             'body' => $image_content,
@@ -120,7 +195,6 @@ class WP_BSky_AutoPoster_API {
         $response_code = wp_remote_retrieve_response_code($response);
 
         if (isset($body['blob'])) {
-            // Return just the ref object from the blob
             return $body['blob']['ref'];
         }
 
@@ -210,9 +284,8 @@ class WP_BSky_AutoPoster_API {
         $this->log_success('Attempting to post with data: ' . wp_json_encode($post_data));
 
         // Send the post
-        $response = wp_remote_post($this->api_endpoint . 'com.atproto.repo.createRecord', array(
+        $response = $this->make_request('com.atproto.repo.createRecord', array(
             'headers' => array(
-                'Authorization' => 'Bearer ' . $this->session['accessJwt'],
                 'Content-Type' => 'application/json',
             ),
             'body' => json_encode($post_data),
