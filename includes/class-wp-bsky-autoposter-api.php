@@ -85,7 +85,7 @@ class WP_BSky_AutoPoster_API {
      *
      * @since    1.0.0
      * @param    string    $image_url    The URL of the image to upload.
-     * @return   string|false    The blob reference if successful, false otherwise.
+     * @return   array|false    The blob reference if successful, false otherwise.
      */
     private function upload_image($image_url) {
         if (empty($image_url)) {
@@ -119,8 +119,8 @@ class WP_BSky_AutoPoster_API {
         $body = json_decode(wp_remote_retrieve_body($response), true);
         $response_code = wp_remote_retrieve_response_code($response);
 
-        if (isset($body['blob']['ref']['$link'])) {
-            return $body['blob']['ref']['$link'];
+        if (isset($body['blob'])) {
+            return $body['blob'];
         }
 
         // Extract detailed error message
@@ -195,15 +195,16 @@ class WP_BSky_AutoPoster_API {
             if ($image_ref) {
                 $embed['external']['thumb'] = array(
                     '$type' => 'blob',
-                    'ref' => array(
-                        '$link' => $image_ref,
-                    ),
+                    'ref' => $image_ref,
                     'mimeType' => 'image/jpeg',
                 );
             }
 
             $post_data['record']['embed'] = $embed;
         }
+
+        // Log the post data for debugging
+        $this->log_success('Attempting to post with data: ' . wp_json_encode($post_data));
 
         // Send the post
         $response = wp_remote_post($this->api_endpoint . 'com.atproto.repo.createRecord', array(
