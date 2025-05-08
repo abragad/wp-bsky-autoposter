@@ -107,8 +107,13 @@ class WP_BSky_AutoPoster {
             return;
         }
 
-        // Skip if this is an update (post_date and post_modified are different)
-        if ($post->post_date !== $post->post_modified) {
+        // Get the post's status
+        $post_status = get_post_status($post_id);
+        
+        // Skip if this is an update (not a new post or scheduled post being published)
+        if ($post_status !== 'publish' || 
+            ($post->post_date !== $post->post_modified && 
+             strtotime($post->post_modified) - strtotime($post->post_date) > 60)) {
             return;
         }
 
