@@ -107,6 +107,11 @@ class WP_BSky_AutoPoster {
             return;
         }
 
+        // Skip if this is an update (post_date and post_modified are different)
+        if ($post->post_date !== $post->post_modified) {
+            return;
+        }
+
         // Get plugin settings
         $settings = get_option('wp_bsky_autoposter_settings');
         if (empty($settings['bluesky_handle']) || empty($settings['app_password'])) {
