@@ -195,7 +195,11 @@ class WP_BSky_AutoPoster_API {
         $response_code = wp_remote_retrieve_response_code($response);
 
         if (isset($body['blob'])) {
-            return $body['blob']['ref'];
+            return array(
+                '$type' => 'blob',
+                'ref' => $body['blob']['ref'],
+                'mimeType' => 'image/jpeg'
+            );
         }
 
         // Extract detailed error message
