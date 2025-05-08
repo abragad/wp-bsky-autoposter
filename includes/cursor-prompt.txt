@@ -1,0 +1,55 @@
+Create a WordPress plugin named "AutoPoster to Bluesky" (directory name wp-bsky-autoposter) that automatically publishes a new post to a specified Bluesky profile when it's published.
+
+---
+
+**Functionality Requirements:**
+
+1. When a new post is published (`publish_post` action):
+   - Format the message using a customizable template that supports `{title}`, `{excerpt}`, `{link}` placeholders.
+   - Use the post's **canonical/public URL** for `{link}`.
+
+2. Immediately include a **rich link preview (social card)** in the Bluesky post:
+   - Use the `embed.external` type as per AT Protocol.
+   - Extract the following from the post’s Open Graph or post data:
+     - `uri`: The post URL.
+     - `title`: Post title.
+     - `description`: Post excerpt or meta description.
+     - `thumb`: Featured image — uploaded to Bluesky's blob endpoint.
+
+3. Use the AT Protocol (App Password) to authenticate and post:
+   - Authenticate using a username (handle) and app password (these will be set in plugin settings).
+   - Post to Bluesky using proper headers and payload to include `embed.external` with uploaded image.
+
+---
+
+**Settings Page:**
+
+- Create a settings page under Settings > "Bluesky AutoPoster" with fields:
+  - Bluesky handle (@handle.bsky.social or DID)
+  - App Password
+  - Post format template
+  - Optional: fallback text if excerpt is missing
+
+Use the WordPress Settings API and sanitize inputs properly.
+
+---
+
+**Best Practices:**
+
+- Use `wp_remote_post()` or `wp_safe_remote_post()` for HTTP calls.
+- Use WordPress functions to get post metadata (`get_the_excerpt()`, `get_the_post_thumbnail_url()`).
+- Upload the image to Bluesky via their blob upload endpoint before posting.
+- Handle and log errors with admin notices or a debug log.
+- Plugin is currently in English, but provide all strings for translation in a .po file
+
+---
+
+**File Structure Suggestions:**
+
+- Main plugin file: registration and hooks.
+- Separate files or functions for:
+  - Settings page
+  - Post formatting
+  - API communication (auth, blob upload, post submit)
+
+Comment and document code thoroughly. Follow WordPress PHP coding standards.
