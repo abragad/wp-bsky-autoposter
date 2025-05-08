@@ -120,7 +120,8 @@ class WP_BSky_AutoPoster_API {
         $response_code = wp_remote_retrieve_response_code($response);
 
         if (isset($body['blob'])) {
-            return $body['blob'];
+            // Return just the ref object from the blob
+            return $body['blob']['ref'];
         }
 
         // Extract detailed error message
