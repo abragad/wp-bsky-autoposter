@@ -117,11 +117,28 @@ class WP_BSky_AutoPoster_API {
         }
 
         $body = json_decode(wp_remote_retrieve_body($response), true);
+        $response_code = wp_remote_retrieve_response_code($response);
+
         if (isset($body['blob']['ref']['$link'])) {
             return $body['blob']['ref']['$link'];
         }
 
-        $this->log_error('Failed to upload image: Invalid response from Bluesky API');
+        // Extract detailed error message
+        $error_message = 'Unknown error';
+        if (isset($body['error'])) {
+            $error_message = $body['error'];
+        } elseif (isset($body['message'])) {
+            $error_message = $body['message'];
+        }
+
+        // Log detailed error information
+        $this->log_error(sprintf(
+            'Failed to upload image (HTTP %d): %s. Response: %s',
+            $response_code,
+            $error_message,
+            wp_json_encode($body)
+        ));
+
         return false;
     }
 
@@ -201,12 +218,29 @@ class WP_BSky_AutoPoster_API {
         }
 
         $body = json_decode(wp_remote_retrieve_body($response), true);
+        $response_code = wp_remote_retrieve_response_code($response);
+
         if (isset($body['uri'])) {
             $this->log_success('Successfully posted to Bluesky: ' . $body['uri']);
             return true;
         }
 
-        $this->log_error('Failed to post to Bluesky: Invalid response from API');
+        // Extract detailed error message
+        $error_message = 'Unknown error';
+        if (isset($body['error'])) {
+            $error_message = $body['error'];
+        } elseif (isset($body['message'])) {
+            $error_message = $body['message'];
+        }
+
+        // Log detailed error information
+        $this->log_error(sprintf(
+            'Failed to post to Bluesky (HTTP %d): %s. Response: %s',
+            $response_code,
+            $error_message,
+            wp_json_encode($body)
+        ));
+
         return false;
     }
 
