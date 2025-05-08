@@ -218,19 +218,48 @@ class WP_BSky_AutoPoster_API {
     }
 
     /**
+     * Get hashtags from post tags.
+     *
+     * @since    1.0.0
+     * @param    int       $post_id    The WordPress post ID.
+     * @return   string    The formatted hashtags string.
+     */
+    private function get_hashtags($post_id) {
+        $tags = get_the_tags($post_id);
+        if (!$tags) {
+            return '';
+        }
+
+        $hashtags = array();
+        foreach ($tags as $tag) {
+            // Use the tag slug directly, just add the # prefix
+            $hashtags[] = '#' . $tag->slug;
+        }
+
+        return implode(' ', $hashtags);
+    }
+
+    /**
      * Post to Bluesky.
      *
      * @since    1.0.0
      * @param    string    $message        The message to post.
      * @param    array     $preview_data   The preview data for the post.
+     * @param    int       $post_id        The WordPress post ID.
      * @return   bool      True if the post was successful.
      */
-    public function post_to_bluesky($message, $preview_data) {
+    public function post_to_bluesky($message, $preview_data, $post_id) {
         if (empty($this->session)) {
             $settings = get_option('wp_bsky_autoposter_settings');
             if (!$this->authenticate($settings['bluesky_handle'], $settings['app_password'])) {
                 return false;
             }
+        }
+
+        // Get hashtags
+        $hashtags = $this->get_hashtags($post_id);
+        if (!empty($hashtags)) {
+            $message .= "\n\n" . $hashtags;
         }
 
         // Upload image if available

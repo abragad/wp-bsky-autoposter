@@ -120,7 +120,7 @@ class WP_BSky_AutoPoster {
         $preview_data = $this->get_post_preview_data($post);
 
         // Send to Bluesky
-        $this->api->post_to_bluesky($message, $preview_data);
+        $this->api->post_to_bluesky($message, $preview_data, $post_id);
     }
 
     /**
