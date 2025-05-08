@@ -262,12 +262,6 @@ class WP_BSky_AutoPoster_API {
             }
         }
 
-        // Get hashtags
-        $hashtags = $this->get_hashtags($post_id);
-        if (!empty($hashtags)) {
-            $message .= "\n\n" . $hashtags;
-        }
-
         // Upload image if available
         $image_ref = null;
         if (!empty($preview_data['thumb'])) {
