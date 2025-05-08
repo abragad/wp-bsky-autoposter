@@ -232,8 +232,14 @@ class WP_BSky_AutoPoster_API {
 
         $hashtags = array();
         foreach ($tags as $tag) {
-            // Use the tag slug directly, just add the # prefix
-            $hashtags[] = '#' . $tag->slug;
+            // Convert to lowercase and ensure proper formatting
+            $tag_slug = strtolower($tag->slug);
+            // Remove any special characters except hyphens
+            $tag_slug = preg_replace('/[^a-z0-9-]/', '', $tag_slug);
+            // Ensure the tag starts with a letter or number
+            if (preg_match('/^[a-z0-9]/', $tag_slug)) {
+                $hashtags[] = '#' . $tag_slug;
+            }
         }
 
         return implode(' ', $hashtags);
@@ -282,6 +288,34 @@ class WP_BSky_AutoPoster_API {
                 'langs' => array('en'),
             ),
         );
+
+        // Add facets for hashtags
+        $facets = array();
+        $tags = get_the_tags($post_id);
+        if ($tags) {
+            foreach ($tags as $tag) {
+                $tag_slug = strtolower($tag->slug);
+                $hashtag = '#' . $tag_slug;
+                $pos = strpos($message, $hashtag);
+                if ($pos !== false) {
+                    $facets[] = array(
+                        'index' => array(
+                            'byteStart' => $pos,
+                            'byteEnd' => $pos + strlen($hashtag)
+                        ),
+                        'features' => array(
+                            array(
+                                '$type' => 'app.bsky.richtext.facet#tag',
+                                'tag' => $tag_slug
+                            )
+                        )
+                    );
+                }
+            }
+        }
+        if (!empty($facets)) {
+            $post_data['record']['facets'] = $facets;
+        }
 
         // Add embed if we have preview data
         if (!empty($preview_data['uri'])) {

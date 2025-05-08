@@ -7,6 +7,7 @@ A WordPress plugin that automatically posts new WordPress posts to Bluesky with 
 - Automatically posts new WordPress posts to Bluesky
 - Supports customizable post templates with placeholders
 - Includes rich link previews with post title, description, and featured image
+- Automatically includes post tags as hashtags
 - Secure authentication using Bluesky App Password
 - Easy to use settings page
 
@@ -24,7 +25,18 @@ A WordPress plugin that automatically posts new WordPress posts to Bluesky with 
    - `{title}` - Post title
    - `{excerpt}` - Post excerpt
    - `{link}` - Post URL
+   - `{hashtags}` - Post tags formatted as hashtags
 4. Optionally set a fallback text to use when the post excerpt is empty
+
+## Hashtag Support
+
+The plugin automatically converts WordPress post tags into Bluesky hashtags. When you use the `{hashtags}` placeholder in your post template, it will be replaced with all the post's tags formatted as hashtags. For example:
+
+- If your post has tags "market-analysis" and "investments"
+- And your template includes `{hashtags}`
+- The output will be: `#market-analysis #investments`
+
+The hashtags are generated from the tag slugs, ensuring they are properly formatted for Bluesky (lowercase, with hyphens instead of spaces).
 
 ## Requirements
 
