@@ -268,13 +268,7 @@ class WP_BSky_AutoPoster_API {
 
             // Add image if available
             if ($image_ref) {
-                $embed['external']['thumb'] = array(
-                    '$type' => 'blob',
-                    'ref' => array(
-                        '$link' => $image_ref['$link']
-                    ),
-                    'mimeType' => 'image/jpeg'
-                );
+                $embed['external']['thumb'] = $image_ref;
             }
 
             $post_data['record']['embed'] = $embed;
