@@ -92,6 +92,14 @@ class WP_BSky_AutoPoster_Settings {
         );
 
         add_settings_field(
+            'test_connection',
+            __('Test Connection', 'wp-bsky-autoposter'),
+            array($this, 'test_connection_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_main'
+        );
+
+        add_settings_field(
             'post_template',
             __('Post Template', 'wp-bsky-autoposter'),
             array($this, 'post_template_callback'),
@@ -106,6 +114,9 @@ class WP_BSky_AutoPoster_Settings {
             $this->plugin_name,
             'wp_bsky_autoposter_main'
         );
+
+        // Add AJAX handlers for test connection
+        add_action('wp_ajax_test_bluesky_connection', array($this, 'ajax_test_connection'));
     }
 
     /**
@@ -148,6 +159,65 @@ class WP_BSky_AutoPoster_Settings {
         <p class="description">
             <?php _e('Enter your Bluesky App Password. You can generate this in your Bluesky account settings.', 'wp-bsky-autoposter'); ?>
         </p>
+        <?php
+    }
+
+    /**
+     * Test connection field callback.
+     *
+     * @since    1.0.0
+     */
+    public function test_connection_callback() {
+        ?>
+        <button type="button" id="test-bluesky-connection" class="button button-secondary">
+            <?php _e('Test Connection', 'wp-bsky-autoposter'); ?>
+        </button>
+        <span class="spinner" style="float: none; margin-top: 4px;"></span>
+        <p class="description">
+            <?php _e('Test your Bluesky credentials before saving.', 'wp-bsky-autoposter'); ?>
+        </p>
+        <div id="test-connection-result" style="margin-top: 10px;"></div>
+
+        <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            $('#test-bluesky-connection').on('click', function(e) {
+                e.preventDefault();
+                
+                var $button = $(this);
+                var $spinner = $button.next('.spinner');
+                var $result = $('#test-connection-result');
+                
+                $button.prop('disabled', true);
+                $spinner.addClass('is-active');
+                $result.html('');
+                
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'test_bluesky_connection',
+                        handle: $('#bluesky_handle').val(),
+                        password: $('#app_password').val(),
+                        nonce: '<?php echo wp_create_nonce('test_bluesky_connection'); ?>'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $result.html('<div class="notice notice-success inline"><p>' + response.data.message + '</p></div>');
+                        } else {
+                            $result.html('<div class="notice notice-error inline"><p>' + response.data.message + '</p></div>');
+                        }
+                    },
+                    error: function() {
+                        $result.html('<div class="notice notice-error inline"><p><?php _e('Connection test failed. Please try again.', 'wp-bsky-autoposter'); ?></p></div>');
+                    },
+                    complete: function() {
+                        $button.prop('disabled', false);
+                        $spinner.removeClass('is-active');
+                    }
+                });
+            });
+        });
+        </script>
         <?php
     }
 
@@ -218,6 +288,46 @@ class WP_BSky_AutoPoster_Settings {
         $valid['fallback_text'] = sanitize_text_field($input['fallback_text']);
 
         return $valid;
+    }
+
+    /**
+     * AJAX handler for testing Bluesky connection.
+     *
+     * @since    1.0.0
+     */
+    public function ajax_test_connection() {
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'test_bluesky_connection')) {
+            wp_send_json_error(array('message' => __('Security check failed.', 'wp-bsky-autoposter')));
+        }
+
+        // Verify user capabilities
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('You do not have permission to perform this action.', 'wp-bsky-autoposter')));
+        }
+
+        // Get and validate input
+        $handle = isset($_POST['handle']) ? sanitize_text_field($_POST['handle']) : '';
+        $password = isset($_POST['password']) ? sanitize_text_field($_POST['password']) : '';
+
+        if (empty($handle) || empty($password)) {
+            wp_send_json_error(array('message' => __('Please enter both Bluesky handle and app password.', 'wp-bsky-autoposter')));
+        }
+
+        // Test connection
+        $api = new WP_BSky_AutoPoster_API();
+        if ($api->authenticate($handle, $password)) {
+            wp_send_json_success(array(
+                'message' => sprintf(
+                    __('Connection successful! Authenticated as %s.', 'wp-bsky-autoposter'),
+                    esc_html($handle)
+                )
+            ));
+        } else {
+            wp_send_json_error(array(
+                'message' => __('Connection failed. Please check your credentials and try again.', 'wp-bsky-autoposter')
+            ));
+        }
     }
 
     /**
