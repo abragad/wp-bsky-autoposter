@@ -132,10 +132,14 @@ class WP_BSky_AutoPoster {
      * @return   string  The formatted message.
      */
     private function format_post_message($post, $template) {
+        // Get hashtags
+        $hashtags = $this->api->get_hashtags($post->ID);
+
         $replacements = array(
             '{title}' => get_the_title($post),
             '{excerpt}' => get_the_excerpt($post),
             '{link}' => get_permalink($post),
+            '{hashtags}' => $hashtags,
         );
 
         return str_replace(array_keys($replacements), array_values($replacements), $template);

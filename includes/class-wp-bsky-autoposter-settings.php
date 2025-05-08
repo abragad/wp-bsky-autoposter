@@ -228,13 +228,10 @@ class WP_BSky_AutoPoster_Settings {
      */
     public function post_template_callback() {
         $options = get_option('wp_bsky_autoposter_settings');
-        $value = isset($options['post_template']) ? $options['post_template'] : '{title} - {link}';
+        $value = isset($options['post_template']) ? $options['post_template'] : '{title} {link}';
         ?>
-        <textarea id="post_template" name="wp_bsky_autoposter_settings[post_template]" 
-                  rows="3" cols="50"><?php echo esc_textarea($value); ?></textarea>
-        <p class="description">
-            <?php _e('Available placeholders: {title}, {excerpt}, {link}', 'wp-bsky-autoposter'); ?>
-        </p>
+        <textarea name="wp_bsky_autoposter_settings[post_template]" rows="3" cols="50" class="large-text"><?php echo esc_textarea($value); ?></textarea>
+        <p class="description">Available placeholders: {title}, {excerpt}, {link}, {hashtags}</p>
         <?php
     }
 

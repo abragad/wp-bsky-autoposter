@@ -224,7 +224,7 @@ class WP_BSky_AutoPoster_API {
      * @param    int       $post_id    The WordPress post ID.
      * @return   string    The formatted hashtags string.
      */
-    private function get_hashtags($post_id) {
+    public function get_hashtags($post_id) {
         $tags = get_the_tags($post_id);
         if (!$tags) {
             return '';
