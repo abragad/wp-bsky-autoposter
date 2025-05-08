@@ -195,7 +195,7 @@ class WP_BSky_AutoPoster_API {
         $response_code = wp_remote_retrieve_response_code($response);
 
         if (isset($body['blob'])) {
-            return $body['blob']['ref'];
+            return $body['blob'];
         }
 
         // Extract detailed error message
@@ -268,11 +268,7 @@ class WP_BSky_AutoPoster_API {
 
             // Add image if available
             if ($image_ref) {
-                $embed['external']['thumb'] = array(
-                    '$type' => 'blob',
-                    'ref' => $image_ref,
-                    'mimeType' => 'image/jpeg'
-                );
+                $embed['external']['thumb'] = $image_ref;
             }
 
             $post_data['record']['embed'] = $embed;
