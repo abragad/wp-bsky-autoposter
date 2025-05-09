@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -80,6 +80,10 @@ Yes, you can customize the post template using placeholders for title, excerpt, 
 
 == Changelog ==
 
+= 1.0.1 =
+* Fixed HTML entity decoding for special characters in post titles and excerpts
+* Improved handling of international characters
+
 = 1.0.0 =
 * Initial release
 * Automatic posting of new WordPress posts
@@ -90,6 +94,9 @@ Yes, you can customize the post template using placeholders for title, excerpt, 
 * Scheduled post support
 
 == Upgrade Notice ==
+
+= 1.0.1 =
+Fixed HTML entity decoding for special characters in post titles and excerpts.
 
 = 1.0.0 =
 Initial release of AutoPoster to Bluesky.

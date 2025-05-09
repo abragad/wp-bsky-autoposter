@@ -3,7 +3,7 @@
  * Plugin Name: AutoPoster to Bluesky
  * Plugin URI: https://github.com/abragad/wp-bsky-autoposter
  * Description: Automatically posts new WordPress posts to Bluesky with rich link previews.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Alessio Bragadini <alessio@techartconsulting.it>
  * Author URI: https://techartconsulting.it/alessio-bragadini
  * License: GPL v2 or later
@@ -20,7 +20,7 @@ if (!defined('WPINC')) {
 }
 
 // Plugin version
-define('WP_BSKY_AUTOPOSTER_VERSION', '1.0.0');
+define('WP_BSKY_AUTOPOSTER_VERSION', '1.0.1');
 define('WP_BSKY_AUTOPOSTER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WP_BSKY_AUTOPOSTER_PLUGIN_URL', plugin_dir_url(__FILE__));
 

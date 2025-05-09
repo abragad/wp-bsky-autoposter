@@ -146,8 +146,8 @@ class WP_BSky_AutoPoster {
         $hashtags = $this->api->get_hashtags($post->ID);
 
         $replacements = array(
-            '{title}' => get_the_title($post),
-            '{excerpt}' => get_the_excerpt($post),
+            '{title}' => html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            '{excerpt}' => html_entity_decode(get_the_excerpt($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
             '{link}' => get_permalink($post),
             '{hashtags}' => $hashtags,
         );
