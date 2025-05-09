@@ -134,6 +134,29 @@ class WP_BSky_AutoPoster {
     }
 
     /**
+     * Truncate text to fit within AT Protocol's 300 graphemes limit.
+     *
+     * @since    1.1.0
+     * @param    string    $text    The text to truncate.
+     * @return   string    The truncated text.
+     */
+    private function truncate_for_at_protocol($text) {
+        // Remove HTML tags and decode entities
+        $text = wp_strip_all_tags($text);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        
+        // Count graphemes (characters that may be composed of multiple code points)
+        $grapheme_count = mb_strlen($text, 'UTF-8');
+        
+        if ($grapheme_count <= 300) {
+            return $text;
+        }
+        
+        // Truncate to 297 characters and add ellipsis
+        return mb_substr($text, 0, 297, 'UTF-8') . '...';
+    }
+
+    /**
      * Format the post message using the template.
      *
      * @since    1.0.0
@@ -163,14 +186,20 @@ class WP_BSky_AutoPoster {
             $excerpt = str_replace(array_keys($fallback_replacements), array_values($fallback_replacements), $settings['fallback_text']);
         }
 
+        // Truncate excerpt if needed
+        $excerpt = $this->truncate_for_at_protocol($excerpt);
+
         $replacements = array(
             '{title}' => html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-            '{excerpt}' => html_entity_decode($excerpt, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            '{excerpt}' => $excerpt,
             '{link}' => $link,
             '{hashtags}' => $hashtags,
         );
 
-        return str_replace(array_keys($replacements), array_values($replacements), $template);
+        $message = str_replace(array_keys($replacements), array_values($replacements), $template);
+
+        // Ensure the final message doesn't exceed the limit
+        return $this->truncate_for_at_protocol($message);
     }
 
     /**
@@ -245,6 +274,9 @@ class WP_BSky_AutoPoster {
             );
             $excerpt = str_replace(array_keys($fallback_replacements), array_values($fallback_replacements), $settings['fallback_text']);
         }
+
+        // Truncate excerpt for preview description
+        $excerpt = $this->truncate_for_at_protocol($excerpt);
 
         $preview_data = array(
             'uri' => $this->get_post_link_with_utm($post),
