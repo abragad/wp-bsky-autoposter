@@ -75,6 +75,14 @@ class WP_BSky_AutoPoster_Settings {
             $this->plugin_name
         );
 
+        // Add link tracking section
+        add_settings_section(
+            'wp_bsky_autoposter_link_tracking',
+            __('Link Tracking', 'wp-bsky-autoposter'),
+            array($this, 'link_tracking_section_callback'),
+            $this->plugin_name
+        );
+
         add_settings_field(
             'bluesky_handle',
             __('Bluesky Handle', 'wp-bsky-autoposter'),
@@ -115,6 +123,55 @@ class WP_BSky_AutoPoster_Settings {
             'wp_bsky_autoposter_main'
         );
 
+        // Add link tracking fields
+        add_settings_field(
+            'enable_link_tracking',
+            __('Enable Link Tracking', 'wp-bsky-autoposter'),
+            array($this, 'enable_link_tracking_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_link_tracking'
+        );
+
+        add_settings_field(
+            'utm_source',
+            __('UTM Source', 'wp-bsky-autoposter'),
+            array($this, 'utm_source_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_link_tracking'
+        );
+
+        add_settings_field(
+            'utm_medium',
+            __('UTM Medium', 'wp-bsky-autoposter'),
+            array($this, 'utm_medium_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_link_tracking'
+        );
+
+        add_settings_field(
+            'utm_campaign',
+            __('UTM Campaign', 'wp-bsky-autoposter'),
+            array($this, 'utm_campaign_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_link_tracking'
+        );
+
+        add_settings_field(
+            'utm_term',
+            __('UTM Term', 'wp-bsky-autoposter'),
+            array($this, 'utm_term_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_link_tracking'
+        );
+
+        add_settings_field(
+            'utm_content',
+            __('UTM Content', 'wp-bsky-autoposter'),
+            array($this, 'utm_content_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_link_tracking'
+        );
+
         // Add AJAX handlers for test connection
         add_action('wp_ajax_test_bluesky_connection', array($this, 'ajax_test_connection'));
     }
@@ -126,6 +183,15 @@ class WP_BSky_AutoPoster_Settings {
      */
     public function settings_section_callback() {
         echo '<p>' . __('Enter your Bluesky account details and customize how posts are formatted.', 'wp-bsky-autoposter') . '</p>';
+    }
+
+    /**
+     * Link tracking section callback.
+     *
+     * @since    1.0.0
+     */
+    public function link_tracking_section_callback() {
+        echo '<p>' . __('Configure UTM parameters for link tracking. You can use {id} and {slug} placeholders in the values.', 'wp-bsky-autoposter') . '</p>';
     }
 
     /**
@@ -253,6 +319,108 @@ class WP_BSky_AutoPoster_Settings {
     }
 
     /**
+     * Enable link tracking field callback.
+     *
+     * @since    1.0.0
+     */
+    public function enable_link_tracking_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $value = isset($options['enable_link_tracking']) ? $options['enable_link_tracking'] : 0;
+        ?>
+        <input type="checkbox" id="enable_link_tracking" name="wp_bsky_autoposter_settings[enable_link_tracking]" 
+               value="1" <?php checked(1, $value); ?>>
+        <p class="description">
+            <?php _e('Enable UTM parameter tracking for links posted to Bluesky.', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
+     * UTM source field callback.
+     *
+     * @since    1.0.0
+     */
+    public function utm_source_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $value = isset($options['utm_source']) ? $options['utm_source'] : '';
+        ?>
+        <input type="text" id="utm_source" name="wp_bsky_autoposter_settings[utm_source]" 
+               value="<?php echo esc_attr($value); ?>" class="regular-text">
+        <p class="description">
+            <?php _e('Suggested: bsky', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
+     * UTM medium field callback.
+     *
+     * @since    1.0.0
+     */
+    public function utm_medium_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $value = isset($options['utm_medium']) ? $options['utm_medium'] : '';
+        ?>
+        <input type="text" id="utm_medium" name="wp_bsky_autoposter_settings[utm_medium]" 
+               value="<?php echo esc_attr($value); ?>" class="regular-text">
+        <p class="description">
+            <?php _e('Suggested: social', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
+     * UTM campaign field callback.
+     *
+     * @since    1.0.0
+     */
+    public function utm_campaign_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $value = isset($options['utm_campaign']) ? $options['utm_campaign'] : '';
+        ?>
+        <input type="text" id="utm_campaign" name="wp_bsky_autoposter_settings[utm_campaign]" 
+               value="<?php echo esc_attr($value); ?>" class="regular-text">
+        <p class="description">
+            <?php _e('Suggested: feed', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
+     * UTM term field callback.
+     *
+     * @since    1.0.0
+     */
+    public function utm_term_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $value = isset($options['utm_term']) ? $options['utm_term'] : '';
+        ?>
+        <input type="text" id="utm_term" name="wp_bsky_autoposter_settings[utm_term]" 
+               value="<?php echo esc_attr($value); ?>" class="regular-text">
+        <p class="description">
+            <?php _e('Optional. You can use {id} and {slug} placeholders.', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
+     * UTM content field callback.
+     *
+     * @since    1.0.0
+     */
+    public function utm_content_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $value = isset($options['utm_content']) ? $options['utm_content'] : '';
+        ?>
+        <input type="text" id="utm_content" name="wp_bsky_autoposter_settings[utm_content]" 
+               value="<?php echo esc_attr($value); ?>" class="regular-text">
+        <p class="description">
+            <?php _e('Optional. You can use {id} and {slug} placeholders.', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
      * Validate settings before saving.
      *
      * @since    1.0.0
@@ -286,6 +454,14 @@ class WP_BSky_AutoPoster_Settings {
 
         // Validate fallback text
         $valid['fallback_text'] = sanitize_text_field($input['fallback_text']);
+
+        // Validate link tracking settings
+        $valid['enable_link_tracking'] = isset($input['enable_link_tracking']) ? 1 : 0;
+        $valid['utm_source'] = sanitize_text_field($input['utm_source']);
+        $valid['utm_medium'] = sanitize_text_field($input['utm_medium']);
+        $valid['utm_campaign'] = sanitize_text_field($input['utm_campaign']);
+        $valid['utm_term'] = sanitize_text_field($input['utm_term']);
+        $valid['utm_content'] = sanitize_text_field($input['utm_content']);
 
         return $valid;
     }

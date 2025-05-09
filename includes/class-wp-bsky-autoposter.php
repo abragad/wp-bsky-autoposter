@@ -145,14 +145,63 @@ class WP_BSky_AutoPoster {
         // Get hashtags
         $hashtags = $this->api->get_hashtags($post->ID);
 
+        // Get the post link with UTM parameters if enabled
+        $link = $this->get_post_link_with_utm($post);
+
         $replacements = array(
             '{title}' => html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
             '{excerpt}' => html_entity_decode(get_the_excerpt($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-            '{link}' => get_permalink($post),
+            '{link}' => $link,
             '{hashtags}' => $hashtags,
         );
 
         return str_replace(array_keys($replacements), array_values($replacements), $template);
+    }
+
+    /**
+     * Get post link with UTM parameters if enabled.
+     *
+     * @since    1.0.0
+     * @param    WP_Post $post The post object.
+     * @return   string  The post URL with UTM parameters if enabled.
+     */
+    private function get_post_link_with_utm($post) {
+        $link = get_permalink($post);
+        
+        // Get plugin settings
+        $settings = get_option('wp_bsky_autoposter_settings');
+        
+        // Check if link tracking is enabled
+        if (empty($settings['enable_link_tracking'])) {
+            return $link;
+        }
+
+        // Prepare UTM parameters
+        $utm_params = array();
+        
+        // Process each UTM parameter
+        $utm_fields = array('utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content');
+        foreach ($utm_fields as $field) {
+            if (!empty($settings[$field])) {
+                $value = $settings[$field];
+                
+                // Replace placeholders
+                $value = str_replace(
+                    array('{id}', '{slug}'),
+                    array($post->ID, $post->post_name),
+                    $value
+                );
+                
+                $utm_params[$field] = urlencode($value);
+            }
+        }
+        
+        // Add UTM parameters to the URL if any exist
+        if (!empty($utm_params)) {
+            $link = add_query_arg($utm_params, $link);
+        }
+        
+        return $link;
     }
 
     /**
@@ -164,7 +213,7 @@ class WP_BSky_AutoPoster {
      */
     private function get_post_preview_data($post) {
         $preview_data = array(
-            'uri' => get_permalink($post),
+            'uri' => $this->get_post_link_with_utm($post),
             'title' => get_the_title($post),
             'description' => get_the_excerpt($post),
         );
