@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -24,6 +24,7 @@ AutoPoster to Bluesky is a WordPress plugin that automatically shares your new b
 * Easy to use settings page
 * Connection testing functionality
 * Support for scheduled posts
+* UTM parameter tracking for analytics
 
 = Post Template =
 
@@ -42,6 +43,14 @@ The plugin automatically converts WordPress post tags into Bluesky hashtags. Whe
 * The output will be: `#market-analysis #investments`
 
 The hashtags are generated from the tag slugs, ensuring they are properly formatted for Bluesky (lowercase, with hyphens instead of spaces).
+
+= Link Tracking =
+
+The plugin supports UTM parameter tracking for analytics. You can:
+* Enable/disable link tracking
+* Configure UTM parameters (source, medium, campaign, term, content)
+* Use {id} and {slug} placeholders in parameter values
+* Suggested default values: source=bsky, medium=social, campaign=feed
 
 == Installation ==
 
@@ -71,14 +80,25 @@ No, the plugin only posts new content. Updates to existing posts are ignored to 
 
 Yes, you can customize the post template using placeholders for title, excerpt, link, and hashtags.
 
+= How does link tracking work? =
+
+The plugin can add UTM parameters to your post links when they're shared on Bluesky. This helps you track traffic coming from Bluesky in your analytics. You can configure the UTM parameters in the plugin settings, and use {id} and {slug} placeholders to include post-specific information.
+
 == Screenshots ==
 
 1. Plugin settings page
 2. Connection test functionality
 3. Post template configuration
 4. Example of a post on Bluesky
+5. Link tracking settings
 
 == Changelog ==
+
+= 1.1.0 =
+* Added UTM parameter tracking for analytics
+* Added support for {id} and {slug} placeholders in UTM parameters
+* Added link tracking settings section
+* Improved settings organization
 
 = 1.0.1 =
 * Fixed HTML entity decoding for special characters in post titles and excerpts
@@ -94,6 +114,9 @@ Yes, you can customize the post template using placeholders for title, excerpt, 
 * Scheduled post support
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+Added UTM parameter tracking for analytics with support for {id} and {slug} placeholders.
 
 = 1.0.1 =
 Fixed HTML entity decoding for special characters in post titles and excerpts.

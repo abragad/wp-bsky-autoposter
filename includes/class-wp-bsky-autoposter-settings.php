@@ -313,7 +313,7 @@ class WP_BSky_AutoPoster_Settings {
         <input type="text" id="fallback_text" name="wp_bsky_autoposter_settings[fallback_text]" 
                value="<?php echo esc_attr($value); ?>" class="regular-text">
         <p class="description">
-            <?php _e('Text to use when post excerpt is empty.', 'wp-bsky-autoposter'); ?>
+            <?php _e('Text to use when post excerpt is empty. Supports {title}, {link}, and {hashtags} placeholders.', 'wp-bsky-autoposter'); ?>
         </p>
         <?php
     }

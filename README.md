@@ -10,6 +10,7 @@ A WordPress plugin that automatically posts new WordPress posts to Bluesky with 
 - Automatically includes post tags as hashtags
 - Secure authentication using Bluesky App Password
 - Easy to use settings page
+- UTM parameter tracking for analytics
 
 ## Installation
 
@@ -27,6 +28,11 @@ A WordPress plugin that automatically posts new WordPress posts to Bluesky with 
    - `{link}` - Post URL
    - `{hashtags}` - Post tags formatted as hashtags
 4. Optionally set a fallback text to use when the post excerpt is empty
+5. Configure UTM parameters for link tracking:
+   - Enable/disable link tracking
+   - Set UTM parameters (source, medium, campaign, term, content)
+   - Use {id} and {slug} placeholders in parameter values
+   - Suggested defaults: source=bsky, medium=social, campaign=feed
 
 ## Hashtag Support
 
@@ -37,6 +43,16 @@ The plugin automatically converts WordPress post tags into Bluesky hashtags. Whe
 - The output will be: `#market-analysis #investments`
 
 The hashtags are generated from the tag slugs, ensuring they are properly formatted for Bluesky (lowercase, with hyphens instead of spaces).
+
+## Link Tracking
+
+The plugin supports UTM parameter tracking for analytics. You can:
+- Enable/disable link tracking
+- Configure UTM parameters (source, medium, campaign, term, content)
+- Use {id} and {slug} placeholders in parameter values
+- Suggested default values: source=bsky, medium=social, campaign=feed
+
+This helps you track traffic coming from Bluesky in your analytics tools.
 
 ## Requirements
 

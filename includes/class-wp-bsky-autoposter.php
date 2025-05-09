@@ -148,9 +148,24 @@ class WP_BSky_AutoPoster {
         // Get the post link with UTM parameters if enabled
         $link = $this->get_post_link_with_utm($post);
 
+        // Get plugin settings
+        $settings = get_option('wp_bsky_autoposter_settings');
+
+        // Get excerpt or fallback text
+        $excerpt = get_the_excerpt($post);
+        if (empty($excerpt) && !empty($settings['fallback_text'])) {
+            // Process placeholders in fallback text
+            $fallback_replacements = array(
+                '{title}' => html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                '{link}' => $link,
+                '{hashtags}' => $hashtags,
+            );
+            $excerpt = str_replace(array_keys($fallback_replacements), array_values($fallback_replacements), $settings['fallback_text']);
+        }
+
         $replacements = array(
             '{title}' => html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-            '{excerpt}' => html_entity_decode(get_the_excerpt($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            '{excerpt}' => html_entity_decode($excerpt, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
             '{link}' => $link,
             '{hashtags}' => $hashtags,
         );
@@ -212,10 +227,29 @@ class WP_BSky_AutoPoster {
      * @return   array   The preview data.
      */
     private function get_post_preview_data($post) {
+        // Get plugin settings
+        $settings = get_option('wp_bsky_autoposter_settings');
+
+        // Get excerpt or fallback text
+        $excerpt = get_the_excerpt($post);
+        if (empty($excerpt) && !empty($settings['fallback_text'])) {
+            // Get hashtags and link for fallback text processing
+            $hashtags = $this->api->get_hashtags($post->ID);
+            $link = $this->get_post_link_with_utm($post);
+
+            // Process placeholders in fallback text
+            $fallback_replacements = array(
+                '{title}' => html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                '{link}' => $link,
+                '{hashtags}' => $hashtags,
+            );
+            $excerpt = str_replace(array_keys($fallback_replacements), array_values($fallback_replacements), $settings['fallback_text']);
+        }
+
         $preview_data = array(
             'uri' => $this->get_post_link_with_utm($post),
             'title' => get_the_title($post),
-            'description' => get_the_excerpt($post),
+            'description' => $excerpt,
         );
 
         // Get featured image if available
