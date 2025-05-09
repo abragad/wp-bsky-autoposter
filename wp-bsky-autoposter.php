@@ -5,7 +5,7 @@
  * Description: Automatically posts new WordPress posts to Bluesky with rich link previews.
  * Version: 1.0.0
  * Author: Alessio Bragadini <alessio@techartconsulting.it>
- * Author URI: https://techartconsulting.it/app/wp-bsky-autoposter
+ * Author URI: https://techartconsulting.it/alessio-bragadini
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: wp-bsky-autoposter
