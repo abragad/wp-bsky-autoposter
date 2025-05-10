@@ -157,6 +157,73 @@ class WP_BSky_AutoPoster {
     }
 
     /**
+     * Apply smart replacements to text.
+     *
+     * @since    1.1.0
+     * @param    string    $text    The text to process.
+     * @return   string    The processed text.
+     */
+    private function apply_smart_replacements($text) {
+        // Get replacement rules
+        $settings = get_option('wp_bsky_autoposter_settings');
+        if (empty($settings['smart_replacements'])) {
+            return $text;
+        }
+
+        // Process each rule
+        foreach ($settings['smart_replacements'] as $rule) {
+            // Skip if either match or replace is empty
+            if (empty($rule['match']) || empty($rule['replace'])) {
+                continue;
+            }
+
+            // Create a regex pattern that matches whole words only
+            $pattern = '/\b' . preg_quote($rule['match'], '/') . '\b/i';
+            
+            // Check if the replacement would break URLs or markdown
+            $test_text = preg_replace($pattern, $rule['replace'], $text);
+            if ($this->is_safe_replacement($text, $test_text)) {
+                $text = $test_text;
+            }
+        }
+
+        return $text;
+    }
+
+    /**
+     * Check if a replacement is safe (won't break URLs or markdown).
+     *
+     * @since    1.1.0
+     * @param    string    $original    The original text.
+     * @param    string    $replaced    The text after replacement.
+     * @return   bool      True if the replacement is safe.
+     */
+    private function is_safe_replacement($original, $replaced) {
+        // Check for URL patterns
+        $url_pattern = '/https?:\/\/[^\s<>"]+|www\.[^\s<>"]+/';
+        if (preg_match($url_pattern, $original) !== preg_match($url_pattern, $replaced)) {
+            return false;
+        }
+
+        // Check for markdown patterns
+        $markdown_patterns = array(
+            '/\[([^\]]+)\]\(([^)]+)\)/', // Links
+            '/\*\*([^*]+)\*\*/',         // Bold
+            '/\*([^*]+)\*/',             // Italic
+            '/`([^`]+)`/',               // Code
+            '/#{1,6}\s+[^\n]+/'          // Headers
+        );
+
+        foreach ($markdown_patterns as $pattern) {
+            if (preg_match($pattern, $original) !== preg_match($pattern, $replaced)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Format the post message using the template.
      *
      * @since    1.0.0
@@ -197,6 +264,9 @@ class WP_BSky_AutoPoster {
         );
 
         $message = str_replace(array_keys($replacements), array_values($replacements), $template);
+
+        // Apply smart replacements
+        $message = $this->apply_smart_replacements($message);
 
         // Ensure the final message doesn't exceed the limit
         return $this->truncate_for_at_protocol($message);

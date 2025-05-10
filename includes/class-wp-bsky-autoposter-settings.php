@@ -83,6 +83,14 @@ class WP_BSky_AutoPoster_Settings {
             $this->plugin_name
         );
 
+        // Add smart replacements section
+        add_settings_section(
+            'wp_bsky_autoposter_smart_replacements',
+            __('Smart Replacements', 'wp-bsky-autoposter'),
+            array($this, 'smart_replacements_section_callback'),
+            $this->plugin_name
+        );
+
         add_settings_field(
             'bluesky_handle',
             __('Bluesky Handle', 'wp-bsky-autoposter'),
@@ -172,8 +180,19 @@ class WP_BSky_AutoPoster_Settings {
             'wp_bsky_autoposter_link_tracking'
         );
 
+        // Add smart replacements field
+        add_settings_field(
+            'smart_replacements',
+            __('Replacement Rules', 'wp-bsky-autoposter'),
+            array($this, 'smart_replacements_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_smart_replacements'
+        );
+
         // Add AJAX handlers for test connection
         add_action('wp_ajax_test_bluesky_connection', array($this, 'ajax_test_connection'));
+        add_action('wp_ajax_add_smart_replacement', array($this, 'ajax_add_smart_replacement'));
+        add_action('wp_ajax_delete_smart_replacement', array($this, 'ajax_delete_smart_replacement'));
     }
 
     /**
@@ -192,6 +211,15 @@ class WP_BSky_AutoPoster_Settings {
      */
     public function link_tracking_section_callback() {
         echo '<p>' . __('Configure UTM parameters for link tracking. You can use {id} and {slug} placeholders in the values.', 'wp-bsky-autoposter') . '</p>';
+    }
+
+    /**
+     * Smart replacements section callback.
+     *
+     * @since    1.1.0
+     */
+    public function smart_replacements_section_callback() {
+        echo '<p>' . __('Define rules to automatically replace words or phrases in your posts with hashtags, handles, or cashtags.', 'wp-bsky-autoposter') . '</p>';
     }
 
     /**
@@ -421,6 +449,99 @@ class WP_BSky_AutoPoster_Settings {
     }
 
     /**
+     * Smart replacements field callback.
+     *
+     * @since    1.1.0
+     */
+    public function smart_replacements_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $rules = isset($options['smart_replacements']) ? $options['smart_replacements'] : array();
+        ?>
+        <div class="smart-replacements-container">
+            <table class="widefat" id="smart-replacements-table">
+                <thead>
+                    <tr>
+                        <th><?php _e('Match Text', 'wp-bsky-autoposter'); ?></th>
+                        <th><?php _e('Replacement Text', 'wp-bsky-autoposter'); ?></th>
+                        <th class="actions"><?php _e('Actions', 'wp-bsky-autoposter'); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($rules)) : ?>
+                        <?php foreach ($rules as $index => $rule) : ?>
+                            <tr>
+                                <td>
+                                    <input type="text" name="wp_bsky_autoposter_settings[smart_replacements][<?php echo esc_attr($index); ?>][match]" 
+                                           value="<?php echo esc_attr($rule['match']); ?>" class="regular-text">
+                                </td>
+                                <td>
+                                    <input type="text" name="wp_bsky_autoposter_settings[smart_replacements][<?php echo esc_attr($index); ?>][replace]" 
+                                           value="<?php echo esc_attr($rule['replace']); ?>" class="regular-text">
+                                </td>
+                                <td>
+                                    <button type="button" class="button delete-rule" data-index="<?php echo esc_attr($index); ?>">
+                                        <?php _e('Delete', 'wp-bsky-autoposter'); ?>
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3">
+                            <button type="button" class="button button-secondary" id="add-replacement-rule">
+                                <?php _e('Add Rule', 'wp-bsky-autoposter'); ?>
+                            </button>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            // Add new rule
+            $('#add-replacement-rule').on('click', function() {
+                var index = $('.smart-replacements-container tbody tr').length;
+                var newRow = `
+                    <tr>
+                        <td>
+                            <input type="text" name="wp_bsky_autoposter_settings[smart_replacements][${index}][match]" 
+                                   class="regular-text">
+                        </td>
+                        <td>
+                            <input type="text" name="wp_bsky_autoposter_settings[smart_replacements][${index}][replace]" 
+                                   class="regular-text">
+                        </td>
+                        <td>
+                            <button type="button" class="button delete-rule" data-index="${index}">
+                                <?php _e('Delete', 'wp-bsky-autoposter'); ?>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                $('.smart-replacements-container tbody').append(newRow);
+            });
+
+            // Delete rule
+            $(document).on('click', '.delete-rule', function() {
+                $(this).closest('tr').remove();
+                // Reindex remaining rows
+                $('.smart-replacements-container tbody tr').each(function(index) {
+                    $(this).find('input').each(function() {
+                        var name = $(this).attr('name');
+                        $(this).attr('name', name.replace(/\[\d+\]/, '[' + index + ']'));
+                    });
+                    $(this).find('.delete-rule').attr('data-index', index);
+                });
+            });
+        });
+        </script>
+        <?php
+    }
+
+    /**
      * Validate settings before saving.
      *
      * @since    1.0.0
@@ -462,6 +583,19 @@ class WP_BSky_AutoPoster_Settings {
         $valid['utm_campaign'] = sanitize_text_field($input['utm_campaign']);
         $valid['utm_term'] = sanitize_text_field($input['utm_term']);
         $valid['utm_content'] = sanitize_text_field($input['utm_content']);
+
+        // Validate smart replacements
+        $valid['smart_replacements'] = array();
+        if (!empty($input['smart_replacements'])) {
+            foreach ($input['smart_replacements'] as $rule) {
+                if (!empty($rule['match']) && !empty($rule['replace'])) {
+                    $valid['smart_replacements'][] = array(
+                        'match' => sanitize_text_field($rule['match']),
+                        'replace' => sanitize_text_field($rule['replace'])
+                    );
+                }
+            }
+        }
 
         return $valid;
     }
