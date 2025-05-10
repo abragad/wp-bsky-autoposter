@@ -180,6 +180,15 @@ class WP_BSky_AutoPoster_Settings {
             'wp_bsky_autoposter_link_tracking'
         );
 
+        // Add enable smart replacements field
+        add_settings_field(
+            'enable_smart_replacements',
+            __('Enable Smart Replacements', 'wp-bsky-autoposter'),
+            array($this, 'enable_smart_replacements_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_smart_replacements'
+        );
+
         // Add smart replacements field
         add_settings_field(
             'smart_replacements',
@@ -449,6 +458,23 @@ class WP_BSky_AutoPoster_Settings {
     }
 
     /**
+     * Enable smart replacements field callback.
+     *
+     * @since    1.2.0
+     */
+    public function enable_smart_replacements_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $value = isset($options['enable_smart_replacements']) ? $options['enable_smart_replacements'] : 0;
+        ?>
+        <input type="checkbox" id="enable_smart_replacements" name="wp_bsky_autoposter_settings[enable_smart_replacements]" 
+               value="1" <?php checked(1, $value); ?>>
+        <p class="description">
+            <?php _e('Enable automatic text replacements for hashtags, handles, and cashtags.', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
      * Smart replacements field callback.
      *
      * @since    1.1.0
@@ -584,7 +610,8 @@ class WP_BSky_AutoPoster_Settings {
         $valid['utm_term'] = sanitize_text_field($input['utm_term']);
         $valid['utm_content'] = sanitize_text_field($input['utm_content']);
 
-        // Validate smart replacements
+        // Validate smart replacements settings
+        $valid['enable_smart_replacements'] = isset($input['enable_smart_replacements']) ? 1 : 0;
         $valid['smart_replacements'] = array();
         if (!empty($input['smart_replacements'])) {
             foreach ($input['smart_replacements'] as $rule) {

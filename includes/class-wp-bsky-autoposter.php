@@ -164,8 +164,15 @@ class WP_BSky_AutoPoster {
      * @return   string    The processed text.
      */
     private function apply_smart_replacements($text) {
-        // Get replacement rules
+        // Get plugin settings
         $settings = get_option('wp_bsky_autoposter_settings');
+        
+        // Check if smart replacements are enabled
+        if (empty($settings['enable_smart_replacements'])) {
+            return $text;
+        }
+
+        // Check if there are any replacement rules
         if (empty($settings['smart_replacements'])) {
             return $text;
         }
