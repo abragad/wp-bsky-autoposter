@@ -159,7 +159,7 @@ class WP_BSky_AutoPoster {
     /**
      * Apply smart replacements to text.
      *
-     * @since    1.1.0
+     * @since    1.2.0
      * @param    string    $text    The text to process.
      * @return   string    The processed text.
      */
@@ -200,7 +200,7 @@ class WP_BSky_AutoPoster {
     /**
      * Check if a replacement is safe (won't break URLs or markdown).
      *
-     * @since    1.1.0
+     * @since    1.2.0
      * @param    string    $original    The original text.
      * @param    string    $replaced    The text after replacement.
      * @return   bool      True if the replacement is safe.
@@ -282,7 +282,7 @@ class WP_BSky_AutoPoster {
     /**
      * Get post link with UTM parameters if enabled.
      *
-     * @since    1.0.0
+     * @since    1.1.0
      * @param    WP_Post $post The post object.
      * @return   string  The post URL with UTM parameters if enabled.
      */

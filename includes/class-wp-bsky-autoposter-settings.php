@@ -216,7 +216,7 @@ class WP_BSky_AutoPoster_Settings {
     /**
      * Link tracking section callback.
      *
-     * @since    1.0.0
+     * @since    1.1.0
      */
     public function link_tracking_section_callback() {
         echo '<p>' . __('Configure UTM parameters for link tracking. You can use {id} and {slug} placeholders in the values.', 'wp-bsky-autoposter') . '</p>';
@@ -225,7 +225,7 @@ class WP_BSky_AutoPoster_Settings {
     /**
      * Smart replacements section callback.
      *
-     * @since    1.1.0
+     * @since    1.2.0
      */
     public function smart_replacements_section_callback() {
         echo '<p>' . __('Define rules to automatically replace words or phrases in your posts with hashtags, handles, or cashtags.', 'wp-bsky-autoposter') . '</p>';
@@ -358,7 +358,7 @@ class WP_BSky_AutoPoster_Settings {
     /**
      * Enable link tracking field callback.
      *
-     * @since    1.0.0
+     * @since    1.1.0
      */
     public function enable_link_tracking_callback() {
         $options = get_option('wp_bsky_autoposter_settings');
@@ -375,7 +375,7 @@ class WP_BSky_AutoPoster_Settings {
     /**
      * UTM source field callback.
      *
-     * @since    1.0.0
+     * @since    1.1.0
      */
     public function utm_source_callback() {
         $options = get_option('wp_bsky_autoposter_settings');
@@ -392,7 +392,7 @@ class WP_BSky_AutoPoster_Settings {
     /**
      * UTM medium field callback.
      *
-     * @since    1.0.0
+     * @since    1.1.0
      */
     public function utm_medium_callback() {
         $options = get_option('wp_bsky_autoposter_settings');
@@ -409,7 +409,7 @@ class WP_BSky_AutoPoster_Settings {
     /**
      * UTM campaign field callback.
      *
-     * @since    1.0.0
+     * @since    1.1.0
      */
     public function utm_campaign_callback() {
         $options = get_option('wp_bsky_autoposter_settings');
@@ -426,7 +426,7 @@ class WP_BSky_AutoPoster_Settings {
     /**
      * UTM term field callback.
      *
-     * @since    1.0.0
+     * @since    1.1.0
      */
     public function utm_term_callback() {
         $options = get_option('wp_bsky_autoposter_settings');
@@ -443,7 +443,7 @@ class WP_BSky_AutoPoster_Settings {
     /**
      * UTM content field callback.
      *
-     * @since    1.0.0
+     * @since    1.1.0
      */
     public function utm_content_callback() {
         $options = get_option('wp_bsky_autoposter_settings');
@@ -477,7 +477,7 @@ class WP_BSky_AutoPoster_Settings {
     /**
      * Smart replacements field callback.
      *
-     * @since    1.1.0
+     * @since    1.2.0
      */
     public function smart_replacements_callback() {
         $options = get_option('wp_bsky_autoposter_settings');
