@@ -11,6 +11,7 @@ A WordPress plugin that automatically posts new WordPress posts to Bluesky with 
 - Secure authentication using Bluesky App Password
 - Easy to use settings page
 - UTM parameter tracking for analytics
+- Smart text replacements for hashtags, handles, and cashtags
 
 ## Installation
 
@@ -33,6 +34,11 @@ A WordPress plugin that automatically posts new WordPress posts to Bluesky with 
    - Set UTM parameters (source, medium, campaign, term, content)
    - Use {id} and {slug} placeholders in parameter values
    - Suggested defaults: source=bsky, medium=social, campaign=feed
+6. Set up Smart Replacements:
+   - Add rules to automatically replace words with hashtags, handles, or cashtags
+   - Example: Replace "bitcoin" with "#bitcoin"
+   - Replacements only match whole words to prevent unwanted changes
+   - Safety checks prevent breaking URLs or markdown formatting
 
 ## Hashtag Support
 
@@ -44,6 +50,16 @@ The plugin automatically converts WordPress post tags into Bluesky hashtags. Whe
 
 The hashtags are generated from the tag slugs, ensuring they are properly formatted for Bluesky (lowercase, with hyphens instead of spaces).
 
+## Smart Replacements
+
+The Smart Replacements feature allows you to automatically replace specific words or phrases in your posts with hashtags, handles, or cashtags. For example:
+
+- Replace "bitcoin" with "#bitcoin"
+- Replace "Apple" with "$AAPL"
+- Replace "Washington Post" with "@washingtonpost.com"
+
+The replacements are applied to both the post title and excerpt, and they only match whole words to prevent unwanted replacements. The feature includes safety checks to prevent breaking URLs or markdown formatting.
+
 ## Link Tracking
 
 The plugin supports UTM parameter tracking for analytics. You can:
@@ -53,6 +69,33 @@ The plugin supports UTM parameter tracking for analytics. You can:
 - Suggested default values: source=bsky, medium=social, campaign=feed
 
 This helps you track traffic coming from Bluesky in your analytics tools.
+
+## Changelog
+
+### 1.2.0
+- Added Smart Replacements feature for automatic text substitutions
+- Added support for hashtags, handles, and cashtags in replacements
+- Added safety checks to prevent breaking URLs and markdown
+- Improved settings organization
+
+### 1.1.0
+- Added UTM parameter tracking for analytics
+- Added support for {id} and {slug} placeholders in UTM parameters
+- Added link tracking settings section
+- Improved settings organization
+
+### 1.0.1
+- Fixed HTML entity decoding for special characters in post titles and excerpts
+- Improved handling of international characters
+
+### 1.0.0
+- Initial release
+- Automatic posting of new WordPress posts
+- Rich link previews with images
+- Customizable post templates
+- Hashtag support
+- Connection testing
+- Scheduled post support
 
 ## Requirements
 

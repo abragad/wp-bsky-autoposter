@@ -3,8 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.1.0
-Requires PHP: 7.2
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,41 +11,31 @@ Automatically posts new WordPress posts to Bluesky with rich link previews.
 
 == Description ==
 
-AutoPoster to Bluesky is a WordPress plugin that automatically shares your new blog posts to Bluesky, the decentralized social network. It creates rich link previews with your post's title, description, and featured image, making your posts stand out in the Bluesky feed.
+AutoPoster to Bluesky is a WordPress plugin that automatically publishes your new posts to Bluesky with rich link previews. It supports customizable post templates, hashtags, link tracking and smart text replacements.
 
 = Features =
 
-* Automatically posts new WordPress posts to Bluesky
-* Supports customizable post templates with placeholders
-* Includes rich link previews with post title, description, and featured image
-* Automatically includes post tags as hashtags
-* Secure authentication using Bluesky App Password
-* Easy to use settings page
-* Connection testing functionality
-* Support for scheduled posts
+* Automatic posting of new WordPress posts to Bluesky
+* Rich link previews with post title, description, and featured image
+* Customizable post templates with placeholders
+* Automatic hashtag generation from post tags
 * UTM parameter tracking for analytics
+* Smart text replacements for hashtags, handles, and cashtags
 
-= Post Template =
+= Smart Replacements =
 
-Customize how your posts appear on Bluesky using these placeholders:
-* `{title}` - Post title
-* `{excerpt}` - Post excerpt
-* `{link}` - Post URL
-* `{hashtags}` - Post tags formatted as hashtags
+The plugin includes a Smart Replacements feature that allows you to automatically replace specific words or phrases in your posts with hashtags, handles, or cashtags. For example:
 
-= Hashtag Support =
+* Replace "bitcoin" with "#bitcoin"
+* Replace "Apple" with "$AAPL"
+* Replace "Washington Post" with "@washingtonpost.com"
 
-The plugin automatically converts WordPress post tags into Bluesky hashtags. When you use the `{hashtags}` placeholder in your post template, it will be replaced with all the post's tags formatted as hashtags. For example:
-
-* If your post has tags "market-analysis" and "investments"
-* And your template includes `{hashtags}`
-* The output will be: `#market-analysis #investments`
-
-The hashtags are generated from the tag slugs, ensuring they are properly formatted for Bluesky (lowercase, with hyphens instead of spaces).
+The replacements are applied to both the post title and excerpt, and they only match whole words to prevent unwanted replacements. The feature also includes safety checks to prevent breaking URLs or markdown formatting.
 
 = Link Tracking =
 
-The plugin supports UTM parameter tracking for analytics. You can:
+The plugin supports UTM parameter tracking for analytics:
+
 * Enable/disable link tracking
 * Configure UTM parameters (source, medium, campaign, term, content)
 * Use {id} and {slug} placeholders in parameter values
@@ -78,11 +67,15 @@ No, the plugin only posts new content. Updates to existing posts are ignored to 
 
 = Can I customize how my posts appear on Bluesky? =
 
-Yes, you can customize the post template using placeholders for title, excerpt, link, and hashtags.
+Yes, you can customize the post template using placeholders for title, excerpt, link, and hashtags. You can also use the Smart Replacements feature to automatically convert specific words to hashtags, handles, or cashtags.
 
 = How does link tracking work? =
 
 The plugin can add UTM parameters to your post links when they're shared on Bluesky. This helps you track traffic coming from Bluesky in your analytics. You can configure the UTM parameters in the plugin settings, and use {id} and {slug} placeholders to include post-specific information.
+
+= How do Smart Replacements work? =
+
+Smart Replacements allow you to automatically replace specific words or phrases in your posts with hashtags, handles, or cashtags. For example, you can set up a rule to replace "bitcoin" with "#bitcoin". The replacements are applied to both the post title and excerpt, and they only match whole words to prevent unwanted replacements.
 
 == Screenshots ==
 
@@ -91,8 +84,15 @@ The plugin can add UTM parameters to your post links when they're shared on Blue
 3. Post template configuration
 4. Example of a post on Bluesky
 5. Link tracking settings
+6. Smart Replacements configuration
 
 == Changelog ==
+
+= 1.2.0 =
+* Added Smart Replacements feature for automatic text substitutions
+* Added support for hashtags, handles, and cashtags in replacements
+* Added safety checks to prevent breaking URLs and markdown
+* Improved settings organization
 
 = 1.1.0 =
 * Added UTM parameter tracking for analytics
@@ -114,6 +114,9 @@ The plugin can add UTM parameters to your post links when they're shared on Blue
 * Scheduled post support
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Added Smart Replacements feature for automatic text substitutions with support for hashtags, handles, and cashtags.
 
 = 1.1.0 =
 Added UTM parameter tracking for analytics with support for {id} and {slug} placeholders.
