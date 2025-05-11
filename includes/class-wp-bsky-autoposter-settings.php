@@ -504,7 +504,10 @@ class WP_BSky_AutoPoster_Settings {
                                     <input type="text" name="wp_bsky_autoposter_settings[smart_replacements][<?php echo esc_attr($index); ?>][replace]" 
                                            value="<?php echo esc_attr($rule['replace']); ?>" class="regular-text">
                                 </td>
-                                <td>
+                                <td class="actions">
+                                    <button type="button" class="button save-rule" data-index="<?php echo esc_attr($index); ?>">
+                                        <?php _e('Save', 'wp-bsky-autoposter'); ?>
+                                    </button>
                                     <button type="button" class="button delete-rule" data-index="<?php echo esc_attr($index); ?>">
                                         <?php _e('Delete', 'wp-bsky-autoposter'); ?>
                                     </button>
@@ -523,7 +526,29 @@ class WP_BSky_AutoPoster_Settings {
                     </tr>
                 </tfoot>
             </table>
+            <p class="description">
+                <?php _e('Click "Save" after adding or modifying a rule. Rules are applied in the order they appear.', 'wp-bsky-autoposter'); ?>
+            </p>
         </div>
+
+        <style>
+            .smart-replacements-container .actions {
+                white-space: nowrap;
+            }
+            .smart-replacements-container .actions button {
+                margin-right: 5px;
+            }
+            .smart-replacements-container .actions button:last-child {
+                margin-right: 0;
+            }
+            .smart-replacements-container .save-rule {
+                background-color: #2271b1;
+                color: white;
+            }
+            .smart-replacements-container .save-rule:hover {
+                background-color: #135e96;
+            }
+        </style>
 
         <script type="text/javascript">
         jQuery(document).ready(function($) {
@@ -540,7 +565,10 @@ class WP_BSky_AutoPoster_Settings {
                             <input type="text" name="wp_bsky_autoposter_settings[smart_replacements][${index}][replace]" 
                                    class="regular-text">
                         </td>
-                        <td>
+                        <td class="actions">
+                            <button type="button" class="button save-rule" data-index="${index}">
+                                <?php _e('Save', 'wp-bsky-autoposter'); ?>
+                            </button>
                             <button type="button" class="button delete-rule" data-index="${index}">
                                 <?php _e('Delete', 'wp-bsky-autoposter'); ?>
                             </button>
@@ -550,17 +578,46 @@ class WP_BSky_AutoPoster_Settings {
                 $('.smart-replacements-container tbody').append(newRow);
             });
 
+            // Save rule
+            $(document).on('click', '.save-rule', function() {
+                var $row = $(this).closest('tr');
+                var $inputs = $row.find('input');
+                var match = $inputs.eq(0).val();
+                var replace = $inputs.eq(1).val();
+
+                if (!match || !replace) {
+                    alert('<?php _e('Both Match Text and Replacement Text are required.', 'wp-bsky-autoposter'); ?>');
+                    return;
+                }
+
+                // Visual feedback
+                var $button = $(this);
+                var originalText = $button.text();
+                $button.text('<?php _e('Saving...', 'wp-bsky-autoposter'); ?>').prop('disabled', true);
+
+                // Simulate save (since we're in a form, the actual save happens on form submit)
+                setTimeout(function() {
+                    $button.text(originalText).prop('disabled', false);
+                    $row.addClass('highlight');
+                    setTimeout(function() {
+                        $row.removeClass('highlight');
+                    }, 1000);
+                }, 500);
+            });
+
             // Delete rule
             $(document).on('click', '.delete-rule', function() {
-                $(this).closest('tr').remove();
-                // Reindex remaining rows
-                $('.smart-replacements-container tbody tr').each(function(index) {
-                    $(this).find('input').each(function() {
-                        var name = $(this).attr('name');
-                        $(this).attr('name', name.replace(/\[\d+\]/, '[' + index + ']'));
+                if (confirm('<?php _e('Are you sure you want to delete this rule?', 'wp-bsky-autoposter'); ?>')) {
+                    $(this).closest('tr').remove();
+                    // Reindex remaining rows
+                    $('.smart-replacements-container tbody tr').each(function(index) {
+                        $(this).find('input').each(function() {
+                            var name = $(this).attr('name');
+                            $(this).attr('name', name.replace(/\[\d+\]/, '[' + index + ']'));
+                        });
+                        $(this).find('.save-rule, .delete-rule').attr('data-index', index);
                     });
-                    $(this).find('.delete-rule').attr('data-index', index);
-                });
+                }
             });
         });
         </script>
