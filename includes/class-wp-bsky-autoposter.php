@@ -184,8 +184,8 @@ class WP_BSky_AutoPoster {
                 continue;
             }
 
-            // Create a regex pattern that matches whole words only
-            $pattern = '/\b' . preg_quote($rule['match'], '/') . '\b/i';
+            // Create a regex pattern that matches whole words only, but not if they're already part of a hashtag, handle, or cashtag
+            $pattern = '/(?<![#@$])\b' . preg_quote($rule['match'], '/') . '\b/i';
             
             // Check if the replacement would break URLs or markdown
             $test_text = preg_replace($pattern, $rule['replace'], $text);
