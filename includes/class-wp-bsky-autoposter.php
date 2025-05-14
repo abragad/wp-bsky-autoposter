@@ -134,6 +134,29 @@ class WP_BSky_AutoPoster {
     }
 
     /**
+     * Truncate text to fit within AT Protocol's 300 graphemes limit.
+     *
+     * @since    1.1.0
+     * @param    string    $text    The text to truncate.
+     * @return   string    The truncated text.
+     */
+    private function truncate_for_at_protocol($text) {
+        // Remove HTML tags and decode entities
+        $text = wp_strip_all_tags($text);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        
+        // Count graphemes (characters that may be composed of multiple code points)
+        $grapheme_count = mb_strlen($text, 'UTF-8');
+        
+        if ($grapheme_count <= 300) {
+            return $text;
+        }
+        
+        // Truncate to 297 characters and add ellipsis
+        return mb_substr($text, 0, 297, 'UTF-8') . '...';
+    }
+
+    /**
      * Format the post message using the template.
      *
      * @since    1.0.0
@@ -145,14 +168,84 @@ class WP_BSky_AutoPoster {
         // Get hashtags
         $hashtags = $this->api->get_hashtags($post->ID);
 
+        // Get the post link with UTM parameters if enabled
+        $link = $this->get_post_link_with_utm($post);
+
+        // Get plugin settings
+        $settings = get_option('wp_bsky_autoposter_settings');
+
+        // Get excerpt or fallback text
+        $excerpt = get_the_excerpt($post);
+        if (empty($excerpt) && !empty($settings['fallback_text'])) {
+            // Process placeholders in fallback text
+            $fallback_replacements = array(
+                '{title}' => html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                '{link}' => $link,
+                '{hashtags}' => $hashtags,
+            );
+            $excerpt = str_replace(array_keys($fallback_replacements), array_values($fallback_replacements), $settings['fallback_text']);
+        }
+
+        // Truncate excerpt if needed
+        $excerpt = $this->truncate_for_at_protocol($excerpt);
+
         $replacements = array(
             '{title}' => html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-            '{excerpt}' => html_entity_decode(get_the_excerpt($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-            '{link}' => get_permalink($post),
+            '{excerpt}' => $excerpt,
+            '{link}' => $link,
             '{hashtags}' => $hashtags,
         );
 
-        return str_replace(array_keys($replacements), array_values($replacements), $template);
+        $message = str_replace(array_keys($replacements), array_values($replacements), $template);
+
+        // Ensure the final message doesn't exceed the limit
+        return $this->truncate_for_at_protocol($message);
+    }
+
+    /**
+     * Get post link with UTM parameters if enabled.
+     *
+     * @since    1.0.0
+     * @param    WP_Post $post The post object.
+     * @return   string  The post URL with UTM parameters if enabled.
+     */
+    private function get_post_link_with_utm($post) {
+        $link = get_permalink($post);
+        
+        // Get plugin settings
+        $settings = get_option('wp_bsky_autoposter_settings');
+        
+        // Check if link tracking is enabled
+        if (empty($settings['enable_link_tracking'])) {
+            return $link;
+        }
+
+        // Prepare UTM parameters
+        $utm_params = array();
+        
+        // Process each UTM parameter
+        $utm_fields = array('utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content');
+        foreach ($utm_fields as $field) {
+            if (!empty($settings[$field])) {
+                $value = $settings[$field];
+                
+                // Replace placeholders
+                $value = str_replace(
+                    array('{id}', '{slug}'),
+                    array($post->ID, $post->post_name),
+                    $value
+                );
+                
+                $utm_params[$field] = urlencode($value);
+            }
+        }
+        
+        // Add UTM parameters to the URL if any exist
+        if (!empty($utm_params)) {
+            $link = add_query_arg($utm_params, $link);
+        }
+        
+        return $link;
     }
 
     /**
@@ -163,10 +256,32 @@ class WP_BSky_AutoPoster {
      * @return   array   The preview data.
      */
     private function get_post_preview_data($post) {
+        // Get plugin settings
+        $settings = get_option('wp_bsky_autoposter_settings');
+
+        // Get excerpt or fallback text
+        $excerpt = get_the_excerpt($post);
+        if (empty($excerpt) && !empty($settings['fallback_text'])) {
+            // Get hashtags and link for fallback text processing
+            $hashtags = $this->api->get_hashtags($post->ID);
+            $link = $this->get_post_link_with_utm($post);
+
+            // Process placeholders in fallback text
+            $fallback_replacements = array(
+                '{title}' => html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                '{link}' => $link,
+                '{hashtags}' => $hashtags,
+            );
+            $excerpt = str_replace(array_keys($fallback_replacements), array_values($fallback_replacements), $settings['fallback_text']);
+        }
+
+        // Truncate excerpt for preview description
+        $excerpt = $this->truncate_for_at_protocol($excerpt);
+
         $preview_data = array(
-            'uri' => get_permalink($post),
+            'uri' => $this->get_post_link_with_utm($post),
             'title' => get_the_title($post),
-            'description' => get_the_excerpt($post),
+            'description' => $excerpt,
         );
 
         // Get featured image if available

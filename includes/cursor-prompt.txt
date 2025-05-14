@@ -53,3 +53,17 @@ Use the WordPress Settings API and sanitize inputs properly.
   - API communication (auth, blob upload, post submit)
 
 Comment and document code thoroughly. Follow WordPress PHP coding standards.
+
+---
+
+FURTHER PROMPTS
+
+Now, I would like to add a new section in settings, titled "Link Tracking" with a checkbox labelled "Enable link tracking parameters" that can turn the whole section on or off. Default is off. If on, we can have these 5 parameters that can be set independently:
+utm_source, with default "bsky"
+utm_medium, with default "social"
+utm_campaign, with default "feed"
+utm_term, with no default
+utm_content, with no default
+
+The link for the WordPress post would then be augmented with these parameters before being sent to Blueksy. Please pay attention to the construction of the full URL and escaping the values of the parameters.
+The values inside can contain one or more of the placeholders {id} or {slug} that would be expanded into the post->id or post->slug for the given article.
