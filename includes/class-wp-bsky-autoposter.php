@@ -113,7 +113,7 @@ class WP_BSky_AutoPoster {
         // Skip if this is an update (not a new post or scheduled post being published)
         if ($post_status !== 'publish' || 
             ($post->post_date !== $post->post_modified && 
-             strtotime($post->post_modified) - strtotime($post->post_date) > 60)) {
+             strtotime($post->post_modified) - strtotime($post->post_date) > 10)) {
             return;
         }
 

@@ -80,6 +80,10 @@ Yes, you can customize the post template using placeholders for title, excerpt, 
 
 == Changelog ==
 
+= 1.0.2 =
+* Reduced grace period for post updates from 60 to 10 seconds to better prevent duplicate posts
+* Improved handling of post updates vs new posts
+
 = 1.0.1 =
 * Fixed HTML entity decoding for special characters in post titles and excerpts
 * Improved handling of international characters
@@ -94,6 +98,9 @@ Yes, you can customize the post template using placeholders for title, excerpt, 
 * Scheduled post support
 
 == Upgrade Notice ==
+
+= 1.0.2 =
+Improved handling of post updates to better prevent duplicate posts.
 
 = 1.0.1 =
 Fixed HTML entity decoding for special characters in post titles and excerpts.
