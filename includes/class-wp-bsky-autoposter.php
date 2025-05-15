@@ -213,19 +213,27 @@ class WP_BSky_AutoPoster {
             return $message;
         }
 
+        // Log the original message for debugging
+        error_log('Original message for inline hashtags processing: ' . $message);
+
         // Extract hashtags from the message
         preg_match_all('/#(\w+)/', $message, $matches);
         if (empty($matches[1])) {
+            error_log('No hashtags found in message');
             return $message;
         }
 
         $hashtags = $matches[1];
         $processed_message = $message;
 
+        // Log found hashtags
+        error_log('Found hashtags: ' . implode(', ', $hashtags));
+
         // Process each hashtag
         foreach ($hashtags as $hashtag) {
             // Skip multi-word hashtags or those with special characters
             if (strpos($hashtag, '-') !== false || strpos($hashtag, '_') !== false || preg_match('/[^a-zA-Z0-9]/', $hashtag)) {
+                error_log('Skipping hashtag ' . $hashtag . ' (contains special characters)');
                 continue;
             }
 
@@ -234,6 +242,7 @@ class WP_BSky_AutoPoster {
             
             // Check if the word appears in the text (case-insensitive)
             if (preg_match($pattern, $processed_message)) {
+                error_log('Found word match for hashtag ' . $hashtag);
                 // Replace the word with the hashtag, preserving original capitalization
                 $processed_message = preg_replace_callback($pattern, function($matches) {
                     return '#' . $matches[0];
@@ -241,13 +250,19 @@ class WP_BSky_AutoPoster {
 
                 // Remove the hashtag from the end of the message
                 $processed_message = preg_replace('/\s*#' . preg_quote($hashtag, '/') . '\b/', '', $processed_message);
+                error_log('Processed message after handling ' . $hashtag . ': ' . $processed_message);
+            } else {
+                error_log('No word match found for hashtag ' . $hashtag);
             }
         }
 
         // Clean up any double spaces that might have been created
         $processed_message = preg_replace('/\s+/', ' ', $processed_message);
+        $processed_message = trim($processed_message);
         
-        return trim($processed_message);
+        error_log('Final processed message: ' . $processed_message);
+        
+        return $processed_message;
     }
 
     /**
