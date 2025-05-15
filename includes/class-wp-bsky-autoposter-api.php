@@ -192,15 +192,41 @@ class WP_BSky_AutoPoster_API {
             }
         }
 
-        // Download the image
-        $image_data = wp_remote_get($image_url);
+        // Download the image with additional headers to prevent redirects
+        $image_data = wp_remote_get($image_url, array(
+            'timeout' => 30,
+            'redirection' => 0, // Prevent redirects
+            'headers' => array(
+                'Accept' => 'image/*',
+                'User-Agent' => 'WordPress/' . get_bloginfo('version')
+            )
+        ));
+
         if (is_wp_error($image_data)) {
             $this->log_error('Failed to download image: ' . $image_data->get_error_message());
             return false;
         }
 
+        $response_code = wp_remote_retrieve_response_code($image_data);
+        if ($response_code !== 200) {
+            $this->log_error('Failed to download image: HTTP ' . $response_code);
+            return false;
+        }
+
         $image_content = wp_remote_retrieve_body($image_data);
         $image_type = wp_remote_retrieve_header($image_data, 'content-type');
+
+        // Validate that we actually got an image
+        if (!preg_match('/^image\/(jpeg|png|gif|webp)$/i', $image_type)) {
+            $this->log_error('Invalid image type: ' . $image_type);
+            return false;
+        }
+
+        // Validate image content
+        if (!getimagesizefromstring($image_content)) {
+            $this->log_error('Invalid image content received');
+            return false;
+        }
         
         // Log image size for debugging
         $image_size = strlen($image_content);
@@ -303,6 +329,8 @@ class WP_BSky_AutoPoster_API {
      * @return   bool      True if the post was successful.
      */
     public function post_to_bluesky($message, $preview_data, $post_id) {
+        $this->log_success('Posting article ' . $post_id);
+
         if (empty($this->session)) {
             $settings = get_option('wp_bsky_autoposter_settings');
             if (!$this->authenticate($settings['bluesky_handle'], $settings['app_password'])) {
