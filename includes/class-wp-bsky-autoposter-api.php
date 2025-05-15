@@ -255,6 +255,8 @@ class WP_BSky_AutoPoster_API {
      * @return   bool      True if the post was successful.
      */
     public function post_to_bluesky($message, $preview_data, $post_id) {
+        $this->log_success('Posting article ' . $post_id);
+
         if (empty($this->session)) {
             $settings = get_option('wp_bsky_autoposter_settings');
             if (!$this->authenticate($settings['bluesky_handle'], $settings['app_password'])) {
