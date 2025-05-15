@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -94,6 +94,12 @@ The plugin can add UTM parameters to your post links when they're shared on Blue
 
 == Changelog ==
 
+= 1.1.2 =
+* Improved image handling for rich previews
+* Added smart image size selection with automatic fallback
+* Fixed issues with large images exceeding Bluesky's size limit
+* Added detailed logging for image processing
+
 = 1.1.1 =
 * Fixed HTML entity encoding in rich preview cards
 * Improved handling of special characters in post titles and descriptions
@@ -120,6 +126,9 @@ The plugin can add UTM parameters to your post links when they're shared on Blue
 * Scheduled post support
 
 == Upgrade Notice ==
+
+= 1.1.2 =
+Improved image handling for rich previews with smart size selection and automatic fallback for large images.
 
 = 1.1.1 =
 Fixed HTML entity encoding in rich preview cards for better display of special characters.

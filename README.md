@@ -81,6 +81,12 @@ Developed by [Alessio Bragadini](https://techartconsulting.it/alessio-bragadini/
 
 ## Changelog
 
+### 1.1.2
+- Improved image handling for rich previews
+- Added smart image size selection with automatic fallback
+- Fixed issues with large images exceeding Bluesky's size limit
+- Added detailed logging for image processing
+
 ### 1.1.1
 - Fixed HTML entity encoding in rich preview cards
 - Improved handling of special characters in post titles and descriptions
