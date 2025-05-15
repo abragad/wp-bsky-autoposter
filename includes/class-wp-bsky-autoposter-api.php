@@ -347,6 +347,11 @@ class WP_BSky_AutoPoster_API {
             }
         }
 
+        // Get WordPress site language
+        $site_language = get_locale();
+        // Convert WordPress locale to ISO 639-1 language code
+        $language_code = substr($site_language, 0, 2);
+
         // Prepare the post data
         $post_data = array(
             'repo' => $this->session['did'],
@@ -355,7 +360,7 @@ class WP_BSky_AutoPoster_API {
                 '$type' => 'app.bsky.feed.post',
                 'text' => $message,
                 'createdAt' => gmdate('c'),
-                'langs' => array('en'),
+                'langs' => array($language_code),
             ),
         );
 
