@@ -83,6 +83,14 @@ class WP_BSky_AutoPoster_Settings {
             $this->plugin_name
         );
 
+        // Add inline hashtags section
+        add_settings_section(
+            'wp_bsky_autoposter_inline_hashtags',
+            __('Inline Hashtags', 'wp-bsky-autoposter'),
+            array($this, 'inline_hashtags_section_callback'),
+            $this->plugin_name
+        );
+
         add_settings_field(
             'bluesky_handle',
             __('Bluesky Handle', 'wp-bsky-autoposter'),
@@ -170,6 +178,15 @@ class WP_BSky_AutoPoster_Settings {
             array($this, 'utm_content_callback'),
             $this->plugin_name,
             'wp_bsky_autoposter_link_tracking'
+        );
+
+        // Add inline hashtags field
+        add_settings_field(
+            'enable_inline_hashtags',
+            __('Enable Inline Hashtags', 'wp-bsky-autoposter'),
+            array($this, 'enable_inline_hashtags_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_inline_hashtags'
         );
 
         // Add AJAX handlers for test connection
@@ -421,6 +438,25 @@ class WP_BSky_AutoPoster_Settings {
     }
 
     /**
+     * Enable Inline Hashtags callback.
+     *
+     * @since    1.2.0
+     */
+    public function enable_inline_hashtags_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $enabled = isset($options['enable_inline_hashtags']) ? $options['enable_inline_hashtags'] : 0;
+        ?>
+        <label>
+            <input type="checkbox" name="wp_bsky_autoposter_settings[enable_inline_hashtags]" value="1" <?php checked(1, $enabled); ?> />
+            <?php _e('Move inline hashtags into text (experimental)', 'wp-bsky-autoposter'); ?>
+        </label>
+        <p class="description">
+            <?php _e('When enabled, single-word hashtags will be moved into the text where they appear, replacing the plain word.', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
      * Validate settings before saving.
      *
      * @since    1.0.0
@@ -539,24 +575,5 @@ class WP_BSky_AutoPoster_Settings {
      */
     public function inline_hashtags_section_callback() {
         echo '<p>' . __('Configure how hashtags are displayed in your posts.', 'wp-bsky-autoposter') . '</p>';
-    }
-
-    /**
-     * Enable Inline Hashtags callback.
-     *
-     * @since    1.2.0
-     */
-    public function enable_inline_hashtags_callback() {
-        $options = get_option('wp_bsky_autoposter_settings');
-        $enabled = isset($options['enable_inline_hashtags']) ? $options['enable_inline_hashtags'] : 0;
-        ?>
-        <label>
-            <input type="checkbox" name="wp_bsky_autoposter_settings[enable_inline_hashtags]" value="1" <?php checked(1, $enabled); ?> />
-            <?php _e('Move inline hashtags into text (experimental)', 'wp-bsky-autoposter'); ?>
-        </label>
-        <p class="description">
-            <?php _e('When enabled, single-word hashtags will be moved into the text where they appear, replacing the plain word.', 'wp-bsky-autoposter'); ?>
-        </p>
-        <?php
     }
 } 
