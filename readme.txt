@@ -1,4 +1,4 @@
-=== AutoPoster to Bluesky ===
+=== WP AutoPoster to Bluesky ===
 Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
@@ -12,7 +12,7 @@ Automatically posts new WordPress posts to Bluesky with rich link previews.
 
 == Description ==
 
-AutoPoster to Bluesky is a WordPress plugin that automatically shares your new blog posts to Bluesky, the decentralized social network. It creates rich link previews with your post's title, description, and featured image, making your posts stand out in the Bluesky feed.
+WP AutoPoster to Bluesky is a WordPress plugin that automatically shares your new blog posts to Bluesky, the decentralized social network. It creates rich link previews with your post's title, description, and featured image, making your posts stand out in the Bluesky feed.
 
 = Features =
 
@@ -102,11 +102,9 @@ The plugin can add UTM parameters to your post links when they're shared on Blue
 
 = 1.0.2 =
 * Reduced grace period for post updates from 60 to 10 seconds to better prevent duplicate posts
-* Improved handling of post updates vs new posts
 
 = 1.0.1 =
 * Fixed HTML entity decoding for special characters in post titles and excerpts
-* Improved handling of international characters
 
 = 1.0.0 =
 * Initial release
@@ -129,7 +127,7 @@ Improved handling of post updates to better prevent duplicate posts.
 Fixed HTML entity decoding for special characters in post titles and excerpts.
 
 = 1.0.0 =
-Initial release of AutoPoster to Bluesky.
+Initial release of WP AutoPoster to Bluesky.
 
 == Privacy Policy ==
 

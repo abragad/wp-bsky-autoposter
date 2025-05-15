@@ -1,4 +1,4 @@
-# AutoPoster to Bluesky
+# WP AutoPoster to Bluesky
 
 A WordPress plugin that automatically posts new WordPress posts to Bluesky with rich link previews.
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: AutoPoster to Bluesky
+ * Plugin Name: WP AutoPoster to Bluesky
  * Plugin URI: https://github.com/abragad/wp-bsky-autoposter
  * Description: Automatically posts new WordPress posts to Bluesky with rich link previews.
  * Version: 1.1.0
