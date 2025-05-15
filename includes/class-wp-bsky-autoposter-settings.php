@@ -499,6 +499,9 @@ class WP_BSky_AutoPoster_Settings {
         $valid['utm_term'] = sanitize_text_field($input['utm_term']);
         $valid['utm_content'] = sanitize_text_field($input['utm_content']);
 
+        // Validate inline hashtags setting
+        $valid['enable_inline_hashtags'] = isset($input['enable_inline_hashtags']) ? 1 : 0;
+
         return $valid;
     }
 
