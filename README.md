@@ -78,3 +78,30 @@ This plugin is licensed under the GPL v2 or later.
 ## Credits
 
 Developed by [Alessio Bragadini](https://techartconsulting.it/alessio-bragadini/)
+
+## Changelog
+
+### 1.1.1
+- Fixed HTML entity encoding in rich preview cards
+- Improved handling of special characters in post titles and descriptions
+
+### 1.1.0
+- Added support for UTM parameter tracking for better analytics
+- Added utm_source, utm_medium, and utm_campaign parameters to post URLs
+
+### 1.0.2
+- Reduced grace period for post updates from 60 to 10 seconds to better prevent duplicate posts
+- Improved handling of post updates vs new posts
+
+### 1.0.1
+- Fixed HTML entity decoding for special characters in post titles and excerpts
+- Improved handling of international characters
+
+### 1.0.0
+- Initial release
+- Automatic posting of new WordPress posts
+- Rich link previews with images
+- Customizable post templates
+- Hashtag support
+- Connection testing
+- Scheduled post support

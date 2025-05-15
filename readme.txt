@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -94,17 +94,21 @@ The plugin can add UTM parameters to your post links when they're shared on Blue
 
 == Changelog ==
 
+= 1.1.1 =
+* Fixed HTML entity encoding in rich preview cards
+* Improved handling of special characters in post titles and descriptions
+
 = 1.1.0 =
-* Added UTM parameter tracking for analytics
-* Added support for {id} and {slug} placeholders in UTM parameters
-* Added link tracking settings section
-* Improved settings organization
+* Added support for UTM parameter tracking for better analytics
+* Added utm_source, utm_medium, and utm_campaign parameters to post URLs
 
 = 1.0.2 =
 * Reduced grace period for post updates from 60 to 10 seconds to better prevent duplicate posts
+* Improved handling of post updates vs new posts
 
 = 1.0.1 =
 * Fixed HTML entity decoding for special characters in post titles and excerpts
+* Improved handling of international characters
 
 = 1.0.0 =
 * Initial release
@@ -117,8 +121,11 @@ The plugin can add UTM parameters to your post links when they're shared on Blue
 
 == Upgrade Notice ==
 
+= 1.1.1 =
+Fixed HTML entity encoding in rich preview cards for better display of special characters.
+
 = 1.1.0 =
-Added UTM parameter tracking for analytics with support for {id} and {slug} placeholders.
+Added UTM parameter tracking for better analytics.
 
 = 1.0.2 =
 Improved handling of post updates to better prevent duplicate posts.

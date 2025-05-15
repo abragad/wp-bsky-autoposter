@@ -278,9 +278,12 @@ class WP_BSky_AutoPoster {
         // Truncate excerpt for preview description
         $excerpt = $this->truncate_for_at_protocol($excerpt);
 
+        // Get title and ensure proper encoding
+        $title = html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
         $preview_data = array(
             'uri' => $this->get_post_link_with_utm($post),
-            'title' => get_the_title($post),
+            'title' => $title,
             'description' => $excerpt,
         );
 
