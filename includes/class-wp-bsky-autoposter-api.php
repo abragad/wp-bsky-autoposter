@@ -168,6 +168,30 @@ class WP_BSky_AutoPoster_API {
             return false;
         }
 
+        // Get the attachment ID from the URL
+        $attachment_id = attachment_url_to_postid($image_url);
+        
+        if ($attachment_id) {
+            // Try sizes in order: large -> medium_large -> medium
+            $sizes = array('large', 'medium_large', 'medium');
+            $image_url = null;
+            
+            foreach ($sizes as $size) {
+                $size_url = wp_get_attachment_image_url($attachment_id, $size);
+                if ($size_url) {
+                    $image_url = $size_url;
+                    $this->log_success('Using ' . $size . ' size image URL: ' . $image_url);
+                    break;
+                }
+            }
+            
+            // If no resized version is available, use original
+            if (!$image_url) {
+                $image_url = wp_get_attachment_image_url($attachment_id, 'full');
+                $this->log_success('Using original size image URL: ' . $image_url);
+            }
+        }
+
         // Download the image
         $image_data = wp_remote_get($image_url);
         if (is_wp_error($image_data)) {
@@ -177,6 +201,30 @@ class WP_BSky_AutoPoster_API {
 
         $image_content = wp_remote_retrieve_body($image_data);
         $image_type = wp_remote_retrieve_header($image_data, 'content-type');
+        
+        // Log image size for debugging
+        $image_size = strlen($image_content);
+        $this->log_success(sprintf('Image size: %.2f MB', $image_size / 1024 / 1024));
+
+        // If image is still too large, try to compress it
+        if ($image_size > 900 * 1024) { // 900KB threshold
+            $this->log_success('Image still too large, trying to compress...');
+            // Try next smaller size
+            if ($attachment_id) {
+                $current_size = array_search($image_url, array_map(function($size) use ($attachment_id) {
+                    return wp_get_attachment_image_url($attachment_id, $size);
+                }, $sizes));
+                
+                if ($current_size !== false && isset($sizes[$current_size + 1])) {
+                    $next_size = $sizes[$current_size + 1];
+                    $image_url = wp_get_attachment_image_url($attachment_id, $next_size);
+                    if ($image_url) {
+                        $this->log_success('Retrying with ' . $next_size . ' size: ' . $image_url);
+                        return $this->upload_image($image_url); // Recursive call with smaller size
+                    }
+                }
+            }
+        }
 
         // Upload to Bluesky
         $response = $this->make_request('com.atproto.repo.uploadBlob', array(
