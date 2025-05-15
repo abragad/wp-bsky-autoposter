@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -25,6 +25,7 @@ WP AutoPoster to Bluesky is a WordPress plugin that automatically shares your ne
 * Connection testing functionality
 * Support for scheduled posts
 * UTM parameter tracking for analytics
+* Inline hashtags support (experimental)
 
 = Post Template =
 
@@ -43,6 +44,19 @@ The plugin automatically converts WordPress post tags into Bluesky hashtags. Whe
 * The output will be: `#market-analysis #investments`
 
 The hashtags are generated from the tag slugs, ensuring they are properly formatted for Bluesky (lowercase, with hyphens instead of spaces).
+
+= Inline Hashtags =
+
+The plugin includes an experimental feature to improve hashtag readability by moving single-word hashtags into the text where they appear. For example:
+
+* If your post contains "Apple plans to launch an all-screen iPhone in 2027 #apple #iphone #anniversary-iphone"
+* With inline hashtags enabled, it will become: "#Apple plans to launch an all-screen #iPhone in 2027 #anniversary-iphone"
+
+Features:
+* Only affects single-word hashtags (no multi-word or special characters)
+* Preserves original word capitalization
+* Removes duplicate hashtags from the end of the post
+* Maintains proper spacing and formatting
 
 = Link Tracking =
 
@@ -84,6 +98,10 @@ Yes, you can customize the post template using placeholders for title, excerpt, 
 
 The plugin can add UTM parameters to your post links when they're shared on Bluesky. This helps you track traffic coming from Bluesky in your analytics. You can configure the UTM parameters in the plugin settings, and use {id} and {slug} placeholders to include post-specific information.
 
+= What are inline hashtags? =
+
+Inline hashtags is an experimental feature that moves single-word hashtags into the text where they appear, replacing the plain word. This makes posts more readable while maintaining the hashtag functionality. Only single-word hashtags are affected; multi-word hashtags or those with special characters remain at the end of the post.
+
 == Screenshots ==
 
 1. Plugin settings page
@@ -91,20 +109,26 @@ The plugin can add UTM parameters to your post links when they're shared on Blue
 3. Post template configuration
 4. Example of a post on Bluesky
 5. Link tracking settings
+6. Inline hashtags settings
 
 == Changelog ==
 
+= 1.2.0 =
+* Added experimental inline hashtags feature
+* Improved hashtag handling and formatting
+* Added settings for inline hashtag processing
+
 = 1.1.0 =
-* Added UTM parameter tracking for analytics
-* Added support for {id} and {slug} placeholders in UTM parameters
-* Added link tracking settings section
-* Improved settings organization
+* Added support for UTM parameter tracking for better analytics
+* Added utm_source, utm_medium, and utm_campaign parameters to post URLs
 
 = 1.0.2 =
 * Reduced grace period for post updates from 60 to 10 seconds to better prevent duplicate posts
+* Improved handling of post updates vs new posts
 
 = 1.0.1 =
 * Fixed HTML entity decoding for special characters in post titles and excerpts
+* Improved handling of international characters
 
 = 1.0.0 =
 * Initial release
@@ -117,8 +141,11 @@ The plugin can add UTM parameters to your post links when they're shared on Blue
 
 == Upgrade Notice ==
 
+= 1.2.0 =
+Added experimental inline hashtags feature for improved post readability.
+
 = 1.1.0 =
-Added UTM parameter tracking for analytics with support for {id} and {slug} placeholders.
+Added UTM parameter tracking for better analytics.
 
 = 1.0.2 =
 Improved handling of post updates to better prevent duplicate posts.

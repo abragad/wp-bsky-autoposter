@@ -157,49 +157,97 @@ class WP_BSky_AutoPoster {
     }
 
     /**
-     * Format the post message using the template.
+     * Format the post message according to the template.
      *
      * @since    1.0.0
      * @param    WP_Post $post     The post object.
-     * @param    string  $template The message template.
-     * @return   string  The formatted message.
+     * @param    string  $template The template to use.
+     * @return   string            The formatted message.
      */
     private function format_post_message($post, $template) {
-        // Get hashtags
-        $hashtags = $this->api->get_hashtags($post->ID);
+        // Get post data
+        $title = html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $excerpt = html_entity_decode(get_the_excerpt($post), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $link = get_permalink($post);
+        
+        // Get post tags and format them as hashtags
+        $tags = get_the_tags($post->ID);
+        $hashtags = '';
+        if ($tags) {
+            $hashtag_array = array();
+            foreach ($tags as $tag) {
+                $hashtag_array[] = '#' . $tag->slug;
+            }
+            $hashtags = implode(' ', $hashtag_array);
+        }
+        
+        // Replace placeholders
+        $message = str_replace(
+            array('{title}', '{excerpt}', '{link}', '{hashtags}'),
+            array($title, $excerpt, $link, $hashtags),
+            $template
+        );
+        
+        // Apply smart replacements if enabled
+        $message = $this->apply_smart_replacements($message);
+        
+        // Process inline hashtags if enabled
+        $message = $this->maybe_process_inline_hashtags($message);
+        
+        return $message;
+    }
 
-        // Get the post link with UTM parameters if enabled
-        $link = $this->get_post_link_with_utm($post);
-
+    /**
+     * Process inline hashtags if the feature is enabled.
+     *
+     * @since    1.2.0
+     * @param    string $message The message to process.
+     * @return   string         The processed message.
+     */
+    private function maybe_process_inline_hashtags($message) {
         // Get plugin settings
         $settings = get_option('wp_bsky_autoposter_settings');
-
-        // Get excerpt or fallback text
-        $excerpt = get_the_excerpt($post);
-        if (empty($excerpt) && !empty($settings['fallback_text'])) {
-            // Process placeholders in fallback text
-            $fallback_replacements = array(
-                '{title}' => html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-                '{link}' => $link,
-                '{hashtags}' => $hashtags,
-            );
-            $excerpt = str_replace(array_keys($fallback_replacements), array_values($fallback_replacements), $settings['fallback_text']);
+        
+        // Check if inline hashtags are enabled
+        if (empty($settings['enable_inline_hashtags'])) {
+            return $message;
         }
 
-        // Truncate excerpt if needed
-        $excerpt = $this->truncate_for_at_protocol($excerpt);
+        // Extract hashtags from the message
+        preg_match_all('/#(\w+)/', $message, $matches);
+        if (empty($matches[1])) {
+            return $message;
+        }
 
-        $replacements = array(
-            '{title}' => html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-            '{excerpt}' => $excerpt,
-            '{link}' => $link,
-            '{hashtags}' => $hashtags,
-        );
+        $hashtags = $matches[1];
+        $processed_message = $message;
 
-        $message = str_replace(array_keys($replacements), array_values($replacements), $template);
+        // Process each hashtag
+        foreach ($hashtags as $hashtag) {
+            // Skip multi-word hashtags or those with special characters
+            if (strpos($hashtag, '-') !== false || strpos($hashtag, '_') !== false || preg_match('/[^a-zA-Z0-9]/', $hashtag)) {
+                continue;
+            }
 
-        // Ensure the final message doesn't exceed the limit
-        return $this->truncate_for_at_protocol($message);
+            // Create a regex pattern that matches whole words only
+            $pattern = '/\b' . preg_quote($hashtag, '/') . '\b/i';
+            
+            // Check if the word appears in the text (case-insensitive)
+            if (preg_match($pattern, $processed_message)) {
+                // Replace the word with the hashtag, preserving original capitalization
+                $processed_message = preg_replace_callback($pattern, function($matches) {
+                    return '#' . $matches[0];
+                }, $processed_message);
+
+                // Remove the hashtag from the end of the message
+                $processed_message = preg_replace('/\s*#' . preg_quote($hashtag, '/') . '\b/', '', $processed_message);
+            }
+        }
+
+        // Clean up any double spaces that might have been created
+        $processed_message = preg_replace('/\s+/', ' ', $processed_message);
+        
+        return trim($processed_message);
     }
 
     /**

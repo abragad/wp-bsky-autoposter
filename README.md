@@ -1,6 +1,6 @@
-# WP AutoPoster to Bluesky
+# AutoPoster to Bluesky
 
-A WordPress plugin that automatically posts new WordPress posts to Bluesky with rich link previews.
+A WordPress plugin that automatically posts new blog posts to Bluesky with rich link previews.
 
 ## Features
 
@@ -10,13 +10,117 @@ A WordPress plugin that automatically posts new WordPress posts to Bluesky with 
 - Automatically includes post tags as hashtags
 - Secure authentication using Bluesky App Password
 - Easy to use settings page
+- Connection testing functionality
+- Support for scheduled posts
 - UTM parameter tracking for analytics
+- Inline hashtags support (experimental)
+
+## Post Template
+
+Customize how your posts appear on Bluesky using these placeholders:
+- `{title}` - Post title
+- `{excerpt}` - Post excerpt
+- `{link}` - Post URL
+- `{hashtags}` - Post tags formatted as hashtags
+
+## Hashtag Support
+
+The plugin automatically converts WordPress post tags into Bluesky hashtags. When you use the `{hashtags}` placeholder in your post template, it will be replaced with all the post's tags formatted as hashtags. For example:
+
+- If your post has tags "market-analysis" and "investments"
+- And your template includes `{hashtags}`
+- The output will be: `#market-analysis #investments`
+
+The hashtags are generated from the tag slugs, ensuring they are properly formatted for Bluesky (lowercase, with hyphens instead of spaces).
+
+## Inline Hashtags
+
+The plugin includes an experimental feature to improve hashtag readability by moving single-word hashtags into the text where they appear. For example:
+
+- If your post contains "Apple plans to launch an all-screen iPhone in 2027 #apple #iphone #anniversary-iphone"
+- With inline hashtags enabled, it will become: "#Apple plans to launch an all-screen #iPhone in 2027 #anniversary-iphone"
+
+Features:
+- Only affects single-word hashtags (no multi-word or special characters)
+- Preserves original word capitalization
+- Removes duplicate hashtags from the end of the post
+- Maintains proper spacing and formatting
+
+## Link Tracking
+
+The plugin supports UTM parameter tracking for analytics. You can:
+- Enable/disable link tracking
+- Configure UTM parameters (source, medium, campaign, term, content)
+- Use {id} and {slug} placeholders in parameter values
+- Suggested default values: source=bsky, medium=social, campaign=feed
 
 ## Installation
 
-1. Download the plugin files and upload them to your `/wp-content/plugins/wp-bsky-autoposter` directory
-2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Go to Settings > Bluesky AutoPoster to configure the plugin
+1. Upload the plugin files to the `/wp-content/plugins/wp-bsky-autoposter` directory, or install the plugin through the WordPress plugins screen directly.
+2. Activate the plugin through the 'Plugins' screen in WordPress.
+3. Use the Settings->Bluesky AutoPoster screen to configure the plugin.
+
+## Frequently Asked Questions
+
+### Do I need a Bluesky account?
+
+Yes, you need a Bluesky account to use this plugin. You can sign up at [bsky.app](https://bsky.app).
+
+### How do I get an App Password?
+
+1. Log in to your Bluesky account
+2. Go to Settings
+3. Navigate to App Passwords
+4. Generate a new App Password
+5. Copy and paste it into the plugin settings
+
+### Will the plugin post updates to my existing posts?
+
+No, the plugin only posts new content. Updates to existing posts are ignored to prevent duplicate posts.
+
+### Can I customize how my posts appear on Bluesky?
+
+Yes, you can customize the post template using placeholders for title, excerpt, link, and hashtags.
+
+### How does link tracking work?
+
+The plugin can add UTM parameters to your post links when they're shared on Bluesky. This helps you track traffic coming from Bluesky in your analytics. You can configure the UTM parameters in the plugin settings, and use {id} and {slug} placeholders to include post-specific information.
+
+### What are inline hashtags?
+
+Inline hashtags is an experimental feature that moves single-word hashtags into the text where they appear, replacing the plain word. This makes posts more readable while maintaining the hashtag functionality. Only single-word hashtags are affected; multi-word hashtags or those with special characters remain at the end of the post.
+
+## Changelog
+
+### 1.2.0
+- Added experimental inline hashtags feature
+- Improved hashtag handling and formatting
+- Added settings for inline hashtag processing
+
+### 1.1.0
+- Added support for UTM parameter tracking for better analytics
+- Added utm_source, utm_medium, and utm_campaign parameters to post URLs
+
+### 1.0.2
+- Reduced grace period for post updates from 60 to 10 seconds to better prevent duplicate posts
+- Improved handling of post updates vs new posts
+
+### 1.0.1
+- Fixed HTML entity decoding for special characters in post titles and excerpts
+- Improved handling of international characters
+
+### 1.0.0
+- Initial release
+- Automatic posting of new WordPress posts
+- Rich link previews with images
+- Customizable post templates
+- Hashtag support
+- Connection testing
+- Scheduled post support
+
+## Privacy Policy
+
+This plugin does not collect any personal data. It only uses the Bluesky credentials you provide to post your content to Bluesky.
 
 ## Configuration
 
@@ -33,26 +137,6 @@ A WordPress plugin that automatically posts new WordPress posts to Bluesky with 
    - Set UTM parameters (source, medium, campaign, term, content)
    - Use {id} and {slug} placeholders in parameter values
    - Suggested defaults: source=bsky, medium=social, campaign=feed
-
-## Hashtag Support
-
-The plugin automatically converts WordPress post tags into Bluesky hashtags. When you use the `{hashtags}` placeholder in your post template, it will be replaced with all the post's tags formatted as hashtags. For example:
-
-- If your post has tags "market-analysis" and "investments"
-- And your template includes `{hashtags}`
-- The output will be: `#market-analysis #investments`
-
-The hashtags are generated from the tag slugs, ensuring they are properly formatted for Bluesky (lowercase, with hyphens instead of spaces).
-
-## Link Tracking
-
-The plugin supports UTM parameter tracking for analytics. You can:
-- Enable/disable link tracking
-- Configure UTM parameters (source, medium, campaign, term, content)
-- Use {id} and {slug} placeholders in parameter values
-- Suggested default values: source=bsky, medium=social, campaign=feed
-
-This helps you track traffic coming from Bluesky in your analytics tools.
 
 ## Requirements
 
