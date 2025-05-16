@@ -349,43 +349,74 @@ class WP_BSky_AutoPoster_API {
         // Log the post data for debugging
         $this->log_success('Attempting to post with data: ' . wp_json_encode($post_data));
 
-        // Send the post
-        $response = $this->make_request('com.atproto.repo.createRecord', array(
-            'headers' => array(
-                'Content-Type' => 'application/json',
-            ),
-            'body' => json_encode($post_data),
-        ));
+        // Retry logic for 5XX errors
+        $max_retries = 3;
+        $retry_delay = 30; // seconds
+        $attempt = 0;
 
-        if (is_wp_error($response)) {
-            $this->log_error('Failed to post to Bluesky: ' . $response->get_error_message());
+        while ($attempt < $max_retries) {
+            $attempt++;
+            
+            // Send the post
+            $response = $this->make_request('com.atproto.repo.createRecord', array(
+                'headers' => array(
+                    'Content-Type' => 'application/json',
+                ),
+                'body' => json_encode($post_data),
+            ));
+
+            if (is_wp_error($response)) {
+                $this->log_error('Failed to post article ' . $post_id . ' to Bluesky: ' . $response->get_error_message());
+                return false;
+            }
+
+            $body = json_decode(wp_remote_retrieve_body($response), true);
+            $response_code = wp_remote_retrieve_response_code($response);
+
+            // Success case
+            if (isset($body['uri'])) {
+                $this->log_success('Successfully posted article ' . $post_id . ' to Bluesky: ' . $body['uri']);
+                return true;
+            }
+
+            // Check if it's a 5XX error
+            if ($response_code >= 500 && $response_code < 600) {
+                if ($attempt < $max_retries) {
+                    $this->log_error(sprintf(
+                        'Received 5XX error (HTTP %d) on attempt %d/%d. Retrying in %d seconds...',
+                        $response_code,
+                        $attempt,
+                        $max_retries,
+                        $retry_delay
+                    ));
+                    sleep($retry_delay);
+                    continue;
+                }
+            }
+
+            // Extract detailed error message
+            $error_message = 'Unknown error';
+            if (isset($body['error'])) {
+                $error_message = $body['error'];
+            } elseif (isset($body['message'])) {
+                $error_message = $body['message'];
+            }
+
+            // Log detailed error information
+            $this->log_error(sprintf(
+                'Failed to post to Bluesky (HTTP %d): %s. Response: %s',
+                $response_code,
+                $error_message,
+                wp_json_encode($body)
+            ));
+
             return false;
         }
 
-        $body = json_decode(wp_remote_retrieve_body($response), true);
-        $response_code = wp_remote_retrieve_response_code($response);
-
-        if (isset($body['uri'])) {
-            $this->log_success('Successfully posted to Bluesky: ' . $body['uri']);
-            return true;
-        }
-
-        // Extract detailed error message
-        $error_message = 'Unknown error';
-        if (isset($body['error'])) {
-            $error_message = $body['error'];
-        } elseif (isset($body['message'])) {
-            $error_message = $body['message'];
-        }
-
-        // Log detailed error information
         $this->log_error(sprintf(
-            'Failed to post to Bluesky (HTTP %d): %s. Response: %s',
-            $response_code,
-            $error_message,
-            wp_json_encode($body)
+            'Failed to post to Bluesky after %d attempts with 5XX errors',
+            $max_retries
         ));
-
         return false;
     }
 
