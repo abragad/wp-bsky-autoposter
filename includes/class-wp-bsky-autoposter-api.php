@@ -202,6 +202,105 @@ class WP_BSky_AutoPoster_API {
             return null;
         }
 
+        // Check image size (Bluesky limit is 976.56KB)
+        $max_size = 976.56 * 1024; // Convert to bytes
+        $image_size = strlen($image_data);
+        
+        if ($image_size > $max_size) {
+            $this->log_success(sprintf(
+                'Image too large (%.2f MB), attempting to compress... Original size: %d bytes',
+                $image_size / 1024 / 1024,
+                $image_size
+            ));
+            
+            // Create image resource
+            $image = imagecreatefromstring($image_data);
+            if (!$image) {
+                $this->log_error('Failed to create image resource for compression');
+                return null;
+            }
+
+            // Calculate new dimensions while maintaining aspect ratio
+            $width = imagesx($image);
+            $height = imagesy($image);
+            $ratio = $width / $height;
+            
+            $this->log_success(sprintf(
+                'Original dimensions: %dx%d pixels (ratio: %.2f)',
+                $width,
+                $height,
+                $ratio
+            ));
+            
+            // Start with 80% of original size
+            $new_width = $width * 0.8;
+            $new_height = $new_width / $ratio;
+            
+            $this->log_success(sprintf(
+                'New dimensions: %dx%d pixels (80%% of original)',
+                $new_width,
+                $new_height
+            ));
+            
+            // Create new image
+            $new_image = imagecreatetruecolor($new_width, $new_height);
+            
+            // Preserve transparency for PNG
+            if ($content_type === 'image/png') {
+                imagealphablending($new_image, false);
+                imagesavealpha($new_image, true);
+                $this->log_success('Preserving transparency for PNG image');
+            }
+            
+            // Resize
+            imagecopyresampled($new_image, $image, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
+            
+            // Output to buffer with compression
+            ob_start();
+            if ($content_type === 'image/jpeg') {
+                imagejpeg($new_image, null, 85); // 85% quality
+                $this->log_success('Applied JPEG compression with 85% quality');
+            } elseif ($content_type === 'image/png') {
+                imagepng($new_image, null, 8); // Compression level 8
+                $this->log_success('Applied PNG compression with level 8');
+            } elseif ($content_type === 'image/webp') {
+                imagewebp($new_image, null, 85); // 85% quality
+                $this->log_success('Applied WebP compression with 85% quality');
+            }
+            $compressed_data = ob_get_clean();
+            
+            // Clean up
+            imagedestroy($image);
+            imagedestroy($new_image);
+            
+            $compressed_size = strlen($compressed_data);
+            $size_reduction = (($image_size - $compressed_size) / $image_size) * 100;
+            
+            $this->log_success(sprintf(
+                'Compression results: %.2f MB -> %.2f MB (%.1f%% reduction)',
+                $image_size / 1024 / 1024,
+                $compressed_size / 1024 / 1024,
+                $size_reduction
+            ));
+            
+            // Check if compression was successful
+            if ($compressed_size > $max_size) {
+                $this->log_error(sprintf(
+                    'Image still too large after compression (%.2f MB > %.2f MB limit)',
+                    $compressed_size / 1024 / 1024,
+                    $max_size / 1024 / 1024
+                ));
+                return null;
+            }
+            
+            $image_data = $compressed_data;
+            $this->log_success(sprintf(
+                'Successfully compressed image to %.2f MB (%.1f%% of original size)',
+                $compressed_size / 1024 / 1024,
+                ($compressed_size / $image_size) * 100
+            ));
+        }
+
         // Upload to Bluesky
         $upload_response = $this->make_request('com.atproto.repo.uploadBlob', array(
             'headers' => array(
