@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.1.3
+Stable tag: 1.2.0
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -94,6 +94,9 @@ The plugin can add UTM parameters to your post links when they're shared on Blue
 
 == Changelog ==
 
+= 1.2.0 =
+* Improved logging
+
 = 1.1.3 =
 * Added proper language detection using WordPress site language
 * Improved image upload validation and error handling
@@ -132,6 +135,9 @@ The plugin can add UTM parameters to your post links when they're shared on Blue
 * Scheduled post support
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Improved logging
 
 = 1.1.3 =
 Added proper language detection and improved image handling with better validation and error reporting.

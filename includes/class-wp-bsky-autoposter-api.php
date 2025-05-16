@@ -108,7 +108,7 @@ class WP_BSky_AutoPoster_API {
             $this->session['accessJwt'] = $body['accessJwt'];
             $this->session['refreshJwt'] = $body['refreshJwt'];
             update_option('wp_bsky_autoposter_session', $this->session);
-            $this->log_success('Successfully refreshed authentication token');
+            $this->log_debug('Successfully refreshed authentication token');
             return true;
         }
 
@@ -157,6 +157,65 @@ class WP_BSky_AutoPoster_API {
     }
 
     /**
+     * Write a message to the log file.
+     *
+     * @since    1.0.0
+     * @param    string    $message    The message to log.
+     * @param    string    $type       The type of message (error/success/debug/warning).
+     */
+    private function write_log($message, $type = 'info') {
+        $log_file = $this->get_log_file_path();
+        $timestamp = current_time('Y-m-d H:i:s');
+        $log_message = sprintf("[%s] [%s] %s\n", $timestamp, strtoupper($type), $message);
+        
+        // Create the uploads directory if it doesn't exist
+        wp_mkdir_p(dirname($log_file));
+        
+        // Write to the log file
+        file_put_contents($log_file, $log_message, FILE_APPEND);
+    }
+
+    /**
+     * Log an error message.
+     *
+     * @since    1.0.0
+     * @param    string    $message    The error message.
+     */
+    private function log_error($message) {
+        $this->write_log($message, 'error');
+    }
+
+    /**
+     * Log a warning message.
+     *
+     * @since    1.2.0
+     * @param    string    $message    The warning message.
+     */
+    private function log_warning($message) {
+        $this->write_log($message, 'warning');
+    }
+
+    /**
+     * Log a success message.
+     *
+     * @since    1.0.0
+     * @param    string    $message    The success message.
+     */
+    private function log_success($message) {
+        $this->write_log($message, 'success');
+    }
+
+    /**
+     * Log a debug message.
+     *
+     * @since    1.2.0
+     * @param    string    $message    The debug message.
+     */
+    private function log_debug($message) {
+        $this->write_log($message, 'debug');
+    }
+
+    /**
      * Upload an image to Bluesky.
      *
      * @since    1.0.0
@@ -167,7 +226,7 @@ class WP_BSky_AutoPoster_API {
         // Download the image
         $response = wp_remote_get($image_url);
         if (is_wp_error($response)) {
-            $this->log_error('Failed to download image: ' . $response->get_error_message());
+            $this->log_warning('Failed to download image: ' . $response->get_error_message());
             return null;
         }
 
@@ -188,9 +247,9 @@ class WP_BSky_AutoPoster_API {
             
             if (isset($mime_types[$extension])) {
                 $content_type = $mime_types[$extension];
-                $this->log_success('Determined image type from extension: ' . $content_type);
+                $this->log_debug('Determined image type from extension: ' . $content_type);
             } else {
-                $this->log_error('Could not determine image type from extension: ' . $extension);
+                $this->log_warning('Could not determine image type from extension: ' . $extension);
                 return null;
             }
         }
@@ -198,7 +257,7 @@ class WP_BSky_AutoPoster_API {
         // Validate content type
         $allowed_types = array('image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml');
         if (!in_array($content_type, $allowed_types)) {
-            $this->log_error('Invalid image type: ' . $content_type);
+            $this->log_warning('Invalid image type: ' . $content_type);
             return null;
         }
 
@@ -207,7 +266,7 @@ class WP_BSky_AutoPoster_API {
         $image_size = strlen($image_data);
         
         if ($image_size > $max_size) {
-            $this->log_success(sprintf(
+            $this->log_debug(sprintf(
                 'Image too large (%.2f MB), attempting to compress... Original size: %d bytes',
                 $image_size / 1024 / 1024,
                 $image_size
@@ -216,7 +275,7 @@ class WP_BSky_AutoPoster_API {
             // Create image resource
             $image = imagecreatefromstring($image_data);
             if (!$image) {
-                $this->log_error('Failed to create image resource for compression');
+                $this->log_warning('Failed to create image resource for compression');
                 return null;
             }
 
@@ -225,7 +284,7 @@ class WP_BSky_AutoPoster_API {
             $height = imagesy($image);
             $ratio = $width / $height;
             
-            $this->log_success(sprintf(
+            $this->log_debug(sprintf(
                 'Original dimensions: %dx%d pixels (ratio: %.2f)',
                 $width,
                 $height,
@@ -236,7 +295,7 @@ class WP_BSky_AutoPoster_API {
             $new_width = $width * 0.8;
             $new_height = $new_width / $ratio;
             
-            $this->log_success(sprintf(
+            $this->log_debug(sprintf(
                 'New dimensions: %dx%d pixels (80%% of original)',
                 $new_width,
                 $new_height
@@ -249,7 +308,7 @@ class WP_BSky_AutoPoster_API {
             if ($content_type === 'image/png') {
                 imagealphablending($new_image, false);
                 imagesavealpha($new_image, true);
-                $this->log_success('Preserving transparency for PNG image');
+                $this->log_debug('Preserving transparency for PNG image');
             }
             
             // Resize
@@ -259,13 +318,13 @@ class WP_BSky_AutoPoster_API {
             ob_start();
             if ($content_type === 'image/jpeg') {
                 imagejpeg($new_image, null, 85); // 85% quality
-                $this->log_success('Applied JPEG compression with 85% quality');
+                $this->log_debug('Applied JPEG compression with 85% quality');
             } elseif ($content_type === 'image/png') {
                 imagepng($new_image, null, 8); // Compression level 8
-                $this->log_success('Applied PNG compression with level 8');
+                $this->log_debug('Applied PNG compression with level 8');
             } elseif ($content_type === 'image/webp') {
                 imagewebp($new_image, null, 85); // 85% quality
-                $this->log_success('Applied WebP compression with 85% quality');
+                $this->log_debug('Applied WebP compression with 85% quality');
             }
             $compressed_data = ob_get_clean();
             
@@ -276,7 +335,7 @@ class WP_BSky_AutoPoster_API {
             $compressed_size = strlen($compressed_data);
             $size_reduction = (($image_size - $compressed_size) / $image_size) * 100;
             
-            $this->log_success(sprintf(
+            $this->log_debug(sprintf(
                 'Compression results: %.2f MB -> %.2f MB (%.1f%% reduction)',
                 $image_size / 1024 / 1024,
                 $compressed_size / 1024 / 1024,
@@ -285,7 +344,7 @@ class WP_BSky_AutoPoster_API {
             
             // Check if compression was successful
             if ($compressed_size > $max_size) {
-                $this->log_error(sprintf(
+                $this->log_warning(sprintf(
                     'Image still too large after compression (%.2f MB > %.2f MB limit)',
                     $compressed_size / 1024 / 1024,
                     $max_size / 1024 / 1024
@@ -294,7 +353,7 @@ class WP_BSky_AutoPoster_API {
             }
             
             $image_data = $compressed_data;
-            $this->log_success(sprintf(
+            $this->log_debug(sprintf(
                 'Successfully compressed image to %.2f MB (%.1f%% of original size)',
                 $compressed_size / 1024 / 1024,
                 ($compressed_size / $image_size) * 100
@@ -310,7 +369,7 @@ class WP_BSky_AutoPoster_API {
         ));
 
         if (is_wp_error($upload_response)) {
-            $this->log_error('Failed to upload image to Bluesky: ' . $upload_response->get_error_message());
+            $this->log_warning('Failed to upload image to Bluesky: ' . $upload_response->get_error_message());
             return null;
         }
 
@@ -320,7 +379,7 @@ class WP_BSky_AutoPoster_API {
             return $body['blob'];
         }
 
-        $this->log_error('Failed to upload image to Bluesky: ' . wp_json_encode($body));
+        $this->log_warning('Failed to upload image to Bluesky: ' . wp_json_encode($body));
         return null;
     }
 
@@ -362,7 +421,7 @@ class WP_BSky_AutoPoster_API {
      * @return   bool      True if the post was successful.
      */
     public function post_to_bluesky($message, $preview_data, $post_id) {
-        $this->log_success('Posting article ' . $post_id);
+        $this->log_debug('Posting article ' . $post_id);
 
         if (empty($this->session)) {
             $settings = get_option('wp_bsky_autoposter_settings');
@@ -376,7 +435,7 @@ class WP_BSky_AutoPoster_API {
         if (!empty($preview_data['thumb'])) {
             $image_ref = $this->upload_image($preview_data['thumb']);
             if ($image_ref) {
-                $this->log_success('Successfully uploaded image for post: ' . $preview_data['uri']);
+                $this->log_debug('Successfully uploaded image for post: ' . $preview_data['uri']);
             }
         }
 
@@ -446,7 +505,7 @@ class WP_BSky_AutoPoster_API {
         }
 
         // Log the post data for debugging
-        $this->log_success('Attempting to post with data: ' . wp_json_encode($post_data));
+        $this->log_debug('Attempting to post with data: ' . wp_json_encode($post_data));
 
         // Retry logic for 5XX errors
         $max_retries = 3;
@@ -528,44 +587,5 @@ class WP_BSky_AutoPoster_API {
     private function get_log_file_path() {
         $upload_dir = wp_upload_dir();
         return $upload_dir['basedir'] . '/wp-bsky-autoposter.log';
-    }
-
-    /**
-     * Write a message to the log file.
-     *
-     * @since    1.0.0
-     * @param    string    $message    The message to log.
-     * @param    string    $type       The type of message (error/success).
-     */
-    private function write_log($message, $type = 'info') {
-        $log_file = $this->get_log_file_path();
-        $timestamp = current_time('Y-m-d H:i:s');
-        $log_message = sprintf("[%s] [%s] %s\n", $timestamp, strtoupper($type), $message);
-        
-        // Create the uploads directory if it doesn't exist
-        wp_mkdir_p(dirname($log_file));
-        
-        // Write to the log file
-        file_put_contents($log_file, $log_message, FILE_APPEND);
-    }
-
-    /**
-     * Log an error message.
-     *
-     * @since    1.0.0
-     * @param    string    $message    The error message.
-     */
-    private function log_error($message) {
-        $this->write_log($message, 'error');
-    }
-
-    /**
-     * Log a success message.
-     *
-     * @since    1.0.0
-     * @param    string    $message    The success message.
-     */
-    private function log_success($message) {
-        $this->write_log($message, 'success');
     }
 } 

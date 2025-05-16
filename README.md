@@ -81,6 +81,9 @@ Developed by [Alessio Bragadini](https://techartconsulting.it/alessio-bragadini/
 
 ## Changelog
 
+### 1.2.0
+Improve logging
+
 ### 1.1.3
 - Added proper language detection using WordPress site language
 - Improved image upload validation and error handling
