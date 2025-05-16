@@ -161,134 +161,68 @@ class WP_BSky_AutoPoster_API {
      *
      * @since    1.0.0
      * @param    string    $image_url    The URL of the image to upload.
-     * @return   array|false    The blob reference if successful, false otherwise.
+     * @return   array|null              The image reference or null if upload failed.
      */
     private function upload_image($image_url) {
-        if (empty($image_url)) {
-            return false;
+        // Download the image
+        $response = wp_remote_get($image_url);
+        if (is_wp_error($response)) {
+            $this->log_error('Failed to download image: ' . $response->get_error_message());
+            return null;
         }
 
-        // Get the attachment ID from the URL
-        $attachment_id = attachment_url_to_postid($image_url);
-        
-        if ($attachment_id) {
-            // Try sizes in order: large -> medium_large -> medium
-            $sizes = array('large', 'medium_large', 'medium');
-            $image_url = null;
+        $image_data = wp_remote_retrieve_body($response);
+        $content_type = wp_remote_retrieve_header($response, 'content-type');
+
+        // If no content-type is provided, try to determine it from the URL
+        if (empty($content_type)) {
+            $extension = strtolower(pathinfo($image_url, PATHINFO_EXTENSION));
+            $mime_types = array(
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'webp' => 'image/webp',
+                'svg' => 'image/svg+xml'
+            );
             
-            foreach ($sizes as $size) {
-                $size_url = wp_get_attachment_image_url($attachment_id, $size);
-                if ($size_url) {
-                    $image_url = $size_url;
-                    $this->log_success('Using ' . $size . ' size image URL: ' . $image_url);
-                    break;
-                }
-            }
-            
-            // If no resized version is available, use original
-            if (!$image_url) {
-                $image_url = wp_get_attachment_image_url($attachment_id, 'full');
-                $this->log_success('Using original size image URL: ' . $image_url);
+            if (isset($mime_types[$extension])) {
+                $content_type = $mime_types[$extension];
+                $this->log_success('Determined image type from extension: ' . $content_type);
+            } else {
+                $this->log_error('Could not determine image type from extension: ' . $extension);
+                return null;
             }
         }
 
-        // Download the image with additional headers to prevent redirects
-        $image_data = wp_remote_get($image_url, array(
-            'timeout' => 30,
-            'redirection' => 0, // Prevent redirects
-            'headers' => array(
-                'Accept' => 'image/*',
-                'User-Agent' => 'WordPress/' . get_bloginfo('version')
-            )
-        ));
-
-        if (is_wp_error($image_data)) {
-            $this->log_error('Failed to download image: ' . $image_data->get_error_message());
-            return false;
-        }
-
-        $response_code = wp_remote_retrieve_response_code($image_data);
-        if ($response_code !== 200) {
-            $this->log_error('Failed to download image: HTTP ' . $response_code);
-            return false;
-        }
-
-        $image_content = wp_remote_retrieve_body($image_data);
-        $image_type = wp_remote_retrieve_header($image_data, 'content-type');
-
-        // Validate that we actually got an image
-        if (!preg_match('/^image\/(jpeg|png|gif|webp)$/i', $image_type)) {
-            $this->log_error('Invalid image type: ' . $image_type);
-            return false;
-        }
-
-        // Validate image content
-        if (!getimagesizefromstring($image_content)) {
-            $this->log_error('Invalid image content received');
-            return false;
-        }
-        
-        // Log image size for debugging
-        $image_size = strlen($image_content);
-        $this->log_success(sprintf('Image size: %.2f MB', $image_size / 1024 / 1024));
-
-        // If image is still too large, try to compress it
-        if ($image_size > 900 * 1024) { // 900KB threshold
-            $this->log_success('Image still too large, trying to compress...');
-            // Try next smaller size
-            if ($attachment_id) {
-                $current_size = array_search($image_url, array_map(function($size) use ($attachment_id) {
-                    return wp_get_attachment_image_url($attachment_id, $size);
-                }, $sizes));
-                
-                if ($current_size !== false && isset($sizes[$current_size + 1])) {
-                    $next_size = $sizes[$current_size + 1];
-                    $image_url = wp_get_attachment_image_url($attachment_id, $next_size);
-                    if ($image_url) {
-                        $this->log_success('Retrying with ' . $next_size . ' size: ' . $image_url);
-                        return $this->upload_image($image_url); // Recursive call with smaller size
-                    }
-                }
-            }
+        // Validate content type
+        $allowed_types = array('image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml');
+        if (!in_array($content_type, $allowed_types)) {
+            $this->log_error('Invalid image type: ' . $content_type);
+            return null;
         }
 
         // Upload to Bluesky
-        $response = $this->make_request('com.atproto.repo.uploadBlob', array(
+        $upload_response = $this->make_request('com.atproto.repo.uploadBlob', array(
             'headers' => array(
-                'Content-Type' => $image_type,
+                'Content-Type' => $content_type,
             ),
-            'body' => $image_content,
+            'body' => $image_data,
         ));
 
-        if (is_wp_error($response)) {
-            $this->log_error('Failed to upload image: ' . $response->get_error_message());
-            return false;
+        if (is_wp_error($upload_response)) {
+            $this->log_error('Failed to upload image to Bluesky: ' . $upload_response->get_error_message());
+            return null;
         }
 
-        $body = json_decode(wp_remote_retrieve_body($response), true);
-        $response_code = wp_remote_retrieve_response_code($response);
-
+        $body = json_decode(wp_remote_retrieve_body($upload_response), true);
         if (isset($body['blob'])) {
+            $this->log_success('Successfully uploaded image to Bluesky');
             return $body['blob'];
         }
 
-        // Extract detailed error message
-        $error_message = 'Unknown error';
-        if (isset($body['error'])) {
-            $error_message = $body['error'];
-        } elseif (isset($body['message'])) {
-            $error_message = $body['message'];
-        }
-
-        // Log detailed error information
-        $this->log_error(sprintf(
-            'Failed to upload image (HTTP %d): %s. Response: %s',
-            $response_code,
-            $error_message,
-            wp_json_encode($body)
-        ));
-
-        return false;
+        $this->log_error('Failed to upload image to Bluesky: ' . wp_json_encode($body));
+        return null;
     }
 
     /**
