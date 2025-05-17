@@ -83,6 +83,14 @@ class WP_BSky_AutoPoster_Settings {
             $this->plugin_name
         );
 
+        // Add logging section
+        add_settings_section(
+            'wp_bsky_autoposter_logging',
+            __('Logging', 'wp-bsky-autoposter'),
+            array($this, 'logging_section_callback'),
+            $this->plugin_name
+        );
+
         add_settings_field(
             'bluesky_handle',
             __('Bluesky Handle', 'wp-bsky-autoposter'),
@@ -172,6 +180,23 @@ class WP_BSky_AutoPoster_Settings {
             'wp_bsky_autoposter_link_tracking'
         );
 
+        // Add logging fields
+        add_settings_field(
+            'log_level',
+            __('Log Level', 'wp-bsky-autoposter'),
+            array($this, 'log_level_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_logging'
+        );
+
+        add_settings_field(
+            'log_file_location',
+            __('Log File Location', 'wp-bsky-autoposter'),
+            array($this, 'log_file_location_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_logging'
+        );
+
         // Add AJAX handlers for test connection
         add_action('wp_ajax_test_bluesky_connection', array($this, 'ajax_test_connection'));
     }
@@ -192,6 +217,15 @@ class WP_BSky_AutoPoster_Settings {
      */
     public function link_tracking_section_callback() {
         echo '<p>' . __('Configure UTM parameters for link tracking. You can use {id} and {slug} placeholders in the values.', 'wp-bsky-autoposter') . '</p>';
+    }
+
+    /**
+     * Logging section callback.
+     *
+     * @since    1.2.0
+     */
+    public function logging_section_callback() {
+        echo '<p>' . __('Configure logging settings for the plugin.', 'wp-bsky-autoposter') . '</p>';
     }
 
     /**
@@ -421,6 +455,50 @@ class WP_BSky_AutoPoster_Settings {
     }
 
     /**
+     * Log level field callback.
+     *
+     * @since    1.2.0
+     */
+    public function log_level_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $log_level = isset($options['log_level']) ? $options['log_level'] : 'error';
+        ?>
+        <select name="wp_bsky_autoposter_settings[log_level]">
+            <option value="error" <?php selected($log_level, 'error'); ?>><?php _e('Error Only', 'wp-bsky-autoposter'); ?></option>
+            <option value="warning" <?php selected($log_level, 'warning'); ?>><?php _e('Warning and Above', 'wp-bsky-autoposter'); ?></option>
+            <option value="success" <?php selected($log_level, 'success'); ?>><?php _e('Success and Above', 'wp-bsky-autoposter'); ?></option>
+            <option value="debug" <?php selected($log_level, 'debug'); ?>><?php _e('Debug (All Messages)', 'wp-bsky-autoposter'); ?></option>
+        </select>
+        <p class="description">
+            <?php _e('Choose the minimum level of messages to be logged. Messages below this level will not be written to the log file.', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
+     * Log file location field callback.
+     *
+     * @since    1.2.0
+     */
+    public function log_file_location_callback() {
+        $upload_dir = wp_upload_dir();
+        $log_file = $upload_dir['basedir'] . '/wp-bsky-autoposter.log';
+        $log_url = $upload_dir['baseurl'] . '/wp-bsky-autoposter.log';
+        ?>
+        <p>
+            <?php echo esc_html($log_file); ?>
+            <br>
+            <a href="<?php echo esc_url($log_url); ?>" target="_blank" class="button button-secondary">
+                <?php _e('View Log File', 'wp-bsky-autoposter'); ?>
+            </a>
+        </p>
+        <p class="description">
+            <?php _e('The log file is stored in your WordPress uploads directory.', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
      * Validate settings before saving.
      *
      * @since    1.0.0
@@ -462,6 +540,9 @@ class WP_BSky_AutoPoster_Settings {
         $valid['utm_campaign'] = sanitize_text_field($input['utm_campaign']);
         $valid['utm_term'] = sanitize_text_field($input['utm_term']);
         $valid['utm_content'] = sanitize_text_field($input['utm_content']);
+
+        // Validate log level
+        $valid['log_level'] = sanitize_text_field($input['log_level']);
 
         return $valid;
     }
