@@ -226,7 +226,7 @@ class WP_BSky_AutoPoster_API {
         // Download the image
         $response = wp_remote_get($image_url);
         if (is_wp_error($response)) {
-            $this->log_warning('Failed to download image: ' . $response->get_error_message());
+            $this->log_warning('Failed to download image at ' . $image_url . ': ' . $response->get_error_message());
             return null;
         }
 
@@ -369,17 +369,17 @@ class WP_BSky_AutoPoster_API {
         ));
 
         if (is_wp_error($upload_response)) {
-            $this->log_warning('Failed to upload image to Bluesky: ' . $upload_response->get_error_message());
+            $this->log_warning('Failed to upload image: ' . $upload_response->get_error_message());
             return null;
         }
 
         $body = json_decode(wp_remote_retrieve_body($upload_response), true);
         if (isset($body['blob'])) {
-            $this->log_success('Successfully uploaded image to Bluesky');
+            // $this->log_success('Successfully uploaded image to Bluesky');
             return $body['blob'];
         }
 
-        $this->log_warning('Failed to upload image to Bluesky: ' . wp_json_encode($body));
+        $this->log_warning('Failed to upload image: ' . wp_json_encode($body));
         return null;
     }
 
@@ -421,7 +421,7 @@ class WP_BSky_AutoPoster_API {
      * @return   bool      True if the post was successful.
      */
     public function post_to_bluesky($message, $preview_data, $post_id) {
-        $this->log_debug('Posting article ' . $post_id);
+        $this->log_debug('Posting article ' . $post_id . ' at ' . $preview_data['uri']);
 
         if (empty($this->session)) {
             $settings = get_option('wp_bsky_autoposter_settings');
@@ -435,7 +435,7 @@ class WP_BSky_AutoPoster_API {
         if (!empty($preview_data['thumb'])) {
             $image_ref = $this->upload_image($preview_data['thumb']);
             if ($image_ref) {
-                $this->log_debug('Successfully uploaded image for post: ' . $preview_data['uri']);
+                $this->log_debug('Successfully uploaded image');
             }
         }
 
