@@ -163,7 +163,24 @@ class WP_BSky_AutoPoster_API {
      * @param    string    $message    The message to log.
      * @param    string    $type       The type of message (error/success/debug/warning).
      */
-    private function write_log($message, $type = 'info') {
+    private function write_log($message, $type) {
+        // Get the configured log level
+        $settings = get_option('wp_bsky_autoposter_settings');
+        $log_level = isset($settings['log_level']) ? $settings['log_level'] : 'error';
+
+        // Define log level hierarchy
+        $log_levels = array(
+            'error' => 1,
+            'warning' => 2,
+            'success' => 3,
+            'debug' => 4
+        );
+
+        // Skip if message level is below configured level
+        if ($log_levels[$type] > $log_levels[$log_level]) {
+            return;
+        }
+
         $log_file = $this->get_log_file_path();
         $timestamp = current_time('Y-m-d H:i:s');
         $log_message = sprintf("[%s] [%s] %s\n", $timestamp, strtoupper($type), $message);
