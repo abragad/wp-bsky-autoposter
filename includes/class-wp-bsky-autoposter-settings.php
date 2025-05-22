@@ -141,6 +141,14 @@ class WP_BSky_AutoPoster_Settings {
             'wp_bsky_autoposter_main'
         );
 
+        add_settings_field(
+            'inline_hashtags',
+            __('Inline Hashtags', 'wp-bsky-autoposter'),
+            array($this, 'inline_hashtags_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_main'
+        );
+
         // Add link tracking fields
         add_settings_field(
             'enable_link_tracking',
@@ -372,6 +380,23 @@ class WP_BSky_AutoPoster_Settings {
     }
 
     /**
+     * Inline hashtags field callback.
+     *
+     * @since    1.3.0
+     */
+    public function inline_hashtags_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $value = isset($options['inline_hashtags']) ? $options['inline_hashtags'] : 0;
+        ?>
+        <input type="checkbox" id="inline_hashtags" name="wp_bsky_autoposter_settings[inline_hashtags]" 
+               value="1" <?php checked(1, $value); ?>>
+        <p class="description">
+            <?php _e('Move matching hashtags into the main text (experimental). Only affects single-word hashtags that appear as whole words in the text.', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
      * Enable link tracking field callback.
      *
      * @since    1.0.0
@@ -571,6 +596,9 @@ class WP_BSky_AutoPoster_Settings {
 
         // Validate fallback text
         $valid['fallback_text'] = sanitize_text_field($input['fallback_text']);
+
+        // Validate inline hashtags setting
+        $valid['inline_hashtags'] = isset($input['inline_hashtags']) ? 1 : 0;
 
         // Validate link tracking settings
         $valid['enable_link_tracking'] = isset($input['enable_link_tracking']) ? 1 : 0;

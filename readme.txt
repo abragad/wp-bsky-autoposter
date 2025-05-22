@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -113,6 +113,11 @@ The plugin includes a built-in log viewer that you can access from the settings 
 
 == Changelog ==
 
+= 1.3.0 =
+* Added support for inline hashtags in post content
+* Improved hashtag handling and formatting
+* Enhanced post template flexibility
+
 = 1.2.0 =
 * Improved logging
 * Added comprehensive logging system
@@ -162,6 +167,9 @@ The plugin includes a built-in log viewer that you can access from the settings 
 * Scheduled post support
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+Added support for inline hashtags in post content, allowing for more flexible hashtag placement and formatting.
 
 = 1.2.0 =
 Improved logging
