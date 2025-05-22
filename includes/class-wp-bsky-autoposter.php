@@ -110,9 +110,13 @@ class WP_BSky_AutoPoster {
         // Get the post's status
         $post_status = get_post_status($post_id);
         
-        // Skip if this is an update (not a new post or scheduled post being published)
+        // Get the previous status from post meta
+        $previous_status = get_post_meta($post_id, '_wp_bsky_previous_status', true);
+        
+        // Skip if this is an update to an already published post
         if ($post_status !== 'publish' || 
-            ($post->post_date !== $post->post_modified && 
+            ($previous_status === 'publish' && 
+             $post->post_date !== $post->post_modified && 
              strtotime($post->post_modified) - strtotime($post->post_date) > 10)) {
             return;
         }
@@ -131,6 +135,9 @@ class WP_BSky_AutoPoster {
 
         // Send to Bluesky
         $this->api->post_to_bluesky($message, $preview_data, $post_id);
+        
+        // Update the previous status
+        update_post_meta($post_id, '_wp_bsky_previous_status', $post_status);
     }
 
     /**
