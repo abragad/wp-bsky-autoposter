@@ -11,6 +11,11 @@ A WordPress plugin that automatically posts new WordPress posts to Bluesky with 
 - Secure authentication using Bluesky App Password
 - Easy to use settings page
 - UTM parameter tracking for analytics
+- Comprehensive logging system with:
+  - Configurable log levels (Error, Warning, Success, Debug)
+  - Custom log file location
+  - Built-in log viewer with color-coded entries
+  - Log management (view, refresh, clear)
 
 ## Installation
 
@@ -33,6 +38,11 @@ A WordPress plugin that automatically posts new WordPress posts to Bluesky with 
    - Set UTM parameters (source, medium, campaign, term, content)
    - Use {id} and {slug} placeholders in parameter values
    - Suggested defaults: source=bsky, medium=social, campaign=feed
+6. Choose minimum log level (Error Only, Warning and Above, Success and Above, Debug)
+7. View current log file location
+8. Set custom log file path
+9. Access built-in log viewer with color-coded entries
+10. Clear logs when needed
 
 ## Hashtag Support
 
