@@ -559,12 +559,15 @@ class WP_BSky_AutoPoster_API {
             foreach ($tags as $tag) {
                 $tag_slug = strtolower($tag->slug);
                 $hashtag = '#' . $tag_slug;
-                $pos = strpos($message, $hashtag);
+                // Use case-insensitive search to find the hashtag in the message
+                $pos = stripos($message, $hashtag);
                 if ($pos !== false) {
+                    // Get the actual hashtag from the message to preserve its case
+                    $actual_hashtag = substr($message, $pos, strlen($hashtag));
                     $facets[] = array(
                         'index' => array(
                             'byteStart' => $pos,
-                            'byteEnd' => $pos + strlen($hashtag)
+                            'byteEnd' => $pos + strlen($actual_hashtag)
                         ),
                         'features' => array(
                             array(
