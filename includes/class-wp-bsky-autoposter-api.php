@@ -429,6 +429,82 @@ class WP_BSky_AutoPoster_API {
     }
 
     /**
+     * Process hashtags for inline placement.
+     *
+     * @since    1.3.0
+     * @param    string    $message    The message to process.
+     * @return   string    The processed message with inline hashtags.
+     */
+    private function process_inline_hashtags($message) {
+        // Get settings
+        $settings = get_option('wp_bsky_autoposter_settings');
+        if (empty($settings['inline_hashtags'])) {
+            return $message;
+        }
+
+        // Extract hashtags from the end of the message
+        $parts = explode(' ', $message);
+        $hashtags = array();
+        $main_text = array();
+        $in_hashtags = false;
+
+        // Split message into main text and hashtags
+        foreach ($parts as $part) {
+            if (strpos($part, '#') === 0) {
+                $in_hashtags = true;
+                $hashtags[] = $part;
+            } else {
+                if ($in_hashtags) {
+                    // If we find a non-hashtag after hashtags, add it to main text
+                    $in_hashtags = false;
+                    $main_text[] = $part;
+                } else {
+                    $main_text[] = $part;
+                }
+            }
+        }
+
+        // If no hashtags found, return original message
+        if (empty($hashtags)) {
+            return $message;
+        }
+
+        // Process each hashtag
+        $processed_hashtags = array();
+        $main_text_str = implode(' ', $main_text);
+
+        foreach ($hashtags as $hashtag) {
+            // Skip hashtags with special characters or multiple words
+            if (preg_match('/[^a-zA-Z0-9_]/', substr($hashtag, 1))) {
+                $processed_hashtags[] = $hashtag;
+                continue;
+            }
+
+            // Get the word without the # symbol
+            $word = substr($hashtag, 1);
+            
+            // Look for whole word matches in the main text
+            $pattern = '/\b' . preg_quote($word, '/') . '\b/i';
+            if (preg_match($pattern, $main_text_str, $matches)) {
+                // Found a match, replace the word with the hashtag
+                $replacement = '#' . $matches[0]; // Preserve original capitalization
+                $main_text_str = preg_replace($pattern, $replacement, $main_text_str, 1);
+            } else {
+                // No match found, keep the hashtag at the end
+                $processed_hashtags[] = $hashtag;
+            }
+        }
+
+        // Combine main text with remaining hashtags
+        $result = trim($main_text_str);
+        if (!empty($processed_hashtags)) {
+            $result .= ' ' . implode(' ', $processed_hashtags);
+        }
+
+        return $result;
+    }
+
+    /**
      * Post to Bluesky.
      *
      * @since    1.0.0
@@ -439,6 +515,9 @@ class WP_BSky_AutoPoster_API {
      */
     public function post_to_bluesky($message, $preview_data, $post_id) {
         $this->log_debug('Posting article ' . $post_id . ' at ' . $preview_data['uri']);
+
+        // Process inline hashtags if enabled
+        $message = $this->process_inline_hashtags($message);
 
         if (empty($this->session)) {
             $settings = get_option('wp_bsky_autoposter_settings');

@@ -91,6 +91,11 @@ Developed by [Alessio Bragadini](https://techartconsulting.it/alessio-bragadini/
 
 ## Changelog
 
+### 1.3.0
+- Added support for inline hashtags in post content
+- Improved hashtag handling and formatting
+- Enhanced post template flexibility
+
 ### 1.2.0
 Improve logging
 
