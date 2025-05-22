@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.1.3
+Stable tag: 1.2.0
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -52,6 +52,15 @@ The plugin supports UTM parameter tracking for analytics. You can:
 * Use {id} and {slug} placeholders in parameter values
 * Suggested default values: source=bsky, medium=social, campaign=feed
 
+= Logging =
+
+The plugin includes a comprehensive logging system:
+* Choose minimum log level (Error Only, Warning and Above, Success and Above, Debug)
+* View current log file location
+* Set custom log file path
+* Access built-in log viewer with color-coded entries
+* Clear logs when needed
+
 == Installation ==
 
 1. Upload the plugin files to the `/wp-content/plugins/wp-bsky-autoposter` directory, or install the plugin through the WordPress plugins screen directly.
@@ -84,6 +93,15 @@ Yes, you can customize the post template using placeholders for title, excerpt, 
 
 The plugin can add UTM parameters to your post links when they're shared on Bluesky. This helps you track traffic coming from Bluesky in your analytics. You can configure the UTM parameters in the plugin settings, and use {id} and {slug} placeholders to include post-specific information.
 
+= How can I view the plugin logs? =
+
+The plugin includes a built-in log viewer that you can access from the settings page. You can:
+* View logs with color-coded entries
+* Refresh the log view
+* Clear logs when needed
+* Set a custom log file location
+* Choose the minimum log level to record
+
 == Screenshots ==
 
 1. Plugin settings page
@@ -91,8 +109,20 @@ The plugin can add UTM parameters to your post links when they're shared on Blue
 3. Post template configuration
 4. Example of a post on Bluesky
 5. Link tracking settings
+6. Log viewer
 
 == Changelog ==
+
+= 1.2.0 =
+* Improved logging
+* Added comprehensive logging system
+  * Configurable log levels (Error, Warning, Success, Debug)
+  * Custom log file location support
+  * Built-in log viewer with color-coded entries
+  * Log management features (view, refresh, clear)
+* Added UTM parameter support for link tracking
+* Added fallback text option for posts without excerpts
+* Improved error handling and user feedback
 
 = 1.1.3 =
 * Added proper language detection using WordPress site language
@@ -132,6 +162,9 @@ The plugin can add UTM parameters to your post links when they're shared on Blue
 * Scheduled post support
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Improved logging
 
 = 1.1.3 =
 Added proper language detection and improved image handling with better validation and error reporting.

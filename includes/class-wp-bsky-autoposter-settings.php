@@ -39,6 +39,16 @@ class WP_BSky_AutoPoster_Settings {
             $this->plugin_name,
             array($this, 'display_plugin_admin_page')
         );
+
+        // Add log viewer page
+        add_submenu_page(
+            null, // Hidden from menu
+            __('Bluesky AutoPoster Logs', 'wp-bsky-autoposter'),
+            __('Logs', 'wp-bsky-autoposter'),
+            'manage_options',
+            'wp-bsky-autoposter-logs',
+            array($this, 'display_log_viewer_page')
+        );
     }
 
     /**
@@ -80,6 +90,14 @@ class WP_BSky_AutoPoster_Settings {
             'wp_bsky_autoposter_link_tracking',
             __('Link Tracking', 'wp-bsky-autoposter'),
             array($this, 'link_tracking_section_callback'),
+            $this->plugin_name
+        );
+
+        // Add logging section
+        add_settings_section(
+            'wp_bsky_autoposter_logging',
+            __('Logging', 'wp-bsky-autoposter'),
+            array($this, 'logging_section_callback'),
             $this->plugin_name
         );
 
@@ -172,8 +190,34 @@ class WP_BSky_AutoPoster_Settings {
             'wp_bsky_autoposter_link_tracking'
         );
 
-        // Add AJAX handlers for test connection
+        // Add logging fields
+        add_settings_field(
+            'log_level',
+            __('Log Level', 'wp-bsky-autoposter'),
+            array($this, 'log_level_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_logging'
+        );
+
+        add_settings_field(
+            'log_file_location',
+            __('Log File Location', 'wp-bsky-autoposter'),
+            array($this, 'log_file_location_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_logging'
+        );
+
+        add_settings_field(
+            'custom_log_path',
+            __('Custom Log Path', 'wp-bsky-autoposter'),
+            array($this, 'custom_log_path_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_logging'
+        );
+
+        // Add AJAX handlers for test connection and log clearing
         add_action('wp_ajax_test_bluesky_connection', array($this, 'ajax_test_connection'));
+        add_action('wp_ajax_clear_bluesky_logs', array($this, 'ajax_clear_logs'));
     }
 
     /**
@@ -192,6 +236,15 @@ class WP_BSky_AutoPoster_Settings {
      */
     public function link_tracking_section_callback() {
         echo '<p>' . __('Configure UTM parameters for link tracking. You can use {id} and {slug} placeholders in the values.', 'wp-bsky-autoposter') . '</p>';
+    }
+
+    /**
+     * Logging section callback.
+     *
+     * @since    1.2.0
+     */
+    public function logging_section_callback() {
+        echo '<p>' . __('Configure logging settings for the plugin.', 'wp-bsky-autoposter') . '</p>';
     }
 
     /**
@@ -421,6 +474,70 @@ class WP_BSky_AutoPoster_Settings {
     }
 
     /**
+     * Log level field callback.
+     *
+     * @since    1.2.0
+     */
+    public function log_level_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $log_level = isset($options['log_level']) ? $options['log_level'] : 'error';
+        ?>
+        <select name="wp_bsky_autoposter_settings[log_level]">
+            <option value="error" <?php selected($log_level, 'error'); ?>><?php _e('Error Only', 'wp-bsky-autoposter'); ?></option>
+            <option value="warning" <?php selected($log_level, 'warning'); ?>><?php _e('Warning and Above', 'wp-bsky-autoposter'); ?></option>
+            <option value="success" <?php selected($log_level, 'success'); ?>><?php _e('Success and Above', 'wp-bsky-autoposter'); ?></option>
+            <option value="debug" <?php selected($log_level, 'debug'); ?>><?php _e('Debug (All Messages)', 'wp-bsky-autoposter'); ?></option>
+        </select>
+        <p class="description">
+            <?php _e('Choose the minimum level of messages to be logged. Messages below this level will not be written to the log file.', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
+     * Log file location field callback.
+     *
+     * @since    1.2.0
+     */
+    public function log_file_location_callback() {
+        $upload_dir = wp_upload_dir();
+        $log_file = $upload_dir['basedir'] . '/wp-bsky-autoposter.log';
+        ?>
+        <p>
+            <?php echo esc_html($log_file); ?>
+            <br>
+            <a href="<?php echo esc_url(admin_url('admin.php?page=wp-bsky-autoposter-logs')); ?>" target="_blank" class="button button-secondary">
+                <?php _e('View Log File', 'wp-bsky-autoposter'); ?>
+            </a>
+        </p>
+        <p class="description">
+            <?php _e('The log file is stored in your WordPress uploads directory.', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
+     * Custom log path field callback.
+     *
+     * @since    1.2.0
+     */
+    public function custom_log_path_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $custom_path = isset($options['custom_log_path']) ? $options['custom_log_path'] : '';
+        ?>
+        <input type="text" 
+               name="wp_bsky_autoposter_settings[custom_log_path]" 
+               value="<?php echo esc_attr($custom_path); ?>" 
+               class="regular-text"
+               placeholder="<?php echo esc_attr(wp_upload_dir()['basedir'] . '/wp-bsky-autoposter.log'); ?>"
+        />
+        <p class="description">
+            <?php _e('Leave empty to use the default location in the WordPress uploads directory. The path must be writable by the web server.', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
      * Validate settings before saving.
      *
      * @since    1.0.0
@@ -462,6 +579,27 @@ class WP_BSky_AutoPoster_Settings {
         $valid['utm_campaign'] = sanitize_text_field($input['utm_campaign']);
         $valid['utm_term'] = sanitize_text_field($input['utm_term']);
         $valid['utm_content'] = sanitize_text_field($input['utm_content']);
+
+        // Validate log level
+        $valid['log_level'] = sanitize_text_field($input['log_level']);
+
+        // Validate custom log path
+        if (!empty($input['custom_log_path'])) {
+            $path = sanitize_text_field($input['custom_log_path']);
+            // Check if the directory is writable
+            $dir = dirname($path);
+            if (is_dir($dir) && is_writable($dir)) {
+                $valid['custom_log_path'] = $path;
+            } else {
+                add_settings_error(
+                    'wp_bsky_autoposter_settings',
+                    'invalid_log_path',
+                    __('The specified log directory is not writable. Please choose a different location.', 'wp-bsky-autoposter')
+                );
+            }
+        } else {
+            $valid['custom_log_path'] = '';
+        }
 
         return $valid;
     }
@@ -507,6 +645,155 @@ class WP_BSky_AutoPoster_Settings {
                 'message' => __('Connection failed. Please check your credentials and try again.', 'wp-bsky-autoposter')
             ));
         }
+    }
+
+    /**
+     * Display the log viewer page.
+     *
+     * @since    1.2.0
+     */
+    public function display_log_viewer_page() {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
+        // Get log file path
+        $settings = get_option('wp_bsky_autoposter_settings');
+        $log_file = !empty($settings['custom_log_path']) 
+            ? $settings['custom_log_path'] 
+            : wp_upload_dir()['basedir'] . '/wp-bsky-autoposter.log';
+
+        // Read log file
+        $log_contents = '';
+        if (file_exists($log_file)) {
+            $log_contents = file_get_contents($log_file);
+            if ($log_contents === false) {
+                $log_contents = __('Error reading log file.', 'wp-bsky-autoposter');
+            }
+        } else {
+            $log_contents = __('Log file does not exist.', 'wp-bsky-autoposter');
+        }
+
+        // Format log entries
+        $log_entries = array_filter(explode("\n", $log_contents));
+        ?>
+        <div class="wrap">
+            <h1><?php _e('Bluesky AutoPoster Logs', 'wp-bsky-autoposter'); ?></h1>
+            
+            <div class="log-viewer-controls">
+                <button type="button" class="button button-secondary" id="refresh-logs">
+                    <?php _e('Refresh', 'wp-bsky-autoposter'); ?>
+                </button>
+                <button type="button" class="button button-secondary" id="clear-logs">
+                    <?php _e('Clear Logs', 'wp-bsky-autoposter'); ?>
+                </button>
+            </div>
+
+            <div class="log-viewer-container">
+                <pre class="log-content"><?php
+                    foreach ($log_entries as $entry) {
+                        // Color code different log levels
+                        $entry = esc_html($entry);
+                        if (strpos($entry, '[ERROR]') !== false) {
+                            echo '<span class="log-error">' . $entry . '</span>';
+                        } elseif (strpos($entry, '[WARNING]') !== false) {
+                            echo '<span class="log-warning">' . $entry . '</span>';
+                        } elseif (strpos($entry, '[SUCCESS]') !== false) {
+                            echo '<span class="log-success">' . $entry . '</span>';
+                        } elseif (strpos($entry, '[DEBUG]') !== false) {
+                            echo '<span class="log-debug">' . $entry . '</span>';
+                        } else {
+                            echo $entry;
+                        }
+                        echo "\n";
+                    }
+                ?></pre>
+            </div>
+
+            <style>
+                .log-viewer-container {
+                    background: #fff;
+                    border: 1px solid #ccd0d4;
+                    padding: 20px;
+                    margin-top: 20px;
+                    max-height: 600px;
+                    overflow-y: auto;
+                }
+                .log-content {
+                    margin: 0;
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                }
+                .log-error { color: #dc3232; }
+                .log-warning { color: #ffb900; }
+                .log-success { color: #46b450; }
+                .log-debug { color: #00a0d2; }
+                .log-viewer-controls {
+                    margin: 20px 0;
+                }
+                .log-viewer-controls .button {
+                    margin-right: 10px;
+                }
+            </style>
+
+            <script type="text/javascript">
+            jQuery(document).ready(function($) {
+                // Refresh logs
+                $('#refresh-logs').on('click', function() {
+                    location.reload();
+                });
+
+                // Clear logs
+                $('#clear-logs').on('click', function() {
+                    if (confirm('<?php _e('Are you sure you want to clear all logs?', 'wp-bsky-autoposter'); ?>')) {
+                        $.post(ajaxurl, {
+                            action: 'clear_bluesky_logs',
+                            nonce: '<?php echo wp_create_nonce('clear_bluesky_logs'); ?>'
+                        }, function(response) {
+                            if (response.success) {
+                                location.reload();
+                            } else {
+                                alert(response.data.message);
+                            }
+                        });
+                    }
+                });
+            });
+            </script>
+        </div>
+        <?php
+    }
+
+    /**
+     * AJAX handler for clearing logs.
+     *
+     * @since    1.2.0
+     */
+    public function ajax_clear_logs() {
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'clear_bluesky_logs')) {
+            wp_send_json_error(array('message' => __('Security check failed.', 'wp-bsky-autoposter')));
+        }
+
+        // Verify user capabilities
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('You do not have permission to perform this action.', 'wp-bsky-autoposter')));
+        }
+
+        // Get log file path
+        $settings = get_option('wp_bsky_autoposter_settings');
+        $log_file = !empty($settings['custom_log_path']) 
+            ? $settings['custom_log_path'] 
+            : wp_upload_dir()['basedir'] . '/wp-bsky-autoposter.log';
+
+        // Clear log file
+        if (file_exists($log_file)) {
+            if (file_put_contents($log_file, '') === false) {
+                wp_send_json_error(array('message' => __('Failed to clear log file.', 'wp-bsky-autoposter')));
+            }
+        }
+
+        wp_send_json_success(array('message' => __('Logs cleared successfully.', 'wp-bsky-autoposter')));
     }
 
     /**
