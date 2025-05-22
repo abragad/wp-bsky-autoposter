@@ -602,6 +602,11 @@ class WP_BSky_AutoPoster_API {
      * @return   string    The path to the log file.
      */
     private function get_log_file_path() {
+        $settings = get_option('wp_bsky_autoposter_settings');
+        if (!empty($settings['custom_log_path'])) {
+            return $settings['custom_log_path'];
+        }
+        
         $upload_dir = wp_upload_dir();
         return $upload_dir['basedir'] . '/wp-bsky-autoposter.log';
     }

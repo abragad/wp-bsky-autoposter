@@ -197,6 +197,14 @@ class WP_BSky_AutoPoster_Settings {
             'wp_bsky_autoposter_logging'
         );
 
+        add_settings_field(
+            'custom_log_path',
+            __('Custom Log Path', 'wp-bsky-autoposter'),
+            array($this, 'custom_log_path_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_logging'
+        );
+
         // Add AJAX handlers for test connection
         add_action('wp_ajax_test_bluesky_connection', array($this, 'ajax_test_connection'));
     }
@@ -499,6 +507,27 @@ class WP_BSky_AutoPoster_Settings {
     }
 
     /**
+     * Custom log path field callback.
+     *
+     * @since    1.2.0
+     */
+    public function custom_log_path_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $custom_path = isset($options['custom_log_path']) ? $options['custom_log_path'] : '';
+        ?>
+        <input type="text" 
+               name="wp_bsky_autoposter_settings[custom_log_path]" 
+               value="<?php echo esc_attr($custom_path); ?>" 
+               class="regular-text"
+               placeholder="<?php echo esc_attr(wp_upload_dir()['basedir'] . '/wp-bsky-autoposter.log'); ?>"
+        />
+        <p class="description">
+            <?php _e('Leave empty to use the default location in the WordPress uploads directory. The path must be writable by the web server.', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
      * Validate settings before saving.
      *
      * @since    1.0.0
@@ -543,6 +572,24 @@ class WP_BSky_AutoPoster_Settings {
 
         // Validate log level
         $valid['log_level'] = sanitize_text_field($input['log_level']);
+
+        // Validate custom log path
+        if (!empty($input['custom_log_path'])) {
+            $path = sanitize_text_field($input['custom_log_path']);
+            // Check if the directory is writable
+            $dir = dirname($path);
+            if (is_dir($dir) && is_writable($dir)) {
+                $valid['custom_log_path'] = $path;
+            } else {
+                add_settings_error(
+                    'wp_bsky_autoposter_settings',
+                    'invalid_log_path',
+                    __('The specified log directory is not writable. Please choose a different location.', 'wp-bsky-autoposter')
+                );
+            }
+        } else {
+            $valid['custom_log_path'] = '';
+        }
 
         return $valid;
     }
