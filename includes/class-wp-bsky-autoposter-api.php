@@ -59,6 +59,7 @@ class WP_BSky_AutoPoster_API {
         ));
 
         if (is_wp_error($response)) {
+            /* translators: %s: Error message */
             $this->log_error(sprintf(__('Authentication failed: %s', 'wp-bsky-autoposter'), $response->get_error_message()));
             return false;
         }
@@ -72,6 +73,7 @@ class WP_BSky_AutoPoster_API {
                 'did' => $body['did'],
             );
             update_option('wp_bsky_autoposter_session', $this->session);
+            /* translators: %s: Bluesky handle */
             $this->log_success(sprintf(__('Successfully authenticated with Bluesky as %s', 'wp-bsky-autoposter'), $handle));
             return true;
         }
@@ -99,6 +101,7 @@ class WP_BSky_AutoPoster_API {
         ));
 
         if (is_wp_error($response)) {
+            /* translators: %s: Error message */
             $this->log_error(sprintf(__('Token refresh failed: %s', 'wp-bsky-autoposter'), $response->get_error_message()));
             return false;
         }
@@ -243,7 +246,8 @@ class WP_BSky_AutoPoster_API {
         // Download the image
         $response = wp_remote_get($image_url);
         if (is_wp_error($response)) {
-            $this->log_warning(sprintf(__('Failed to download image at %s: %s', 'wp-bsky-autoposter'), $image_url, $response->get_error_message()));
+            /* translators: %s: Image URL, %s: Error message */
+            $this->log_warning(sprintf(__('Failed to download image at %1$s: %2$s', 'wp-bsky-autoposter'), $image_url, $response->get_error_message()));
             return null;
         }
 
@@ -264,8 +268,10 @@ class WP_BSky_AutoPoster_API {
             
             if (isset($mime_types[$extension])) {
                 $content_type = $mime_types[$extension];
+                /* translators: %s: MIME type */
                 $this->log_debug(sprintf(__('Determined image type from extension: %s', 'wp-bsky-autoposter'), $content_type));
             } else {
+                /* translators: %s: File extension */
                 $this->log_warning(sprintf(__('Could not determine image type from extension: %s', 'wp-bsky-autoposter'), $extension));
                 return null;
             }
@@ -274,6 +280,7 @@ class WP_BSky_AutoPoster_API {
         // Validate content type
         $allowed_types = array('image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml');
         if (!in_array($content_type, $allowed_types)) {
+            /* translators: %s: MIME type */
             $this->log_warning(sprintf(__('Invalid image type: %s', 'wp-bsky-autoposter'), $content_type));
             return null;
         }
@@ -283,8 +290,9 @@ class WP_BSky_AutoPoster_API {
         $image_size = strlen($image_data);
         
         if ($image_size > $max_size) {
+            /* translators: 1: Image size in MB, 2: Original size in bytes */
             $this->log_debug(sprintf(
-                __('Image too large (%.2f MB), attempting to compress... Original size: %d bytes', 'wp-bsky-autoposter'),
+                __('Image too large (%1$.2f MB), attempting to compress... Original size: %2$d bytes', 'wp-bsky-autoposter'),
                 $image_size / 1024 / 1024,
                 $image_size
             ));
@@ -301,8 +309,9 @@ class WP_BSky_AutoPoster_API {
             $height = imagesy($image);
             $ratio = $width / $height;
             
+            /* translators: 1: Width in pixels, 2: Height in pixels, 3: Aspect ratio */
             $this->log_debug(sprintf(
-                __('Original dimensions: %dx%d pixels (ratio: %.2f)', 'wp-bsky-autoposter'),
+                __('Original dimensions: %1$dx%2$d pixels (ratio: %3$.2f)', 'wp-bsky-autoposter'),
                 $width,
                 $height,
                 $ratio
@@ -312,8 +321,9 @@ class WP_BSky_AutoPoster_API {
             $new_width = $width * 0.8;
             $new_height = $new_width / $ratio;
             
+            /* translators: 1: New width in pixels, 2: New height in pixels */
             $this->log_debug(sprintf(
-                __('New dimensions: %dx%d pixels (80%% of original)', 'wp-bsky-autoposter'),
+                __('New dimensions: %1$dx%2$d pixels (80%% of original)', 'wp-bsky-autoposter'),
                 $new_width,
                 $new_height
             ));
@@ -352,8 +362,9 @@ class WP_BSky_AutoPoster_API {
             $compressed_size = strlen($compressed_data);
             $size_reduction = (($image_size - $compressed_size) / $image_size) * 100;
             
+            /* translators: 1: Original size in MB, 2: Compressed size in MB, 3: Size reduction percentage */
             $this->log_debug(sprintf(
-                __('Compression results: %.2f MB -> %.2f MB (%.1f%% reduction)', 'wp-bsky-autoposter'),
+                __('Compression results: %1$.2f MB -> %2$.2f MB (%3$.1f%% reduction)', 'wp-bsky-autoposter'),
                 $image_size / 1024 / 1024,
                 $compressed_size / 1024 / 1024,
                 $size_reduction
@@ -361,8 +372,9 @@ class WP_BSky_AutoPoster_API {
             
             // Check if compression was successful
             if ($compressed_size > $max_size) {
+                /* translators: 1: Compressed size in MB, 2: Maximum allowed size in MB */
                 $this->log_warning(sprintf(
-                    __('Image still too large after compression (%.2f MB > %.2f MB limit)', 'wp-bsky-autoposter'),
+                    __('Image still too large after compression (%1$.2f MB > %2$.2f MB limit)', 'wp-bsky-autoposter'),
                     $compressed_size / 1024 / 1024,
                     $max_size / 1024 / 1024
                 ));
@@ -370,8 +382,9 @@ class WP_BSky_AutoPoster_API {
             }
             
             $image_data = $compressed_data;
+            /* translators: 1: Compressed size in MB, 2: Percentage of original size */
             $this->log_debug(sprintf(
-                __('Successfully compressed image to %.2f MB (%.1f%% of original size)', 'wp-bsky-autoposter'),
+                __('Successfully compressed image to %1$.2f MB (%2$.1f%% of original size)', 'wp-bsky-autoposter'),
                 $compressed_size / 1024 / 1024,
                 ($compressed_size / $image_size) * 100
             ));
@@ -386,6 +399,7 @@ class WP_BSky_AutoPoster_API {
         ));
 
         if (is_wp_error($upload_response)) {
+            /* translators: %s: Error message */
             $this->log_warning(sprintf(__('Failed to upload image: %s', 'wp-bsky-autoposter'), $upload_response->get_error_message()));
             return null;
         }
@@ -395,6 +409,7 @@ class WP_BSky_AutoPoster_API {
             return $body['blob'];
         }
 
+        /* translators: %s: Error response */
         $this->log_warning(sprintf(__('Failed to upload image: %s', 'wp-bsky-autoposter'), wp_json_encode($body)));
         return null;
     }
@@ -513,7 +528,8 @@ class WP_BSky_AutoPoster_API {
      * @return   bool      True if the post was successful.
      */
     public function post_to_bluesky($message, $preview_data, $post_id) {
-        $this->log_debug(sprintf(__('Posting article %d at %s', 'wp-bsky-autoposter'), $post_id, $preview_data['uri']));
+        /* translators: 1: Post ID, 2: Post URI */
+        $this->log_debug(sprintf(__('Posting article %1$d at %2$s', 'wp-bsky-autoposter'), $post_id, $preview_data['uri']));
 
         // Process inline hashtags if enabled
         $message = $this->process_inline_hashtags($message);
@@ -603,6 +619,7 @@ class WP_BSky_AutoPoster_API {
         }
 
         // Log the post data for debugging
+        /* translators: %s: Post data JSON */
         $this->log_debug(sprintf(__('Attempting to post with data: %s', 'wp-bsky-autoposter'), wp_json_encode($post_data)));
 
         // Retry logic for 5XX errors
@@ -622,7 +639,8 @@ class WP_BSky_AutoPoster_API {
             ));
 
             if (is_wp_error($response)) {
-                $this->log_error(sprintf(__('Failed to post article %d to Bluesky: %s', 'wp-bsky-autoposter'), $post_id, $response->get_error_message()));
+                /* translators: 1: Post ID, 2: Error message */
+                $this->log_error(sprintf(__('Failed to post article %1$d to Bluesky: %2$s', 'wp-bsky-autoposter'), $post_id, $response->get_error_message()));
                 return false;
             }
 
@@ -631,15 +649,17 @@ class WP_BSky_AutoPoster_API {
 
             // Success case
             if (isset($body['uri'])) {
-                $this->log_success(sprintf(__('Successfully posted article %d to Bluesky: %s', 'wp-bsky-autoposter'), $post_id, $body['uri']));
+                /* translators: 1: Post ID, 2: Post URI */
+                $this->log_success(sprintf(__('Successfully posted article %1$d to Bluesky: %2$s', 'wp-bsky-autoposter'), $post_id, $body['uri']));
                 return true;
             }
 
             // Check if it's a 5XX error
             if ($response_code >= 500 && $response_code < 600) {
                 if ($attempt < $max_retries) {
+                    /* translators: 1: HTTP status code, 2: Current attempt number, 3: Maximum number of attempts, 4: Retry delay in seconds */
                     $this->log_error(sprintf(
-                        __('Received 5XX error (HTTP %d) on attempt %d/%d. Retrying in %d seconds...', 'wp-bsky-autoposter'),
+                        __('Received 5XX error (HTTP %1$d) on attempt %2$d/%3$d. Retrying in %4$d seconds...', 'wp-bsky-autoposter'),
                         $response_code,
                         $attempt,
                         $max_retries,
@@ -659,8 +679,9 @@ class WP_BSky_AutoPoster_API {
             }
 
             // Log detailed error information
+            /* translators: 1: HTTP status code, 2: Error message, 3: Response body */
             $this->log_error(sprintf(
-                __('Failed to post to Bluesky (HTTP %d): %s. Response: %s', 'wp-bsky-autoposter'),
+                __('Failed to post to Bluesky (HTTP %1$d): %2$s. Response: %3$s', 'wp-bsky-autoposter'),
                 $response_code,
                 $error_message,
                 wp_json_encode($body)
@@ -669,6 +690,7 @@ class WP_BSky_AutoPoster_API {
             return false;
         }
 
+        /* translators: %d: Number of retry attempts */
         $this->log_error(sprintf(
             __('Failed to post to Bluesky after %d attempts with 5XX errors', 'wp-bsky-autoposter'),
             $max_retries
