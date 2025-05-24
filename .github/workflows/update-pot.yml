@@ -37,7 +37,7 @@ jobs:
       - name: Commit and create PR
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_FOR_ACTIONS }}
           commit-message: "Update .pot file automatically"
           branch: update-pot-file
           title: "Update .pot file automatically"
