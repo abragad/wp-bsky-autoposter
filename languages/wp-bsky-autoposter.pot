@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-05-24T13:03:59+02:00\n"
+"POT-Creation-Date: 2025-05-24T13:12:23+02:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: wp-bsky-autoposter\n"
@@ -39,128 +39,141 @@ msgstr ""
 msgid "https://techartconsulting.it/alessio-bragadini"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:62
+#. translators: %s: Error message
+#: includes/class-wp-bsky-autoposter-api.php:63
 msgid "Authentication failed: %s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:75
+#. translators: %s: Bluesky handle
+#: includes/class-wp-bsky-autoposter-api.php:77
 msgid "Successfully authenticated with Bluesky as %s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:79
+#: includes/class-wp-bsky-autoposter-api.php:81
 msgid "Authentication failed: Invalid response from Bluesky API"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:102
+#. translators: %s: Error message
+#: includes/class-wp-bsky-autoposter-api.php:105
 msgid "Token refresh failed: %s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:111
+#: includes/class-wp-bsky-autoposter-api.php:114
 msgid "Successfully refreshed authentication token"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:115
+#: includes/class-wp-bsky-autoposter-api.php:118
 msgid "Token refresh failed: Invalid response from Bluesky API"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:246
-msgid "Failed to download image at %s: %s"
+#. translators: %s: Image URL, %s: Error message
+#: includes/class-wp-bsky-autoposter-api.php:250
+msgid "Failed to download image at %1$s: %2$s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:267
+#. translators: %s: MIME type
+#: includes/class-wp-bsky-autoposter-api.php:272
 msgid "Determined image type from extension: %s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:269
+#. translators: %s: File extension
+#: includes/class-wp-bsky-autoposter-api.php:275
 msgid "Could not determine image type from extension: %s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:277
+#. translators: %s: MIME type
+#: includes/class-wp-bsky-autoposter-api.php:284
 msgid "Invalid image type: %s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:287
-msgid "Image too large (%.2f MB), attempting to compress... Original size: %d bytes"
+#: includes/class-wp-bsky-autoposter-api.php:295
+msgid "Image too large (%1$.2f MB), attempting to compress... Original size: %2$d bytes"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:295
+#: includes/class-wp-bsky-autoposter-api.php:303
 msgid "Failed to create image resource for compression"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:305
-msgid "Original dimensions: %dx%d pixels (ratio: %.2f)"
+#: includes/class-wp-bsky-autoposter-api.php:314
+msgid "Original dimensions: %1$dx%2$d pixels (ratio: %3$.2f)"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:316
-msgid "New dimensions: %dx%d pixels (80%% of original)"
-msgstr ""
-
-#: includes/class-wp-bsky-autoposter-api.php:328
-msgid "Preserving transparency for PNG image"
+#: includes/class-wp-bsky-autoposter-api.php:326
+msgid "New dimensions: %1$dx%2$d pixels (80%% of original)"
 msgstr ""
 
 #: includes/class-wp-bsky-autoposter-api.php:338
+msgid "Preserving transparency for PNG image"
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter-api.php:348
 msgid "Applied JPEG compression with 85% quality"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:341
+#: includes/class-wp-bsky-autoposter-api.php:351
 msgid "Applied PNG compression with level 8"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:344
+#: includes/class-wp-bsky-autoposter-api.php:354
 msgid "Applied WebP compression with 85% quality"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:356
-msgid "Compression results: %.2f MB -> %.2f MB (%.1f%% reduction)"
+#: includes/class-wp-bsky-autoposter-api.php:367
+msgid "Compression results: %1$.2f MB -> %2$.2f MB (%3$.1f%% reduction)"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:365
-msgid "Image still too large after compression (%.2f MB > %.2f MB limit)"
+#: includes/class-wp-bsky-autoposter-api.php:377
+msgid "Image still too large after compression (%1$.2f MB > %2$.2f MB limit)"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:374
-msgid "Successfully compressed image to %.2f MB (%.1f%% of original size)"
+#: includes/class-wp-bsky-autoposter-api.php:387
+msgid "Successfully compressed image to %1$.2f MB (%2$.1f%% of original size)"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:389
-#: includes/class-wp-bsky-autoposter-api.php:398
+#. translators: %s: Error message
+#. translators: %s: Error response
+#: includes/class-wp-bsky-autoposter-api.php:403
+#: includes/class-wp-bsky-autoposter-api.php:413
 msgid "Failed to upload image: %s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:516
-msgid "Posting article %d at %s"
+#. translators: 1: Post ID, 2: Post URI
+#: includes/class-wp-bsky-autoposter-api.php:532
+msgid "Posting article %1$d at %2$s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:533
+#: includes/class-wp-bsky-autoposter-api.php:549
 msgid "Successfully uploaded image"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:606
+#. translators: %s: Post data JSON
+#: includes/class-wp-bsky-autoposter-api.php:623
 msgid "Attempting to post with data: %s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:625
-msgid "Failed to post article %d to Bluesky: %s"
+#. translators: 1: Post ID, 2: Error message
+#: includes/class-wp-bsky-autoposter-api.php:643
+msgid "Failed to post article %1$d to Bluesky: %2$s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:634
-msgid "Successfully posted article %d to Bluesky: %s"
+#. translators: 1: Post ID, 2: Post URI
+#: includes/class-wp-bsky-autoposter-api.php:653
+msgid "Successfully posted article %1$d to Bluesky: %2$s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:642
-msgid "Received 5XX error (HTTP %d) on attempt %d/%d. Retrying in %d seconds..."
+#: includes/class-wp-bsky-autoposter-api.php:662
+msgid "Received 5XX error (HTTP %1$d) on attempt %2$d/%3$d. Retrying in %4$d seconds..."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:654
+#: includes/class-wp-bsky-autoposter-api.php:674
 msgid "Unknown error"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:663
-msgid "Failed to post to Bluesky (HTTP %d): %s. Response: %s"
+#: includes/class-wp-bsky-autoposter-api.php:684
+msgid "Failed to post to Bluesky (HTTP %1$d): %2$s. Response: %3$s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:673
+#: includes/class-wp-bsky-autoposter-api.php:695
 msgid "Failed to post to Bluesky after %d attempts with 5XX errors"
 msgstr ""
 
