@@ -91,6 +91,12 @@ Developed by [Alessio Bragadini](https://techartconsulting.it/alessio-bragadini/
 
 ## Changelog
 
+### 1.4.0
+- Added WordPress.org translation support
+- Added translator comments for all translatable strings
+- Improved string formatting for better translation
+- Fixed placeholder ordering in translated strings
+
 ### 1.3.0
 - Added support for inline hashtags in post content
 - Improved hashtag handling and formatting
