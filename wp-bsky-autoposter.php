@@ -3,7 +3,7 @@
  * Plugin Name: WP AutoPoster to Bluesky
  * Plugin URI: https://github.com/abragad/wp-bsky-autoposter
  * Description: Automatically posts new WordPress posts to Bluesky with rich link previews.
- * Version: 1.2.0
+ * Version: 1.4.0
  * Author: Alessio Bragadini <alessio@techartconsulting.it>
  * Author URI: https://techartconsulting.it/alessio-bragadini
  * License: GPL v2 or later
@@ -20,7 +20,7 @@ if (!defined('WPINC')) {
 }
 
 // Plugin version
-define('WP_BSKY_AUTOPOSTER_VERSION', '1.2.0');
+define('WP_BSKY_AUTOPOSTER_VERSION', '1.4.0');
 define('WP_BSKY_AUTOPOSTER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WP_BSKY_AUTOPOSTER_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -28,6 +28,14 @@ define('WP_BSKY_AUTOPOSTER_PLUGIN_URL', plugin_dir_url(__FILE__));
 require_once WP_BSKY_AUTOPOSTER_PLUGIN_DIR . 'includes/class-wp-bsky-autoposter.php';
 require_once WP_BSKY_AUTOPOSTER_PLUGIN_DIR . 'includes/class-wp-bsky-autoposter-settings.php';
 require_once WP_BSKY_AUTOPOSTER_PLUGIN_DIR . 'includes/class-wp-bsky-autoposter-api.php';
+
+/**
+ * Load plugin text domain.
+ */
+function wpbskyautoposter_load_textdomain() {
+    load_plugin_textdomain('wp-bsky-autoposter', false, dirname(plugin_basename(__FILE__)) . '/languages/');
+}
+add_action('plugins_loaded', 'wpbskyautoposter_load_textdomain');
 
 /**
  * Begins execution of the plugin.

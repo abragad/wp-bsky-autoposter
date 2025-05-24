@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -113,6 +113,12 @@ The plugin includes a built-in log viewer that you can access from the settings 
 
 == Changelog ==
 
+= 1.4.0 =
+* Added WordPress.org translation support
+* Added translator comments for all translatable strings
+* Improved string formatting for better translation
+* Fixed placeholder ordering in translated strings
+
 = 1.3.0 =
 * Added support for inline hashtags in post content
 * Improved hashtag handling and formatting
@@ -167,6 +173,9 @@ The plugin includes a built-in log viewer that you can access from the settings 
 * Scheduled post support
 
 == Upgrade Notice ==
+
+= 1.4.0 =
+Added WordPress.org translation support, making it easier for users to contribute translations and use the plugin in their own language.
 
 = 1.3.0 =
 Added support for inline hashtags in post content, allowing for more flexible hashtag placement and formatting.
