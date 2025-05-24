@@ -30,6 +30,14 @@ require_once WP_BSKY_AUTOPOSTER_PLUGIN_DIR . 'includes/class-wp-bsky-autoposter-
 require_once WP_BSKY_AUTOPOSTER_PLUGIN_DIR . 'includes/class-wp-bsky-autoposter-api.php';
 
 /**
+ * Load plugin text domain.
+ */
+function wpbskyautoposter_load_textdomain() {
+    load_plugin_textdomain('wp-bsky-autoposter', false, dirname(plugin_basename(__FILE__)) . '/languages/');
+}
+add_action('plugins_loaded', 'wpbskyautoposter_load_textdomain');
+
+/**
  * Begins execution of the plugin.
  */
 function run_wp_bsky_autoposter() {
