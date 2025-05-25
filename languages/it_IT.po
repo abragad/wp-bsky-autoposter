@@ -276,7 +276,7 @@ msgstr ""
 
 #: includes/class-wp-bsky-autoposter-settings.php:304
 msgid "Test your Bluesky credentials before saving."
-msgstr ""
+msgstr "Test delle credenziali Bluesky prima di salvare."
 
 #: includes/class-wp-bsky-autoposter-settings.php:338
 msgid "Connection test failed. Please try again."
@@ -296,15 +296,15 @@ msgstr ""
 
 #: includes/class-wp-bsky-autoposter-settings.php:428
 msgid "Suggested: bsky"
-msgstr ""
+msgstr "Consigliato: bsky"
 
 #: includes/class-wp-bsky-autoposter-settings.php:445
 msgid "Suggested: social"
-msgstr ""
+msgstr "Consigliato: social"
 
 #: includes/class-wp-bsky-autoposter-settings.php:462
 msgid "Suggested: feed"
-msgstr ""
+msgstr "Consigliato: feed"
 
 #: includes/class-wp-bsky-autoposter-settings.php:479
 #: includes/class-wp-bsky-autoposter-settings.php:496
