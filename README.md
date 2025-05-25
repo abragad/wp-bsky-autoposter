@@ -91,6 +91,9 @@ Developed by [Alessio Bragadini](https://techartconsulting.it/alessio-bragadini/
 
 ## Changelog
 
+### 1.4.1
+- Added Italian translation
+
 ### 1.4.0
 - Added WordPress.org translation support
 - Added translator comments for all translatable strings

@@ -77,7 +77,7 @@ wp-content/plugins/hello.php
 # Plugin specific
 *.log
 *.pot
-*.po
+#*.po
 *.mo
 node_modules/
 vendor/

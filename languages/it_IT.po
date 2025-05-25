@@ -1,47 +1,45 @@
-# Copyright (C) 2025 Alessio Bragadini <alessio@techartconsulting.it>
-# This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP AutoPoster to Bluesky 1.2.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-bsky-autoposter\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Project-Id-Version: wp-bsky-autoposter\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: Italian\n"
+"Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-05-24T13:12:23+02:00\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.11.0\n"
-"X-Domain: wp-bsky-autoposter\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.6\n"
 
 #. Plugin Name of the plugin
 #: wp-bsky-autoposter.php
 msgid "WP AutoPoster to Bluesky"
-msgstr ""
+msgstr "WP AutoPoster per Bluesky"
 
 #. Description of the plugin
 #: wp-bsky-autoposter.php
 msgid "Automatically posts new WordPress posts to Bluesky with rich link previews."
-msgstr ""
+msgstr "Pubblica automaticamente i nuovi post di WordPress su Bluesky con ricche anteprime dei link."
 
 #. translators: %s: Error message
 #: includes/class-wp-bsky-autoposter-api.php:63
 msgid "Authentication failed: %s"
-msgstr ""
+msgstr "Autenticazione non riuscita: %s"
 
 #. translators: %s: Bluesky handle
 #: includes/class-wp-bsky-autoposter-api.php:77
 msgid "Successfully authenticated with Bluesky as %s"
-msgstr ""
+msgstr "Autenticato con successo con Bluesky come %s"
 
 #: includes/class-wp-bsky-autoposter-api.php:81
 msgid "Authentication failed: Invalid response from Bluesky API"
-msgstr ""
+msgstr "Autenticazione fallita: Risposta non valida dalla API Bluesky"
 
 #. translators: %s: Error message
 #: includes/class-wp-bsky-autoposter-api.php:105
 msgid "Token refresh failed: %s"
-msgstr ""
+msgstr "Aggiornamento del token fallito: %s"
 
 #: includes/class-wp-bsky-autoposter-api.php:114
 msgid "Successfully refreshed authentication token"
@@ -85,7 +83,7 @@ msgstr ""
 
 #: includes/class-wp-bsky-autoposter-api.php:326
 msgid "New dimensions: %1$dx%2$d pixels (80%% of original)"
-msgstr ""
+msgstr "Nuove dimensioni: %1$dx%2$d pixel (80%% dell'originale)"
 
 #: includes/class-wp-bsky-autoposter-api.php:338
 msgid "Preserving transparency for PNG image"
@@ -105,15 +103,15 @@ msgstr ""
 
 #: includes/class-wp-bsky-autoposter-api.php:367
 msgid "Compression results: %1$.2f MB -> %2$.2f MB (%3$.1f%% reduction)"
-msgstr ""
+msgstr "Risultati della compressione: %1$.2f MB -> %2$.2f MB (riduzione del %3$.1f%%)"
 
 #: includes/class-wp-bsky-autoposter-api.php:377
 msgid "Image still too large after compression (%1$.2f MB > %2$.2f MB limit)"
-msgstr ""
+msgstr "Immagine ancora troppo grande dopo la compressione (%1$.2f MB > limite %2$.2f MB)"
 
 #: includes/class-wp-bsky-autoposter-api.php:387
 msgid "Successfully compressed image to %1$.2f MB (%2$.1f%% of original size)"
-msgstr ""
+msgstr "Immagine compressa con successo a %1$.2f MB (%2$.1f%% della dimensione originale)"
 
 #. translators: %s: Error message
 #. translators: %s: Error response
