@@ -78,7 +78,7 @@ wp-content/plugins/hello.php
 *.log
 *.pot
 #*.po
-*.mo
+#*.mo
 node_modules/
 vendor/
 composer.lock
