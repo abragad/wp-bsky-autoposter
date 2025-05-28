@@ -43,16 +43,16 @@ msgstr "Aggiornamento del token fallito: %s"
 
 #: includes/class-wp-bsky-autoposter-api.php:114
 msgid "Successfully refreshed authentication token"
-msgstr ""
+msgstr "Aggiornato con successo il token di autenticazione"
 
 #: includes/class-wp-bsky-autoposter-api.php:118
 msgid "Token refresh failed: Invalid response from Bluesky API"
-msgstr ""
+msgstr "Fallito aggiornamento token: risposta non valida dalla API Bluesky"
 
 #. translators: %s: Image URL, %s: Error message
 #: includes/class-wp-bsky-autoposter-api.php:250
 msgid "Failed to download image at %1$s: %2$s"
-msgstr ""
+msgstr "Non è stato possibile scaricare l'immagine da %1$s: %2$s"
 
 #. translators: %s: MIME type
 #: includes/class-wp-bsky-autoposter-api.php:272
@@ -71,7 +71,7 @@ msgstr ""
 
 #: includes/class-wp-bsky-autoposter-api.php:295
 msgid "Image too large (%1$.2f MB), attempting to compress... Original size: %2$d bytes"
-msgstr ""
+msgstr "Immagine troppo grande (%1$.2f MB), tentativo di compressione... Dimensione originale: %2$d byte"
 
 #: includes/class-wp-bsky-autoposter-api.php:303
 msgid "Failed to create image resource for compression"
@@ -79,7 +79,7 @@ msgstr ""
 
 #: includes/class-wp-bsky-autoposter-api.php:314
 msgid "Original dimensions: %1$dx%2$d pixels (ratio: %3$.2f)"
-msgstr ""
+msgstr "Dimensioni originali: %1$dx%2$d pixel (rapporto: %3$.2f)"
 
 #: includes/class-wp-bsky-autoposter-api.php:326
 msgid "New dimensions: %1$dx%2$d pixels (80%% of original)"
@@ -142,11 +142,11 @@ msgstr ""
 #. translators: 1: Post ID, 2: Post URI
 #: includes/class-wp-bsky-autoposter-api.php:653
 msgid "Successfully posted article %1$d to Bluesky: %2$s"
-msgstr ""
+msgstr "Pubblicato con successo l'articolo %1$d su Bluesky: %2$s"
 
 #: includes/class-wp-bsky-autoposter-api.php:662
 msgid "Received 5XX error (HTTP %1$d) on attempt %2$d/%3$d. Retrying in %4$d seconds..."
-msgstr ""
+msgstr "Ricevuto errore 5XX (HTTP %1$d) al tentativo %2$d/%3$d. Riprova tra %4$d secondi..."
 
 #: includes/class-wp-bsky-autoposter-api.php:674
 msgid "Unknown error"
@@ -154,11 +154,11 @@ msgstr ""
 
 #: includes/class-wp-bsky-autoposter-api.php:684
 msgid "Failed to post to Bluesky (HTTP %1$d): %2$s. Response: %3$s"
-msgstr ""
+msgstr "Impossibile inviare a Bluesky (HTTP %1$d): %2$s. Risposta: %3$s"
 
 #: includes/class-wp-bsky-autoposter-api.php:695
 msgid "Failed to post to Bluesky after %d attempts with 5XX errors"
-msgstr ""
+msgstr "Non è stato possibile inviare un messaggio a Bluesky dopo %d tentativi con 5XX errori"
 
 #: includes/class-wp-bsky-autoposter-settings.php:36
 msgid "Bluesky AutoPoster Settings"
@@ -260,7 +260,7 @@ msgstr ""
 
 #: includes/class-wp-bsky-autoposter-settings.php:246
 msgid "Configure UTM parameters for link tracking. You can use {id} and {slug} placeholders in the values."
-msgstr ""
+msgstr "Configurare i parametri UTM per il tracciamento dei link. È possibile utilizzare i segnaposto {id} e {slug} nei valori."
 
 #: includes/class-wp-bsky-autoposter-settings.php:255
 msgid "Configure logging settings for the plugin."
