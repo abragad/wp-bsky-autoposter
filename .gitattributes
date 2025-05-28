@@ -1,0 +1,34 @@
+# Export all PHP, text, and image files by default
+* text=auto
+
+# Include plugin files in export
+*.php export-ignore=false
+*.txt export-ignore=false
+*.png export-ignore=false
+*.jpg export-ignore=false
+*.jpeg export-ignore=false
+*.svg export-ignore=false
+*.css export-ignore=false
+*.js export-ignore=false
+
+languages/* export-ignore=false
+*.mo export-ignore
+*.po export-ignore
+
+# Exclude GitHub and development files
+.github/ export-ignore
+.gitignore export-ignore
+.gitattributes export-ignore
+readme.md export-ignore
+composer.json export-ignore
+composer.lock export-ignore
+package.json export-ignore
+package-lock.json export-ignore
+webpack.config.js export-ignore
+node_modules/ export-ignore
+tests/ export-ignore
+deploy.sh export-ignore
+
+README.md export-ignore
+
+.DS_Store export-ignore
