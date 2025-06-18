@@ -164,6 +164,40 @@ class WP_BSky_AutoPoster {
     }
 
     /**
+     * Get post excerpt with Yoast SEO priority if enabled.
+     *
+     * @since    1.5.0
+     * @param    WP_Post $post The post object.
+     * @return   string  The excerpt text.
+     */
+    private function get_post_excerpt($post) {
+        // Get plugin settings
+        $settings = get_option('wp_bsky_autoposter_settings');
+        
+        // Check if Yoast SEO metadata should be used
+        if (!empty($settings['use_yoast_metadata']) && $this->is_yoast_seo_active()) {
+            // Try to get Yoast SEO meta description first
+            $yoast_description = get_post_meta($post->ID, '_yoast_wpseo_metadesc', true);
+            if (!empty($yoast_description)) {
+                return $yoast_description;
+            }
+        }
+        
+        // Fall back to WordPress excerpt
+        return get_the_excerpt($post);
+    }
+
+    /**
+     * Check if Yoast SEO is active.
+     *
+     * @since    1.5.0
+     * @return   bool    True if Yoast SEO is active, false otherwise.
+     */
+    private function is_yoast_seo_active() {
+        return function_exists('YoastSEO') || class_exists('WPSEO_Admin');
+    }
+
+    /**
      * Format the post message using the template.
      *
      * @since    1.0.0
@@ -181,8 +215,8 @@ class WP_BSky_AutoPoster {
         // Get plugin settings
         $settings = get_option('wp_bsky_autoposter_settings');
 
-        // Get excerpt or fallback text
-        $excerpt = get_the_excerpt($post);
+        // Get excerpt with Yoast SEO priority or fallback text
+        $excerpt = $this->get_post_excerpt($post);
         if (empty($excerpt) && !empty($settings['fallback_text'])) {
             // Process placeholders in fallback text
             $fallback_replacements = array(
@@ -266,8 +300,8 @@ class WP_BSky_AutoPoster {
         // Get plugin settings
         $settings = get_option('wp_bsky_autoposter_settings');
 
-        // Get excerpt or fallback text
-        $excerpt = get_the_excerpt($post);
+        // Get excerpt with Yoast SEO priority or fallback text
+        $excerpt = $this->get_post_excerpt($post);
         if (empty($excerpt) && !empty($settings['fallback_text'])) {
             // Get hashtags and link for fallback text processing
             $hashtags = $this->api->get_hashtags($post->ID);

@@ -223,6 +223,24 @@ class WP_BSky_AutoPoster_Settings {
             'wp_bsky_autoposter_logging'
         );
 
+        // Add Yoast SEO section only if Yoast SEO is active
+        if ($this->is_yoast_seo_active()) {
+            add_settings_section(
+                'wp_bsky_autoposter_yoast',
+                __('Yoast SEO Metadata', 'wp-bsky-autoposter'),
+                array($this, 'yoast_section_callback'),
+                $this->plugin_name
+            );
+
+            add_settings_field(
+                'use_yoast_metadata',
+                __('Use Yoast SEO Metadata', 'wp-bsky-autoposter'),
+                array($this, 'use_yoast_metadata_callback'),
+                $this->plugin_name,
+                'wp_bsky_autoposter_yoast'
+            );
+        }
+
         // Add AJAX handlers for test connection and log clearing
         add_action('wp_ajax_test_bluesky_connection', array($this, 'ajax_test_connection'));
         add_action('wp_ajax_clear_bluesky_logs', array($this, 'ajax_clear_logs'));
@@ -600,6 +618,11 @@ class WP_BSky_AutoPoster_Settings {
         // Validate inline hashtags setting
         $valid['inline_hashtags'] = isset($input['inline_hashtags']) ? 1 : 0;
 
+        // Validate Yoast SEO metadata setting (only if Yoast SEO is active)
+        if ($this->is_yoast_seo_active()) {
+            $valid['use_yoast_metadata'] = isset($input['use_yoast_metadata']) ? 1 : 0;
+        }
+
         // Validate link tracking settings
         $valid['enable_link_tracking'] = isset($input['enable_link_tracking']) ? 1 : 0;
         $valid['utm_source'] = sanitize_text_field($input['utm_source']);
@@ -844,6 +867,42 @@ class WP_BSky_AutoPoster_Settings {
                 ?>
             </form>
         </div>
+        <?php
+    }
+
+    /**
+     * Check if Yoast SEO is active.
+     *
+     * @since    1.5.0
+     * @return   bool    True if Yoast SEO is active, false otherwise.
+     */
+    private function is_yoast_seo_active() {
+        return function_exists('YoastSEO') || class_exists('WPSEO_Admin');
+    }
+
+    /**
+     * Yoast SEO section callback.
+     *
+     * @since    1.5.0
+     */
+    public function yoast_section_callback() {
+        echo '<p>' . __('If activated, we will check for post excerpt and other information in Yoast SEO metadata.', 'wp-bsky-autoposter') . '</p>';
+    }
+
+    /**
+     * Use Yoast SEO metadata field callback.
+     *
+     * @since    1.5.0
+     */
+    public function use_yoast_metadata_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $value = isset($options['use_yoast_metadata']) ? $options['use_yoast_metadata'] : 0;
+        ?>
+        <input type="checkbox" id="use_yoast_metadata" name="wp_bsky_autoposter_settings[use_yoast_metadata]" 
+               value="1" <?php checked(1, $value); ?>>
+        <p class="description">
+            <?php _e('If activated, we will check for post excerpt and other information in Yoast SEO metadata.', 'wp-bsky-autoposter'); ?>
+        </p>
         <?php
     }
 } 

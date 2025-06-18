@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.4.2
+Stable tag: 1.5
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -112,6 +112,9 @@ The plugin includes a built-in log viewer that you can access from the settings 
 6. Log viewer
 
 == Changelog ==
+
+= 1.5 =
+* Use Yoast SEO metadata for post previews, if available
 
 = 1.4.2 =
 * Better check for inline hashtags
