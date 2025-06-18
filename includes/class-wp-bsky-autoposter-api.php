@@ -498,7 +498,8 @@ class WP_BSky_AutoPoster_API {
             $word = substr($hashtag, 1);
             
             // Look for whole word matches in the main text
-            $pattern = '/\b' . preg_quote($word, '/') . '\b/i';
+            // Updated regex: match only if not part of a larger word (no letter, digit, or underscore before/after)
+            $pattern = '/(?<![a-zA-Z0-9_])' . preg_quote($word, '/') . '(?![a-zA-Z0-9_])/i';
             if (preg_match($pattern, $main_text_str, $matches)) {
                 // Found a match, replace the word with the hashtag
                 $replacement = '#' . $matches[0]; // Preserve original capitalization
