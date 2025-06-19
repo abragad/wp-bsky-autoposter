@@ -164,6 +164,48 @@ class WP_BSky_AutoPoster {
     }
 
     /**
+     * Get post title with Yoast SEO priority if enabled.
+     *
+     * @since    1.5.0
+     * @param    WP_Post $post The post object.
+     * @return   string  The title text.
+     */
+    private function get_post_title($post) {
+        // Get plugin settings
+        $settings = get_option('wp_bsky_autoposter_settings');
+        
+        // Check if Yoast SEO metadata should be used
+        if (!empty($settings['use_yoast_metadata']) && $this->is_yoast_seo_active()) {
+            // Priority 1: Try to get Yoast SEO Twitter title first
+            $yoast_twitter_title = get_post_meta($post->ID, '_yoast_wpseo_twitter-title', true);
+            if (!empty($yoast_twitter_title)) {
+                /* translators: 1: Post ID, 2: Title length */
+                $this->api->log_debug(sprintf(
+                    __('Using Yoast SEO Twitter title for post %1$d (length: %2$d characters)', 'wp-bsky-autoposter'),
+                    $post->ID,
+                    strlen($yoast_twitter_title)
+                ));
+                return $yoast_twitter_title;
+            }
+            
+            // Priority 2: Try to get Yoast SEO title
+            $yoast_title = get_post_meta($post->ID, '_yoast_wpseo_title', true);
+            if (!empty($yoast_title)) {
+                /* translators: 1: Post ID, 2: Title length */
+                $this->api->log_debug(sprintf(
+                    __('Using Yoast SEO title for post %1$d (length: %2$d characters)', 'wp-bsky-autoposter'),
+                    $post->ID,
+                    strlen($yoast_title)
+                ));
+                return $yoast_title;
+            }
+        }
+        
+        // Fall back to WordPress title
+        return get_the_title($post);
+    }
+
+    /**
      * Get post excerpt with Yoast SEO priority if enabled.
      *
      * @since    1.5.0
@@ -176,9 +218,27 @@ class WP_BSky_AutoPoster {
         
         // Check if Yoast SEO metadata should be used
         if (!empty($settings['use_yoast_metadata']) && $this->is_yoast_seo_active()) {
-            // Try to get Yoast SEO meta description first
+            // Priority 1: Try to get Yoast SEO Twitter description first
+            $yoast_twitter_description = get_post_meta($post->ID, '_yoast_wpseo_twitter-description', true);
+            if (!empty($yoast_twitter_description)) {
+                /* translators: 1: Post ID, 2: Description length */
+                $this->api->log_debug(sprintf(
+                    __('Using Yoast SEO Twitter description for post %1$d (length: %2$d characters)', 'wp-bsky-autoposter'),
+                    $post->ID,
+                    strlen($yoast_twitter_description)
+                ));
+                return $yoast_twitter_description;
+            }
+            
+            // Priority 2: Try to get Yoast SEO meta description
             $yoast_description = get_post_meta($post->ID, '_yoast_wpseo_metadesc', true);
             if (!empty($yoast_description)) {
+                /* translators: 1: Post ID, 2: Description length */
+                $this->api->log_debug(sprintf(
+                    __('Using Yoast SEO meta description for post %1$d (length: %2$d characters)', 'wp-bsky-autoposter'),
+                    $post->ID,
+                    strlen($yoast_description)
+                ));
                 return $yoast_description;
             }
         }
@@ -220,7 +280,7 @@ class WP_BSky_AutoPoster {
         if (empty($excerpt) && !empty($settings['fallback_text'])) {
             // Process placeholders in fallback text
             $fallback_replacements = array(
-                '{title}' => html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                '{title}' => html_entity_decode($this->get_post_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
                 '{link}' => $link,
                 '{hashtags}' => $hashtags,
             );
@@ -231,7 +291,7 @@ class WP_BSky_AutoPoster {
         $excerpt = $this->truncate_for_at_protocol($excerpt);
 
         $replacements = array(
-            '{title}' => html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            '{title}' => html_entity_decode($this->get_post_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
             '{excerpt}' => $excerpt,
             '{link}' => $link,
             '{hashtags}' => $hashtags,
@@ -244,6 +304,36 @@ class WP_BSky_AutoPoster {
     }
 
     /**
+     * Get post URL with Yoast SEO canonical priority if enabled.
+     *
+     * @since    1.5.0
+     * @param    WP_Post $post The post object.
+     * @return   string  The post URL.
+     */
+    private function get_post_url($post) {
+        // Get plugin settings
+        $settings = get_option('wp_bsky_autoposter_settings');
+        
+        // Check if Yoast SEO metadata should be used
+        if (!empty($settings['use_yoast_metadata']) && $this->is_yoast_seo_active()) {
+            // Try to get Yoast SEO canonical URL first
+            $yoast_canonical = get_post_meta($post->ID, '_yoast_wpseo_canonical', true);
+            if (!empty($yoast_canonical)) {
+                /* translators: 1: Post ID, 2: Canonical URL */
+                $this->api->log_debug(sprintf(
+                    __('Using Yoast SEO canonical URL for post %1$d: %2$s', 'wp-bsky-autoposter'),
+                    $post->ID,
+                    $yoast_canonical
+                ));
+                return $yoast_canonical;
+            }
+        }
+        
+        // Fall back to WordPress permalink
+        return get_permalink($post);
+    }
+
+    /**
      * Get post link with UTM parameters if enabled.
      *
      * @since    1.0.0
@@ -251,7 +341,7 @@ class WP_BSky_AutoPoster {
      * @return   string  The post URL with UTM parameters if enabled.
      */
     private function get_post_link_with_utm($post) {
-        $link = get_permalink($post);
+        $link = $this->get_post_url($post);
         
         // Get plugin settings
         $settings = get_option('wp_bsky_autoposter_settings');
@@ -290,6 +380,40 @@ class WP_BSky_AutoPoster {
     }
 
     /**
+     * Get post featured image with Yoast SEO Twitter image priority if enabled.
+     *
+     * @since    1.5.0
+     * @param    WP_Post $post The post object.
+     * @return   string|null  The image URL or null if no image available.
+     */
+    private function get_post_featured_image($post) {
+        // Get plugin settings
+        $settings = get_option('wp_bsky_autoposter_settings');
+        
+        // Check if Yoast SEO metadata should be used
+        if (!empty($settings['use_yoast_metadata']) && $this->is_yoast_seo_active()) {
+            // Priority 1: Try to get Yoast SEO Twitter image first
+            $yoast_twitter_image = get_post_meta($post->ID, '_yoast_wpseo_twitter-image', true);
+            if (!empty($yoast_twitter_image)) {
+                /* translators: 1: Post ID, 2: Image URL */
+                $this->api->log_debug(sprintf(
+                    __('Using Yoast SEO Twitter image for post %1$d: %2$s', 'wp-bsky-autoposter'),
+                    $post->ID,
+                    $yoast_twitter_image
+                ));
+                return $yoast_twitter_image;
+            }
+        }
+        
+        // Fall back to WordPress featured image
+        if (has_post_thumbnail($post)) {
+            return get_the_post_thumbnail_url($post, 'large');
+        }
+        
+        return null;
+    }
+
+    /**
      * Get post metadata for rich preview.
      *
      * @since    1.0.0
@@ -309,7 +433,7 @@ class WP_BSky_AutoPoster {
 
             // Process placeholders in fallback text
             $fallback_replacements = array(
-                '{title}' => html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+                '{title}' => html_entity_decode($this->get_post_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
                 '{link}' => $link,
                 '{hashtags}' => $hashtags,
             );
@@ -319,8 +443,8 @@ class WP_BSky_AutoPoster {
         // Truncate excerpt for preview description
         $excerpt = $this->truncate_for_at_protocol($excerpt);
 
-        // Get title and ensure proper encoding
-        $title = html_entity_decode(get_the_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        // Get title with Yoast SEO priority and ensure proper encoding
+        $title = html_entity_decode($this->get_post_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
         $preview_data = array(
             'uri' => $this->get_post_link_with_utm($post),
@@ -328,9 +452,10 @@ class WP_BSky_AutoPoster {
             'description' => $excerpt,
         );
 
-        // Get featured image if available
-        if (has_post_thumbnail($post)) {
-            $preview_data['thumb'] = get_the_post_thumbnail_url($post, 'large');
+        // Get featured image with Yoast SEO Twitter image priority
+        $featured_image = $this->get_post_featured_image($post);
+        if ($featured_image) {
+            $preview_data['thumb'] = $featured_image;
         }
 
         return $preview_data;
