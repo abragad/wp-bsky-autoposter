@@ -415,34 +415,6 @@ class WP_BSky_AutoPoster_API {
     }
 
     /**
-     * Get hashtags from post tags.
-     *
-     * @since    1.0.0
-     * @param    int       $post_id    The WordPress post ID.
-     * @return   string    The formatted hashtags string.
-     */
-    public function get_hashtags($post_id) {
-        $tags = get_the_tags($post_id);
-        if (!$tags) {
-            return '';
-        }
-
-        $hashtags = array();
-        foreach ($tags as $tag) {
-            // Convert to lowercase and ensure proper formatting
-            $tag_slug = strtolower($tag->slug);
-            // Remove any special characters except hyphens
-            $tag_slug = preg_replace('/[^a-z0-9-]/', '', $tag_slug);
-            // Ensure the tag starts with a letter or number
-            if (preg_match('/^[a-z0-9]/', $tag_slug)) {
-                $hashtags[] = '#' . $tag_slug;
-            }
-        }
-
-        return implode(' ', $hashtags);
-    }
-
-    /**
      * Process hashtags for inline placement.
      *
      * @since    1.3.0

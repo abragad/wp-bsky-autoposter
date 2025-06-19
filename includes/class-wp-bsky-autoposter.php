@@ -267,7 +267,7 @@ class WP_BSky_AutoPoster {
      */
     private function format_post_message($post, $template) {
         // Get hashtags
-        $hashtags = $this->api->get_hashtags($post->ID);
+        $hashtags = $this->get_hashtags($post->ID);
 
         // Get the post link with UTM parameters if enabled
         $link = $this->get_post_link_with_utm($post);
@@ -428,7 +428,7 @@ class WP_BSky_AutoPoster {
         $excerpt = $this->get_post_excerpt($post);
         if (empty($excerpt) && !empty($settings['fallback_text'])) {
             // Get hashtags and link for fallback text processing
-            $hashtags = $this->api->get_hashtags($post->ID);
+            $hashtags = $this->get_hashtags($post->ID);
             $link = $this->get_post_link_with_utm($post);
 
             // Process placeholders in fallback text
@@ -459,6 +459,88 @@ class WP_BSky_AutoPoster {
         }
 
         return $preview_data;
+    }
+
+    /**
+     * Get stock tickers from Yoast SEO News and convert to cashtags.
+     *
+     * @since    1.5.0
+     * @param    int       $post_id    The WordPress post ID.
+     * @return   string    The formatted cashtags string.
+     */
+    private function get_stock_cashtags($post_id) {
+        // Get plugin settings
+        $settings = get_option('wp_bsky_autoposter_settings');
+        
+        // Check if Yoast SEO metadata should be used
+        if (!empty($settings['use_yoast_metadata']) && $this->is_yoast_seo_active()) {
+            // Try to get Yoast SEO News stock tickers
+            $stock_tickers = get_post_meta($post_id, '_yoast_wpseo_newssitemap-stocktickers', true);
+            if (!empty($stock_tickers)) {
+                // Parse the comma-separated list and extract tickers
+                $tickers = array();
+                $parts = array_map('trim', explode(',', $stock_tickers));
+                
+                foreach ($parts as $part) {
+                    // Split by colon and get the ticker part (after the exchange)
+                    $exchange_ticker = array_map('trim', explode(':', $part));
+                    if (count($exchange_ticker) >= 2) {
+                        $ticker = trim($exchange_ticker[1]);
+                        // Only add if ticker is not empty and contains valid characters
+                        if (!empty($ticker) && preg_match('/^[A-Z0-9.]+$/', $ticker)) {
+                            $tickers[] = '$' . $ticker;
+                        }
+                    }
+                }
+                
+                if (!empty($tickers)) {
+                    $cashtags = implode(' ', $tickers);
+                    /* translators: 1: Post ID, 2: Cashtags */
+                    $this->api->log_debug(sprintf(
+                        __('Using Yoast SEO News stock tickers for post %1$d: %2$s', 'wp-bsky-autoposter'),
+                        $post_id,
+                        $cashtags
+                    ));
+                    return $cashtags;
+                }
+            }
+        }
+        
+        return '';
+    }
+
+    /**
+     * Get hashtags from post tags.
+     *
+     * @since    1.0.0
+     * @param    int       $post_id    The WordPress post ID.
+     * @return   string    The formatted hashtags string.
+     */
+    public function get_hashtags($post_id) {
+        $tags = get_the_tags($post_id);
+        $hashtags = array();
+        
+        // Get regular hashtags from post tags
+        if ($tags) {
+            foreach ($tags as $tag) {
+                // Convert to lowercase and ensure proper formatting
+                $tag_slug = strtolower($tag->slug);
+                // Remove any special characters except hyphens
+                $tag_slug = preg_replace('/[^a-z0-9-]/', '', $tag_slug);
+                // Ensure the tag starts with a letter or number
+                if (preg_match('/^[a-z0-9]/', $tag_slug)) {
+                    $hashtags[] = '#' . $tag_slug;
+                }
+            }
+        }
+        
+        // Get stock cashtags from Yoast SEO News
+        $cashtags = $this->get_stock_cashtags($post_id);
+        if (!empty($cashtags)) {
+            $hashtags[] = $cashtags;
+        }
+        
+        return implode(' ', $hashtags);
     }
 
     /**
