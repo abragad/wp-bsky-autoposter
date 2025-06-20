@@ -403,6 +403,18 @@ class WP_BSky_AutoPoster {
                 ));
                 return $yoast_twitter_image;
             }
+            
+            // Priority 2: Try to get Yoast SEO Facebook Open Graph image
+            $yoast_facebook_image = get_post_meta($post->ID, '_yoast_wpseo_opengraph-image', true);
+            if (!empty($yoast_facebook_image)) {
+                /* translators: 1: Post ID, 2: Image URL */
+                $this->api->log_debug(sprintf(
+                    __('Using Yoast SEO Facebook Open Graph image for post %1$d: %2$s', 'wp-bsky-autoposter'),
+                    $post->ID,
+                    $yoast_facebook_image
+                ));
+                return $yoast_facebook_image;
+            }
         }
         
         // Fall back to WordPress featured image
@@ -452,7 +464,7 @@ class WP_BSky_AutoPoster {
             'description' => $excerpt,
         );
 
-        // Get featured image with Yoast SEO Twitter image priority
+        // Get featured image with enhanced Yoast SEO priority
         $featured_image = $this->get_post_featured_image($post);
         if ($featured_image) {
             $preview_data['thumb'] = $featured_image;
