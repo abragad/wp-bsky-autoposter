@@ -201,7 +201,7 @@ class WP_BSky_AutoPoster_API {
      * @since    1.0.0
      * @param    string    $message    The error message.
      */
-    private function log_error($message) {
+    public function log_error($message) {
         $this->write_log($message, 'error');
     }
 
@@ -211,7 +211,7 @@ class WP_BSky_AutoPoster_API {
      * @since    1.2.0
      * @param    string    $message    The warning message.
      */
-    private function log_warning($message) {
+    public function log_warning($message) {
         $this->write_log($message, 'warning');
     }
 
@@ -221,7 +221,7 @@ class WP_BSky_AutoPoster_API {
      * @since    1.0.0
      * @param    string    $message    The success message.
      */
-    private function log_success($message) {
+    public function log_success($message) {
         $this->write_log($message, 'success');
     }
 
@@ -231,7 +231,7 @@ class WP_BSky_AutoPoster_API {
      * @since    1.2.0
      * @param    string    $message    The debug message.
      */
-    private function log_debug($message) {
+    public function log_debug($message) {
         $this->write_log($message, 'debug');
     }
 
