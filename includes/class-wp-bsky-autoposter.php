@@ -37,6 +37,15 @@ class WP_BSky_AutoPoster {
     protected $version;
 
     /**
+     * A temporary cache for post data to avoid redundant database calls.
+     *
+     * @since    1.6.0
+     * @access   private
+     * @var      array    $post_data_cache    A cache for post data.
+     */
+    private $post_data_cache = [];
+
+    /**
      * Initialize the class and set its properties.
      *
      * @since    1.0.0
@@ -102,6 +111,9 @@ class WP_BSky_AutoPoster {
      * @param    WP_Post $post       The post object.
      */
     public function handle_post_publication($post_id, $post) {
+        // Clear cache for each new post publication
+        $this->post_data_cache[$post_id] = [];
+        
         // Don't process revisions or autosaves
         if (wp_is_post_revision($post_id) || wp_is_post_autosave($post_id)) {
             return;
@@ -171,7 +183,11 @@ class WP_BSky_AutoPoster {
      * @return   string  The title text.
      */
     private function get_post_title($post) {
-        // Get plugin settings
+        if (isset($this->post_data_cache[$post->ID]['title'])) {
+            return $this->post_data_cache[$post->ID]['title'];
+        }
+
+        $title = '';
         $settings = get_option('wp_bsky_autoposter_settings');
         
         // Check if Yoast SEO metadata should be used
@@ -185,24 +201,31 @@ class WP_BSky_AutoPoster {
                     $post->ID,
                     strlen($yoast_twitter_title)
                 ));
-                return $yoast_twitter_title;
+                $title = $yoast_twitter_title;
             }
             
             // Priority 2: Try to get Yoast SEO title
-            $yoast_title = get_post_meta($post->ID, '_yoast_wpseo_title', true);
-            if (!empty($yoast_title)) {
-                /* translators: 1: Post ID, 2: Title length */
-                $this->api->log_debug(sprintf(
-                    __('Using Yoast SEO title for post %1$d (length: %2$d characters)', 'wp-bsky-autoposter'),
-                    $post->ID,
-                    strlen($yoast_title)
-                ));
-                return $yoast_title;
+            if (empty($title)) {
+                $yoast_title = get_post_meta($post->ID, '_yoast_wpseo_title', true);
+                if (!empty($yoast_title)) {
+                    /* translators: 1: Post ID, 2: Title length */
+                    $this->api->log_debug(sprintf(
+                        __('Using Yoast SEO title for post %1$d (length: %2$d characters)', 'wp-bsky-autoposter'),
+                        $post->ID,
+                        strlen($yoast_title)
+                    ));
+                    $title = $yoast_title;
+                }
             }
         }
         
         // Fall back to WordPress title
-        return get_the_title($post);
+        if (empty($title)) {
+            $title = get_the_title($post);
+        }
+
+        $this->post_data_cache[$post->ID]['title'] = $title;
+        return $title;
     }
 
     /**
@@ -213,7 +236,11 @@ class WP_BSky_AutoPoster {
      * @return   string  The excerpt text.
      */
     private function get_post_excerpt($post) {
-        // Get plugin settings
+        if (isset($this->post_data_cache[$post->ID]['excerpt'])) {
+            return $this->post_data_cache[$post->ID]['excerpt'];
+        }
+
+        $excerpt = '';
         $settings = get_option('wp_bsky_autoposter_settings');
         
         // Check if Yoast SEO metadata should be used
@@ -227,24 +254,31 @@ class WP_BSky_AutoPoster {
                     $post->ID,
                     strlen($yoast_twitter_description)
                 ));
-                return $yoast_twitter_description;
+                $excerpt = $yoast_twitter_description;
             }
             
             // Priority 2: Try to get Yoast SEO meta description
-            $yoast_description = get_post_meta($post->ID, '_yoast_wpseo_metadesc', true);
-            if (!empty($yoast_description)) {
-                /* translators: 1: Post ID, 2: Description length */
-                $this->api->log_debug(sprintf(
-                    __('Using Yoast SEO meta description for post %1$d (length: %2$d characters)', 'wp-bsky-autoposter'),
-                    $post->ID,
-                    strlen($yoast_description)
-                ));
-                return $yoast_description;
+            if (empty($excerpt)) {
+                $yoast_description = get_post_meta($post->ID, '_yoast_wpseo_metadesc', true);
+                if (!empty($yoast_description)) {
+                    /* translators: 1: Post ID, 2: Description length */
+                    $this->api->log_debug(sprintf(
+                        __('Using Yoast SEO meta description for post %1$d (length: %2$d characters)', 'wp-bsky-autoposter'),
+                        $post->ID,
+                        strlen($yoast_description)
+                    ));
+                    $excerpt = $yoast_description;
+                }
             }
         }
         
         // Fall back to WordPress excerpt
-        return get_the_excerpt($post);
+        if (empty($excerpt)) {
+            $excerpt = get_the_excerpt($post);
+        }
+
+        $this->post_data_cache[$post->ID]['excerpt'] = $excerpt;
+        return $excerpt;
     }
 
     /**
@@ -311,7 +345,11 @@ class WP_BSky_AutoPoster {
      * @return   string  The post URL.
      */
     private function get_post_url($post) {
-        // Get plugin settings
+        if (isset($this->post_data_cache[$post->ID]['url'])) {
+            return $this->post_data_cache[$post->ID]['url'];
+        }
+
+        $url = '';
         $settings = get_option('wp_bsky_autoposter_settings');
         
         // Check if Yoast SEO metadata should be used
@@ -325,12 +363,17 @@ class WP_BSky_AutoPoster {
                     $post->ID,
                     $yoast_canonical
                 ));
-                return $yoast_canonical;
+                $url = $yoast_canonical;
             }
         }
         
         // Fall back to WordPress permalink
-        return get_permalink($post);
+        if (empty($url)) {
+            $url = get_permalink($post);
+        }
+
+        $this->post_data_cache[$post->ID]['url'] = $url;
+        return $url;
     }
 
     /**
@@ -387,7 +430,11 @@ class WP_BSky_AutoPoster {
      * @return   string|null  The image URL or null if no image available.
      */
     private function get_post_featured_image($post) {
-        // Get plugin settings
+        if (array_key_exists('featured_image', $this->post_data_cache[$post->ID])) {
+            return $this->post_data_cache[$post->ID]['featured_image'];
+        }
+
+        $image_url = null;
         $settings = get_option('wp_bsky_autoposter_settings');
         
         // Check if Yoast SEO metadata should be used
@@ -401,28 +448,31 @@ class WP_BSky_AutoPoster {
                     $post->ID,
                     $yoast_twitter_image
                 ));
-                return $yoast_twitter_image;
+                $image_url = $yoast_twitter_image;
             }
             
             // Priority 2: Try to get Yoast SEO Facebook Open Graph image
-            $yoast_facebook_image = get_post_meta($post->ID, '_yoast_wpseo_opengraph-image', true);
-            if (!empty($yoast_facebook_image)) {
-                /* translators: 1: Post ID, 2: Image URL */
-                $this->api->log_debug(sprintf(
-                    __('Using Yoast SEO Facebook Open Graph image for post %1$d: %2$s', 'wp-bsky-autoposter'),
-                    $post->ID,
-                    $yoast_facebook_image
-                ));
-                return $yoast_facebook_image;
+            if (empty($image_url)) {
+                $yoast_facebook_image = get_post_meta($post->ID, '_yoast_wpseo_opengraph-image', true);
+                if (!empty($yoast_facebook_image)) {
+                    /* translators: 1: Post ID, 2: Image URL */
+                    $this->api->log_debug(sprintf(
+                        __('Using Yoast SEO Facebook Open Graph image for post %1$d: %2$s', 'wp-bsky-autoposter'),
+                        $post->ID,
+                        $yoast_facebook_image
+                    ));
+                    $image_url = $yoast_facebook_image;
+                }
             }
         }
         
         // Fall back to WordPress featured image
-        if (has_post_thumbnail($post)) {
-            return get_the_post_thumbnail_url($post, 'large');
+        if (empty($image_url) && has_post_thumbnail($post)) {
+            $image_url = get_the_post_thumbnail_url($post, 'large');
         }
         
-        return null;
+        $this->post_data_cache[$post->ID]['featured_image'] = $image_url;
+        return $image_url;
     }
 
     /**
@@ -481,7 +531,11 @@ class WP_BSky_AutoPoster {
      * @return   string    The formatted cashtags string.
      */
     private function get_stock_cashtags($post_id) {
-        // Get plugin settings
+        if (isset($this->post_data_cache[$post_id]['cashtags'])) {
+            return $this->post_data_cache[$post_id]['cashtags'];
+        }
+
+        $cashtags = '';
         $settings = get_option('wp_bsky_autoposter_settings');
         
         // Check if Yoast SEO metadata should be used
@@ -513,12 +567,12 @@ class WP_BSky_AutoPoster {
                         $post_id,
                         $cashtags
                     ));
-                    return $cashtags;
                 }
             }
         }
         
-        return '';
+        $this->post_data_cache[$post_id]['cashtags'] = $cashtags;
+        return $cashtags;
     }
 
     /**
@@ -529,8 +583,12 @@ class WP_BSky_AutoPoster {
      * @return   string    The formatted hashtags string.
      */
     public function get_hashtags($post_id) {
+        if (isset($this->post_data_cache[$post_id]['hashtags'])) {
+            return $this->post_data_cache[$post_id]['hashtags'];
+        }
+
         $tags = get_the_tags($post_id);
-        $hashtags = array();
+        $hashtags_array = array();
         
         // Get regular hashtags from post tags
         if ($tags) {
@@ -541,7 +599,7 @@ class WP_BSky_AutoPoster {
                 $tag_slug = preg_replace('/[^a-z0-9-]/', '', $tag_slug);
                 // Ensure the tag starts with a letter or number
                 if (preg_match('/^[a-z0-9]/', $tag_slug)) {
-                    $hashtags[] = '#' . $tag_slug;
+                    $hashtags_array[] = '#' . $tag_slug;
                 }
             }
         }
@@ -549,10 +607,13 @@ class WP_BSky_AutoPoster {
         // Get stock cashtags from Yoast SEO News
         $cashtags = $this->get_stock_cashtags($post_id);
         if (!empty($cashtags)) {
-            $hashtags[] = $cashtags;
+            $hashtags_array[] = $cashtags;
         }
         
-        return implode(' ', $hashtags);
+        $hashtags_string = implode(' ', $hashtags_array);
+
+        $this->post_data_cache[$post_id]['hashtags'] = $hashtags_string;
+        return $hashtags_string;
     }
 
     /**
