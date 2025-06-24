@@ -428,21 +428,26 @@ class WP_BSky_AutoPoster_API {
             return $message;
         }
 
-        // Extract hashtags from the end of the message
+        // Extract hashtags and cashtags from the end of the message
         $parts = explode(' ', $message);
         $hashtags = array();
+        $cashtags = array();
         $main_text = array();
-        $in_hashtags = false;
+        $in_tags = false;
 
-        // Split message into main text and hashtags
+        // Split message into main text and tags
         foreach ($parts as $part) {
-            if (strpos($part, '#') === 0) {
-                $in_hashtags = true;
-                $hashtags[] = $part;
+            if (strpos($part, '#') === 0 || strpos($part, '$') === 0) {
+                $in_tags = true;
+                if (strpos($part, '#') === 0) {
+                    $hashtags[] = $part;
+                } else {
+                    $cashtags[] = $part;
+                }
             } else {
-                if ($in_hashtags) {
-                    // If we find a non-hashtag after hashtags, add it to main text
-                    $in_hashtags = false;
+                if ($in_tags) {
+                    // If we find a non-tag after tags, add it to main text
+                    $in_tags = false;
                     $main_text[] = $part;
                 } else {
                     $main_text[] = $part;
@@ -450,8 +455,8 @@ class WP_BSky_AutoPoster_API {
             }
         }
 
-        // If no hashtags found, return original message
-        if (empty($hashtags)) {
+        // If no tags found, return original message
+        if (empty($hashtags) && empty($cashtags)) {
             return $message;
         }
 
@@ -482,10 +487,37 @@ class WP_BSky_AutoPoster_API {
             }
         }
 
-        // Combine main text with remaining hashtags
+        // Process each cashtag
+        $processed_cashtags = array();
+
+        foreach ($cashtags as $cashtag) {
+            // Skip cashtags with special characters or multiple words
+            if (preg_match('/[^A-Z0-9.]/', substr($cashtag, 1))) {
+                $processed_cashtags[] = $cashtag;
+                continue;
+            }
+
+            // Get the ticker without the $ symbol
+            $ticker = substr($cashtag, 1);
+            
+            // Look for whole word matches in the main text
+            // Updated regex: match only if not part of a larger word (no letter, digit, or underscore before/after)
+            $pattern = '/(?<![a-zA-Z0-9_])' . preg_quote($ticker, '/') . '(?![a-zA-Z0-9_])/i';
+            if (preg_match($pattern, $main_text_str, $matches)) {
+                // Found a match, replace the word with the cashtag
+                $replacement = '$' . $matches[0]; // Preserve original capitalization
+                $main_text_str = preg_replace($pattern, $replacement, $main_text_str, 1);
+            } else {
+                // No match found, keep the cashtag at the end
+                $processed_cashtags[] = $cashtag;
+            }
+        }
+
+        // Combine main text with remaining tags
         $result = trim($main_text_str);
-        if (!empty($processed_hashtags)) {
-            $result .= ' ' . implode(' ', $processed_hashtags);
+        $remaining_tags = array_merge($processed_hashtags, $processed_cashtags);
+        if (!empty($remaining_tags)) {
+            $result .= ' ' . implode(' ', $remaining_tags);
         }
 
         return $result;
@@ -567,6 +599,68 @@ class WP_BSky_AutoPoster_API {
                 }
             }
         }
+        
+        // Add facets for cashtags (stock tickers) from Yoast SEO News
+        $settings = get_option('wp_bsky_autoposter_settings');
+        if (!empty($settings['use_yoast_metadata'])) {
+            $stock_tickers = get_post_meta($post_id, '_yoast_wpseo_newssitemap-stocktickers', true);
+            if (!empty($stock_tickers)) {
+                /* translators: 1: Post ID, 2: Stock tickers */
+                $this->log_debug(sprintf(
+                    __('Processing Yoast SEO News stock tickers for post %1$d: %2$s', 'wp-bsky-autoposter'),
+                    $post_id,
+                    $stock_tickers
+                ));
+                
+                // Parse the comma-separated list and extract tickers
+                $parts = array_map('trim', explode(',', $stock_tickers));
+                
+                foreach ($parts as $part) {
+                    // Split by colon and get the ticker part (after the exchange)
+                    $exchange_ticker = array_map('trim', explode(':', $part));
+                    if (count($exchange_ticker) >= 2) {
+                        $ticker = trim($exchange_ticker[1]);
+                        // Only process if ticker is not empty and contains valid characters
+                        if (!empty($ticker) && preg_match('/^[A-Z0-9.]+$/', $ticker)) {
+                            $cashtag = '$' . $ticker;
+                            // Use case-insensitive search to find the cashtag in the message
+                            $pos = stripos($message, $cashtag);
+                            if ($pos !== false) {
+                                // Get the actual cashtag from the message to preserve its case
+                                $actual_cashtag = substr($message, $pos, strlen($cashtag));
+                                $facets[] = array(
+                                    'index' => array(
+                                        'byteStart' => $pos,
+                                        'byteEnd' => $pos + strlen($actual_cashtag)
+                                    ),
+                                    'features' => array(
+                                        array(
+                                            '$type' => 'app.bsky.richtext.facet#tag',
+                                            'tag' => strtolower($ticker)
+                                        )
+                                    )
+                                );
+                                /* translators: 1: Post ID, 2: Cashtag, 3: Position */
+                                $this->log_debug(sprintf(
+                                    __('Added cashtag facet for post %1$d: %2$s at position %3$d', 'wp-bsky-autoposter'),
+                                    $post_id,
+                                    $cashtag,
+                                    $pos
+                                ));
+                            } else {
+                                /* translators: 1: Post ID, 2: Cashtag */
+                                $this->log_debug(sprintf(
+                                    __('Cashtag %2$s not found in message for post %1$d', 'wp-bsky-autoposter'),
+                                    $post_id,
+                                    $cashtag
+                                ));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
         if (!empty($facets)) {
             $post_data['record']['facets'] = $facets;
         }

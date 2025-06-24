@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2024-12-19
+
+### Added
+- Clickable cashtags for stock tickers from Yoast SEO News
+  - Stock tickers from `_yoast_wpseo_newssitemap-stocktickers` are now converted to clickable cashtags on Bluesky
+  - Cashtags are processed with proper facets for Bluesky's AT Protocol
+  - Enhanced inline hashtag processing to handle cashtags
+  - Debug logging for cashtag processing and facet creation
+- Comprehensive test suite for cashtag functionality
+
+### Changed
+- Improved hashtag and cashtag processing in Bluesky API calls
+- Enhanced inline tag processing to support both hashtags and cashtags
+
 ## [1.3.0] - 2024-03-20
 
 ### Added
