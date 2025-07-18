@@ -11,6 +11,7 @@ A WordPress plugin that automatically posts new WordPress posts to Bluesky with 
 - Secure authentication using Bluesky App Password
 - Easy to use settings page
 - UTM parameter tracking for analytics
+- Optional Base URL override for post links (replace the host part of the post URL before adding UTM parameters)
 - Comprehensive logging system with:
   - Configurable log levels (Error, Warning, Success, Debug)
   - Custom log file location
@@ -38,11 +39,12 @@ A WordPress plugin that automatically posts new WordPress posts to Bluesky with 
    - Set UTM parameters (source, medium, campaign, term, content)
    - Use {id} and {slug} placeholders in parameter values
    - Suggested defaults: source=bsky, medium=social, campaign=feed
-6. Choose minimum log level (Error Only, Warning and Above, Success and Above, Debug)
-7. View current log file location
-8. Set custom log file path
-9. Access built-in log viewer with color-coded entries
-10. Clear logs when needed
+6. (Optional) Set a Base URL to override the host part of your post links. If set, the plugin will replace the original site host with your specified Base URL before adding any UTM or other parameters. This is useful if your feed exposes an incorrect host or you want to redirect to a different site.
+7. Choose minimum log level (Error Only, Warning and Above, Success and Above, Debug)
+8. View current log file location
+9. Set custom log file path
+10. Access built-in log viewer with color-coded entries
+11. Clear logs when needed
 
 ## Hashtag Support
 
@@ -63,6 +65,10 @@ The plugin supports UTM parameter tracking for analytics. You can:
 - Suggested default values: source=bsky, medium=social, campaign=feed
 
 This helps you track traffic coming from Bluesky in your analytics tools.
+
+## Base URL Override
+
+You can optionally set a Base URL in the plugin settings. If set, the plugin will replace the host part of your post links with the Base URL before adding any UTM or other parameters. For example, if your post link is `http://originalsite.com/post-path/` and you set the Base URL to `https://example.com`, the final link will be `https://example.com/post-path/` (plus any UTM parameters if enabled). This is useful if your feed exposes an incorrect host or you want to redirect to a different site.
 
 ## Requirements
 
@@ -90,6 +96,9 @@ This plugin is licensed under the GPL v2 or later.
 Developed by [Alessio Bragadini](https://techartconsulting.it/alessio-bragadini/)
 
 ## Changelog
+
+### 1.4.3
+- Added Base URL override option for post links. If set, the plugin will replace the host part of your post links with the Base URL before adding UTM or other parameters.
 
 ### 1.4.1
 - Added Italian translation
