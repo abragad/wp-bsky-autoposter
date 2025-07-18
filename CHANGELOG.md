@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved hashtag and cashtag processing in Bluesky API calls
 - Enhanced inline tag processing to support both hashtags and cashtags
 
+## [1.4.3] - 2024-06-03
+
+### Added
+- Base URL override option for post links. If set, the plugin will replace the host part of your post links with the Base URL before adding UTM or other parameters. Useful for correcting or redirecting the site URL in your feed.
+
 ## [1.3.0] - 2024-03-20
 
 ### Added

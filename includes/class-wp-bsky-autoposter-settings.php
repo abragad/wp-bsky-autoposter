@@ -149,6 +149,15 @@ class WP_BSky_AutoPoster_Settings {
             'wp_bsky_autoposter_main'
         );
 
+        // Add base_url field
+        add_settings_field(
+            'base_url',
+            __('Base URL', 'wp-bsky-autoposter'),
+            array($this, 'base_url_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_main'
+        );
+
         // Add link tracking fields
         add_settings_field(
             'enable_link_tracking',
@@ -415,6 +424,23 @@ class WP_BSky_AutoPoster_Settings {
     }
 
     /**
+     * Base URL field callback.
+     *
+     * @since    1.4.3
+     */
+    public function base_url_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $value = isset($options['base_url']) ? $options['base_url'] : '';
+        ?>
+        <input type="url" id="base_url" name="wp_bsky_autoposter_settings[base_url]"
+               value="<?php echo esc_attr($value); ?>" class="regular-text">
+        <p class="description">
+            <?php _e('Host part to replace the one exposed in your feed, if for any reason it is not correct or you want to redirect to a different site.', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
      * Enable link tracking field callback.
      *
      * @since    1.0.0
@@ -617,6 +643,23 @@ class WP_BSky_AutoPoster_Settings {
 
         // Validate inline hashtags setting
         $valid['inline_hashtags'] = isset($input['inline_hashtags']) ? 1 : 0;
+
+        // Validate base_url
+        if (!empty($input['base_url'])) {
+            $base_url = esc_url_raw(trim($input['base_url']));
+            if (filter_var($base_url, FILTER_VALIDATE_URL)) {
+                $valid['base_url'] = untrailingslashit($base_url);
+            } else {
+                $valid['base_url'] = '';
+                add_settings_error(
+                    'wp_bsky_autoposter_settings',
+                    'invalid_base_url',
+                    __('The Base URL must be a valid URL (including http:// or https://).', 'wp-bsky-autoposter')
+                );
+            }
+        } else {
+            $valid['base_url'] = '';
+				}
 
         // Validate Yoast SEO metadata setting (only if Yoast SEO is active)
         if ($this->is_yoast_seo_active()) {

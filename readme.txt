@@ -26,6 +26,7 @@ WP AutoPoster to Bluesky is a WordPress plugin that automatically shares your ne
 * Connection testing functionality
 * Support for scheduled posts
 * UTM parameter tracking for analytics
+* Optional Base URL override for post links (replace the host part of the post URL before adding UTM parameters)
 
 = Post Template =
 
@@ -71,6 +72,10 @@ The plugin includes a comprehensive logging system:
 1. Upload the plugin files to the `/wp-content/plugins/wp-bsky-autoposter` directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the 'Plugins' screen in WordPress.
 3. Use the Settings->Bluesky AutoPoster screen to configure the plugin.
+
+= Base URL Override =
+
+You can optionally set a Base URL in the plugin settings. If set, the plugin will replace the host part of your post links with the Base URL before adding any UTM or other parameters. For example, if your post link is `http://originalsite.com/post-path/` and you set the Base URL to `https://example.com`, the final link will be `https://example.com/post-path/` (plus any UTM parameters if enabled). This is useful if your feed exposes an incorrect host or you want to redirect to a different site.
 
 == Frequently Asked Questions ==
 
@@ -231,6 +236,9 @@ Fixed HTML entity decoding for special characters in post titles and excerpts.
 
 = 1.0.0 =
 Initial release of WP AutoPoster to Bluesky.
+
+= 1.4.3 =
+* Added Base URL override option for post links. If set, the plugin will replace the host part of your post links with the Base URL before adding UTM or other parameters.
 
 == Privacy Policy ==
 

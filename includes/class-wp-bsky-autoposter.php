@@ -388,6 +388,26 @@ class WP_BSky_AutoPoster {
         
         // Get plugin settings
         $settings = get_option('wp_bsky_autoposter_settings');
+
+        // Replace host with base_url if set and valid
+        if (!empty($settings['base_url']) && filter_var($settings['base_url'], FILTER_VALIDATE_URL)) {
+            $parsed_link = wp_parse_url($link);
+            $parsed_base = wp_parse_url($settings['base_url']);
+            if (!empty($parsed_base['scheme']) && !empty($parsed_base['host'])) {
+                // Build new URL: base_url + path + query + fragment from original link
+                $new_link = $settings['base_url'];
+                if (!empty($parsed_link['path'])) {
+                    $new_link .= $parsed_link['path'];
+                }
+                if (!empty($parsed_link['query'])) {
+                    $new_link .= '?' . $parsed_link['query'];
+                }
+                if (!empty($parsed_link['fragment'])) {
+                    $new_link .= '#' . $parsed_link['fragment'];
+                }
+                $link = $new_link;
+            }
+        }
         
         // Check if link tracking is enabled
         if (empty($settings['enable_link_tracking'])) {
