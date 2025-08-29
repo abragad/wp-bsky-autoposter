@@ -364,7 +364,7 @@ class WP_BSky_AutoPoster_Settings {
      */
     public function post_template_callback() {
         $options = get_option('wp_bsky_autoposter_settings');
-        $value = isset($options['post_template']) ? $options['post_template'] : '{title} {link}';
+        $value = isset($options['post_template']) ? $options['post_template'] : '{title} - {excerpt}';
         ?>
         <textarea name="wp_bsky_autoposter_settings[post_template]" rows="3" cols="50" class="large-text"><?php echo esc_textarea($value); ?></textarea>
         <p class="description">Available placeholders: {title}, {excerpt}, {link}, {hashtags}</p>
@@ -617,7 +617,7 @@ class WP_BSky_AutoPoster_Settings {
         // Validate post template
         $valid['post_template'] = sanitize_textarea_field($input['post_template']);
         if (empty($valid['post_template'])) {
-            $valid['post_template'] = '{title} - {link}';
+            $valid['post_template'] = '{title} - {excerpt}';
         }
 
         // Validate fallback text

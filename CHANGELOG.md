@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.4] - 2024-12-19
+
+### Fixed
+- Changed default post template from `{title} - {link}` to `{title} - {excerpt}` to eliminate "text-only" URLs in Bluesky posts. The rich preview embed still provides clickable links.
+
 ## [1.4.3] - 2024-06-03
 
 ### Added
