@@ -37,6 +37,24 @@ class WP_BSky_AutoPoster {
     protected $version;
 
     /**
+     * The settings instance.
+     *
+     * @since    1.0.0
+     * @access   protected
+     * @var      WP_BSky_AutoPoster_Settings    $settings    The settings instance.
+     */
+    protected $settings;
+
+    /**
+     * The API instance.
+     *
+     * @since    1.0.0
+     * @access   protected
+     * @var      WP_BSky_AutoPoster_API    $api    The API instance.
+     */
+    protected $api;
+
+    /**
      * Initialize the class and set its properties.
      *
      * @since    1.0.0
