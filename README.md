@@ -2,6 +2,8 @@
 
 A WordPress plugin that automatically posts new WordPress posts to Bluesky with rich link previews.
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/abragad/wp-bsky-autoposter/badge)](https://scorecard.dev/viewer/?uri=github.com/abragad/wp-bsky-autoposter)
+
 ## Features
 
 - Automatically posts new WordPress posts to Bluesky
