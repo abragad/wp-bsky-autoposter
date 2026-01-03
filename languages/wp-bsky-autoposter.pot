@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP AutoPoster to Bluesky 1.6.0\n"
+"Project-Id-Version: WP AutoPoster to Bluesky 1.7.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-bsky-autoposter\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-01-03T14:06:28+00:00\n"
+"POT-Creation-Date: 2026-01-03T14:36:38+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wp-bsky-autoposter\n"
@@ -199,16 +199,16 @@ msgstr ""
 msgid "Received 5XX error (HTTP %1$d) on attempt %2$d/%3$d. Retrying in %4$d seconds..."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:741
+#: includes/class-wp-bsky-autoposter-api.php:742
 msgid "Unknown error"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:751
+#: includes/class-wp-bsky-autoposter-api.php:752
 #, php-format
 msgid "Failed to post to Bluesky (HTTP %1$d): %2$s. Response: %3$s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:762
+#: includes/class-wp-bsky-autoposter-api.php:763
 #, php-format
 msgid "Failed to post to Bluesky after %d attempts with 5XX errors"
 msgstr ""
@@ -484,42 +484,42 @@ msgstr ""
 msgid "Configure Yoast SEO Settings"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter.php:218
+#: includes/class-wp-bsky-autoposter.php:188
 #, php-format
 msgid "Using Yoast SEO Twitter title for post %1$d (length: %2$d characters)"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter.php:231
+#: includes/class-wp-bsky-autoposter.php:201
 #, php-format
 msgid "Using Yoast SEO title for post %1$d (length: %2$d characters)"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter.php:271
+#: includes/class-wp-bsky-autoposter.php:241
 #, php-format
 msgid "Using Yoast SEO Twitter description for post %1$d (length: %2$d characters)"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter.php:284
+#: includes/class-wp-bsky-autoposter.php:254
 #, php-format
 msgid "Using Yoast SEO meta description for post %1$d (length: %2$d characters)"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter.php:380
+#: includes/class-wp-bsky-autoposter.php:350
 #, php-format
 msgid "Using Yoast SEO canonical URL for post %1$d: %2$s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter.php:485
+#: includes/class-wp-bsky-autoposter.php:455
 #, php-format
 msgid "Using Yoast SEO Twitter image for post %1$d: %2$s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter.php:498
+#: includes/class-wp-bsky-autoposter.php:468
 #, php-format
 msgid "Using Yoast SEO Facebook Open Graph image for post %1$d: %2$s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter.php:604
+#: includes/class-wp-bsky-autoposter.php:574
 #, php-format
 msgid "Using Yoast SEO News stock tickers for post %1$d: %2$s"
 msgstr ""
