@@ -149,6 +149,15 @@ class WP_BSky_AutoPoster_Settings {
             'wp_bsky_autoposter_main'
         );
 
+        // Add base_url field
+        add_settings_field(
+            'base_url',
+            __('Base URL', 'wp-bsky-autoposter'),
+            array($this, 'base_url_callback'),
+            $this->plugin_name,
+            'wp_bsky_autoposter_main'
+        );
+
         // Add link tracking fields
         add_settings_field(
             'enable_link_tracking',
@@ -222,6 +231,24 @@ class WP_BSky_AutoPoster_Settings {
             $this->plugin_name,
             'wp_bsky_autoposter_logging'
         );
+
+        // Add Yoast SEO section only if Yoast SEO is active
+        if ($this->is_yoast_seo_active()) {
+            add_settings_section(
+                'wp_bsky_autoposter_yoast',
+                __('Yoast SEO Metadata', 'wp-bsky-autoposter'),
+                array($this, 'yoast_section_callback'),
+                $this->plugin_name
+            );
+
+            add_settings_field(
+                'use_yoast_metadata',
+                __('Use Yoast SEO Metadata', 'wp-bsky-autoposter'),
+                array($this, 'use_yoast_metadata_callback'),
+                $this->plugin_name,
+                'wp_bsky_autoposter_yoast'
+            );
+        }
 
         // Add AJAX handlers for test connection and log clearing
         add_action('wp_ajax_test_bluesky_connection', array($this, 'ajax_test_connection'));
@@ -355,7 +382,7 @@ class WP_BSky_AutoPoster_Settings {
      */
     public function post_template_callback() {
         $options = get_option('wp_bsky_autoposter_settings');
-        $value = isset($options['post_template']) ? $options['post_template'] : '{title} {link}';
+        $value = isset($options['post_template']) ? $options['post_template'] : '{title} - {excerpt}';
         ?>
         <textarea name="wp_bsky_autoposter_settings[post_template]" rows="3" cols="50" class="large-text"><?php echo esc_textarea($value); ?></textarea>
         <p class="description">Available placeholders: {title}, {excerpt}, {link}, {hashtags}</p>
@@ -392,6 +419,23 @@ class WP_BSky_AutoPoster_Settings {
                value="1" <?php checked(1, $value); ?>>
         <p class="description">
             <?php _e('Move matching hashtags into the main text (experimental). Only affects single-word hashtags that appear as whole words in the text.', 'wp-bsky-autoposter'); ?>
+        </p>
+        <?php
+    }
+
+    /**
+     * Base URL field callback.
+     *
+     * @since    1.4.3
+     */
+    public function base_url_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $value = isset($options['base_url']) ? $options['base_url'] : '';
+        ?>
+        <input type="url" id="base_url" name="wp_bsky_autoposter_settings[base_url]"
+               value="<?php echo esc_attr($value); ?>" class="regular-text">
+        <p class="description">
+            <?php _e('Host part to replace the one exposed in your feed, if for any reason it is not correct or you want to redirect to a different site.', 'wp-bsky-autoposter'); ?>
         </p>
         <?php
     }
@@ -591,7 +635,7 @@ class WP_BSky_AutoPoster_Settings {
         // Validate post template
         $valid['post_template'] = sanitize_textarea_field($input['post_template']);
         if (empty($valid['post_template'])) {
-            $valid['post_template'] = '{title} - {link}';
+            $valid['post_template'] = '{title} - {excerpt}';
         }
 
         // Validate fallback text
@@ -599,6 +643,28 @@ class WP_BSky_AutoPoster_Settings {
 
         // Validate inline hashtags setting
         $valid['inline_hashtags'] = isset($input['inline_hashtags']) ? 1 : 0;
+
+        // Validate base_url
+        if (!empty($input['base_url'])) {
+            $base_url = esc_url_raw(trim($input['base_url']));
+            if (filter_var($base_url, FILTER_VALIDATE_URL)) {
+                $valid['base_url'] = untrailingslashit($base_url);
+            } else {
+                $valid['base_url'] = '';
+                add_settings_error(
+                    'wp_bsky_autoposter_settings',
+                    'invalid_base_url',
+                    __('The Base URL must be a valid URL (including http:// or https://).', 'wp-bsky-autoposter')
+                );
+            }
+        } else {
+            $valid['base_url'] = '';
+				}
+
+        // Validate Yoast SEO metadata setting (only if Yoast SEO is active)
+        if ($this->is_yoast_seo_active()) {
+            $valid['use_yoast_metadata'] = isset($input['use_yoast_metadata']) ? 1 : 0;
+        }
 
         // Validate link tracking settings
         $valid['enable_link_tracking'] = isset($input['enable_link_tracking']) ? 1 : 0;
@@ -844,6 +910,42 @@ class WP_BSky_AutoPoster_Settings {
                 ?>
             </form>
         </div>
+        <?php
+    }
+
+    /**
+     * Check if Yoast SEO is active.
+     *
+     * @since    1.5.0
+     * @return   bool    True if Yoast SEO is active, false otherwise.
+     */
+    private function is_yoast_seo_active() {
+        return function_exists('YoastSEO') || class_exists('WPSEO_Admin');
+    }
+
+    /**
+     * Yoast SEO section callback.
+     *
+     * @since    1.5.0
+     */
+    public function yoast_section_callback() {
+        echo '<p>' . __('If activated, we will check for post excerpt and other information in Yoast SEO metadata.', 'wp-bsky-autoposter') . '</p>';
+        $yoast_settings_url = admin_url('admin.php?page=wpseo_page_settings#/post-type/posts');
+        /* translators: %s: Link to Yoast SEO settings */
+        echo '<p><a href="' . esc_url($yoast_settings_url) . '" target="_blank" class="button button-secondary">' . __('Configure Yoast SEO Settings', 'wp-bsky-autoposter') . '</a></p>';
+    }
+
+    /**
+     * Use Yoast SEO metadata field callback.
+     *
+     * @since    1.5.0
+     */
+    public function use_yoast_metadata_callback() {
+        $options = get_option('wp_bsky_autoposter_settings');
+        $value = isset($options['use_yoast_metadata']) ? $options['use_yoast_metadata'] : 0;
+        ?>
+        <input type="checkbox" id="use_yoast_metadata" name="wp_bsky_autoposter_settings[use_yoast_metadata]" 
+               value="1" <?php checked(1, $value); ?>>
         <?php
     }
 } 

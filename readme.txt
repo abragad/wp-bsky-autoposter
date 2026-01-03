@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.4.0
+Stable tag: 1.7.0
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -20,11 +20,13 @@ WP AutoPoster to Bluesky is a WordPress plugin that automatically shares your ne
 * Supports customizable post templates with placeholders
 * Includes rich link previews with post title, description, and featured image
 * Automatically includes post tags as hashtags
+* Clickable cashtags for stock tickers from Yoast SEO News
 * Secure authentication using Bluesky App Password
 * Easy to use settings page
 * Connection testing functionality
 * Support for scheduled posts
 * UTM parameter tracking for analytics
+* Optional Base URL override for post links (replace the host part of the post URL before adding UTM parameters)
 
 = Post Template =
 
@@ -43,6 +45,10 @@ The plugin automatically converts WordPress post tags into Bluesky hashtags. Whe
 * The output will be: `#market-analysis #investments`
 
 The hashtags are generated from the tag slugs, ensuring they are properly formatted for Bluesky (lowercase, with hyphens instead of spaces).
+
+= Cashtag Support =
+
+The plugin also supports cashtags for stock tickers from Yoast SEO News. When you have stock tickers configured in Yoast SEO News (e.g., "NASDAQ:AAPL, NYSE:GOOGL"), they are automatically converted to clickable cashtags on Bluesky (e.g., "$AAPL $GOOGL"). These cashtags are processed with proper facets for Bluesky's AT Protocol, making them clickable and searchable.
 
 = Link Tracking =
 
@@ -66,6 +72,10 @@ The plugin includes a comprehensive logging system:
 1. Upload the plugin files to the `/wp-content/plugins/wp-bsky-autoposter` directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the 'Plugins' screen in WordPress.
 3. Use the Settings->Bluesky AutoPoster screen to configure the plugin.
+
+= Base URL Override =
+
+You can optionally set a Base URL in the plugin settings. If set, the plugin will replace the host part of your post links with the Base URL before adding any UTM or other parameters. For example, if your post link is `http://originalsite.com/post-path/` and you set the Base URL to `https://example.com`, the final link will be `https://example.com/post-path/` (plus any UTM parameters if enabled). This is useful if your feed exposes an incorrect host or you want to redirect to a different site.
 
 == Frequently Asked Questions ==
 
@@ -102,6 +112,10 @@ The plugin includes a built-in log viewer that you can access from the settings 
 * Set a custom log file location
 * Choose the minimum log level to record
 
+= How do cashtags work with stock tickers? =
+
+If you're using Yoast SEO News and have stock tickers configured (e.g., "NASDAQ:AAPL, NYSE:GOOGL"), the plugin automatically converts them to clickable cashtags on Bluesky (e.g., "$AAPL $GOOGL"). These cashtags are processed with proper facets for Bluesky's AT Protocol, making them clickable and searchable.
+
 == Screenshots ==
 
 1. Plugin settings page
@@ -112,6 +126,30 @@ The plugin includes a built-in log viewer that you can access from the settings 
 6. Log viewer
 
 == Changelog ==
+
+= 1.7.0 =
+* Code refactoring and improvements
+* Removed unused properties from main plugin class
+* Fixed PHP 8.2+ deprecation warnings for property visibility
+* Updated property type hints for better type safety
+* Improved code clarity with modern PHP syntax
+* Enhanced code documentation
+
+= 1.6.0 =
+* Added clickable cashtags for stock tickers from Yoast SEO News
+* Stock tickers from `_yoast_wpseo_newssitemap-stocktickers` are now converted to clickable cashtags on Bluesky
+* Cashtags are processed with proper facets for Bluesky's AT Protocol
+* Enhanced inline hashtag processing to handle cashtags
+* Added debug logging for cashtag processing and facet creation
+
+= 1.5 =
+* Use Yoast SEO metadata for post previews, if available
+
+= 1.4.2 =
+* Better check for inline hashtags
+
+= 1.4.1 =
+* Added Italian translation
 
 = 1.4.0 =
 * Added WordPress.org translation support
@@ -174,6 +212,9 @@ The plugin includes a built-in log viewer that you can access from the settings 
 
 == Upgrade Notice ==
 
+= 1.4.1 =
+Added Italian translation for better localization support.
+
 = 1.4.0 =
 Added WordPress.org translation support, making it easier for users to contribute translations and use the plugin in their own language.
 
@@ -203,6 +244,9 @@ Fixed HTML entity decoding for special characters in post titles and excerpts.
 
 = 1.0.0 =
 Initial release of WP AutoPoster to Bluesky.
+
+= 1.4.3 =
+* Added Base URL override option for post links. If set, the plugin will replace the host part of your post links with the Base URL before adding UTM or other parameters.
 
 == Privacy Policy ==
 

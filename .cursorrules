@@ -1,0 +1,95 @@
+# WordPress Plugin Development Rules for WP Bsky AutoPoster
+
+## Project Overview
+This is a WordPress plugin that automatically posts new WordPress posts to Bluesky with rich link previews. The plugin uses the AT Protocol API to authenticate and post content.
+
+## Code Style & Standards
+- Follow WordPress Coding Standards (WPCS)
+- Use proper PHP documentation blocks with @since, @param, @return tags
+- Use WordPress naming conventions (snake_case for functions, PascalCase for classes)
+- Always use WordPress functions when available (wp_remote_*, get_option, etc.)
+- Use proper escaping functions (esc_attr, esc_textarea, etc.)
+- Include proper nonce verification for security
+- Use WordPress translation functions (__(), _e(), sprintf()) for all user-facing strings
+
+## File Structure
+- Main plugin file: `wp-bsky-autoposter.php`
+- Classes in `includes/` directory
+- Settings page in `includes/class-wp-bsky-autoposter-settings.php`
+- API functionality in `includes/class-wp-bsky-autoposter-api.php`
+- Main plugin logic in `includes/class-wp-bsky-autoposter.php`
+- Language files in `languages/` directory
+- Test files in `tests/` directory
+
+## Security Guidelines
+- Always validate and sanitize user input
+- Use WordPress nonces for form submissions
+- Escape output properly
+- Use prepared statements for database queries
+- Validate file uploads and image types
+- Check user capabilities before performing actions
+
+## API Integration
+- Use WordPress HTTP API (wp_remote_*) for external requests
+- Implement proper error handling for API calls
+- Use retry logic for 5XX errors
+- Log all API interactions for debugging
+- Handle authentication token refresh properly
+
+## Logging
+- Use the plugin's built-in logging system
+- Log levels: error, warning, success, debug
+- Include context information in log messages
+- Use sprintf() for formatted log messages
+- Respect the configured log level setting
+
+## Internationalization
+- All user-facing strings must be translatable
+- Use proper text domain: 'wp-bsky-autoposter'
+- Include translator comments for complex strings
+- Use placeholders in correct order for different languages
+- Test with different locales
+
+## Testing
+- Create test cases for new functionality
+- Test with different WordPress versions
+- Test with and without Yoast SEO
+- Test image upload and compression
+- Test hashtag processing logic
+- Test error scenarios
+
+## Performance
+- Minimize database queries
+- Use WordPress transients for caching when appropriate
+- Optimize image processing
+- Avoid unnecessary API calls
+- Use proper hooks and filters
+
+## Error Handling
+- Provide meaningful error messages
+- Log errors with sufficient context
+- Gracefully handle missing dependencies
+- Validate configuration before operations
+- Use WordPress error handling patterns
+
+## Documentation
+- Update README.md and readme.txt for new features
+- Include proper changelog entries
+- Document any new settings or options
+- Update inline code documentation
+- Include usage examples where helpful
+
+## Version Management
+- Update version numbers in both main file and readme
+- Include proper changelog entries
+- Test thoroughly before releasing
+- Consider backward compatibility
+- Update tested up to version when needed
+
+## Specific Plugin Rules
+- Always check if Yoast SEO is active before using its functions
+- Use fallback to standard WordPress functions when Yoast is not available
+- Handle image compression carefully to stay within Bluesky's limits
+- Process hashtags correctly with proper word boundary detection
+- Implement proper UTM parameter handling for analytics
+- Use WordPress site language for post language detection 

@@ -2,15 +2,20 @@
 
 A WordPress plugin that automatically posts new WordPress posts to Bluesky with rich link previews.
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/abragad/wp-bsky-autoposter/badge)](https://scorecard.dev/viewer/?uri=github.com/abragad/wp-bsky-autoposter)
+
 ## Features
 
 - Automatically posts new WordPress posts to Bluesky
 - Supports customizable post templates with placeholders
 - Includes rich link previews with post title, description, and featured image
 - Automatically includes post tags as hashtags
+- Optional inline hashtag placement (experimental feature that moves matching hashtags into the main text)
 - Secure authentication using Bluesky App Password
+- Connection testing to verify credentials before posting
 - Easy to use settings page
 - UTM parameter tracking for analytics
+- Optional Base URL override for post links (replace the host part of the post URL before adding UTM parameters)
 - Comprehensive logging system with:
   - Configurable log levels (Error, Warning, Success, Debug)
   - Custom log file location
@@ -38,11 +43,17 @@ A WordPress plugin that automatically posts new WordPress posts to Bluesky with 
    - Set UTM parameters (source, medium, campaign, term, content)
    - Use {id} and {slug} placeholders in parameter values
    - Suggested defaults: source=bsky, medium=social, campaign=feed
-6. Choose minimum log level (Error Only, Warning and Above, Success and Above, Debug)
-7. View current log file location
-8. Set custom log file path
-9. Access built-in log viewer with color-coded entries
-10. Clear logs when needed
+6. (Optional) Set a Base URL to override the host part of your post links. If set, the plugin will replace the original site host with your specified Base URL before adding any UTM or other parameters. This is useful if your feed exposes an incorrect host or you want to redirect to a different site.
+7. (Optional) Enable Yoast SEO integration if Yoast SEO is installed:
+   - Check "Use Yoast SEO Metadata" to use Yoast SEO's optimized titles, descriptions, images, and URLs
+   - Stock tickers from Yoast SEO News will be automatically converted to clickable cashtags
+8. (Optional) Enable inline hashtags to move matching hashtags into the main text (experimental)
+9. Choose minimum log level (Error Only, Warning and Above, Success and Above, Debug)
+10. View current log file location
+11. Set custom log file path
+12. Access built-in log viewer with color-coded entries
+13. Clear logs when needed
+14. Test your Bluesky connection using the "Test Connection" button
 
 ## Hashtag Support
 
@@ -54,6 +65,10 @@ The plugin automatically converts WordPress post tags into Bluesky hashtags. Whe
 
 The hashtags are generated from the tag slugs, ensuring they are properly formatted for Bluesky (lowercase, with hyphens instead of spaces).
 
+## Yoast SEO Integration
+
+The plugin includes comprehensive integration with Yoast SEO to enhance your Bluesky posts with optimized metadata. When Yoast SEO is active and the integration is enabled, the plugin automatically uses Yoast SEO's social media and SEO metadata (titles, descriptions, images, URLs) instead of default WordPress content. For sites using Yoast SEO News, stock tickers are automatically converted to clickable cashtags on Bluesky. See the [Yoast SEO Integration documentation](yoast.md) for complete details on this feature.
+
 ## Link Tracking
 
 The plugin supports UTM parameter tracking for analytics. You can:
@@ -63,6 +78,10 @@ The plugin supports UTM parameter tracking for analytics. You can:
 - Suggested default values: source=bsky, medium=social, campaign=feed
 
 This helps you track traffic coming from Bluesky in your analytics tools.
+
+## Base URL Override
+
+You can optionally set a Base URL in the plugin settings. If set, the plugin will replace the host part of your post links with the Base URL before adding any UTM or other parameters. For example, if your post link is `http://originalsite.com/post-path/` and you set the Base URL to `https://example.com`, the final link will be `https://example.com/post-path/` (plus any UTM parameters if enabled). This is useful if your feed exposes an incorrect host or you want to redirect to a different site.
 
 ## Requirements
 
@@ -90,6 +109,28 @@ This plugin is licensed under the GPL v2 or later.
 Developed by [Alessio Bragadini](https://techartconsulting.it/alessio-bragadini/)
 
 ## Changelog
+
+### 1.6.0
+- Added clickable cashtags for stock tickers from Yoast SEO News
+- Enhanced inline hashtag processing to handle cashtags
+- Improved hashtag and cashtag processing in Bluesky API calls
+- Added comprehensive test suite for cashtag functionality
+
+### 1.5.0
+- Added comprehensive Yoast SEO integration
+  - Automatic detection of Yoast SEO plugin
+  - Priority system for titles (Twitter title → SEO title → WordPress title)
+  - Priority system for descriptions (Twitter description → Meta description → WordPress excerpt)
+  - Priority system for images (Twitter image → Open Graph image → Featured image)
+  - Support for Yoast SEO canonical URLs
+  - Settings section appears automatically when Yoast SEO is detected
+  - Comprehensive debug logging for Yoast SEO metadata usage
+
+### 1.4.3
+- Added Base URL override option for post links. If set, the plugin will replace the host part of your post links with the Base URL before adding UTM or other parameters.
+
+### 1.4.1
+- Added Italian translation
 
 ### 1.4.0
 - Added WordPress.org translation support
