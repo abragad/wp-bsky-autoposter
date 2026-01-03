@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-01-03
+
+### Changed
+- Code refactoring and improvements
+  - Removed unused properties (`$loader`, `$plugin_name`, `$version`) from main plugin class
+  - Changed `$settings` and `$api` properties from `protected` to `private` to fix PHP 8.2+ deprecation warnings
+  - Updated `$session` property type hint from `array` to `array|null` for better type safety
+  - Improved code clarity with null coalescing operators (`??`) where appropriate
+  - Added documentation comments for better code maintainability
+
+### Fixed
+- Resolved PHP 8.2+ deprecation warnings for dynamic properties
+- Fixed property visibility issues that could cause deprecation warnings in future PHP versions
+
 ## [1.6.0] - 2024-12-19
 
 ### Added
@@ -18,6 +32,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Improved hashtag and cashtag processing in Bluesky API calls
 - Enhanced inline tag processing to support both hashtags and cashtags
+
+## [1.5.0] - 2024-12-19
+
+### Added
+- Comprehensive Yoast SEO integration
+  - Automatic detection of Yoast SEO plugin
+  - Priority system for titles (Twitter title → SEO title → WordPress title)
+  - Priority system for descriptions (Twitter description → Meta description → WordPress excerpt)
+  - Priority system for images (Twitter image → Open Graph image → Featured image)
+  - Support for Yoast SEO canonical URLs
+  - Settings section appears automatically when Yoast SEO is detected
+  - Comprehensive debug logging for Yoast SEO metadata usage
 
 ## [1.4.4] - 2024-12-19
 

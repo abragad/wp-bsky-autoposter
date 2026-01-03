@@ -9,50 +9,22 @@
 class WP_BSky_AutoPoster {
 
     /**
-     * The loader that's responsible for maintaining and registering all hooks that power
-     * the plugin.
-     *
-     * @since    1.0.0
-     * @access   protected
-     * @var      WP_BSky_AutoPoster_Loader    $loader    Maintains and registers all hooks for the plugin.
-     */
-    protected $loader;
-
-    /**
-     * The unique identifier of this plugin.
-     *
-     * @since    1.0.0
-     * @access   protected
-     * @var      string    $plugin_name    The string used to uniquely identify this plugin.
-     */
-    protected $plugin_name;
-
-    /**
-     * The current version of the plugin.
-     *
-     * @since    1.0.0
-     * @access   protected
-     * @var      string    $version    The current version of the plugin.
-     */
-    protected $version;
-
-    /**
      * The settings instance.
      *
      * @since    1.0.0
-     * @access   protected
+     * @access   private
      * @var      WP_BSky_AutoPoster_Settings    $settings    The settings instance.
      */
-    protected $settings;
+    private $settings;
 
     /**
      * The API instance.
      *
      * @since    1.0.0
-     * @access   protected
+     * @access   private
      * @var      WP_BSky_AutoPoster_API    $api    The API instance.
      */
-    protected $api;
+    private $api;
 
     /**
      * A temporary cache for post data to avoid redundant database calls.
@@ -69,8 +41,6 @@ class WP_BSky_AutoPoster {
      * @since    1.0.0
      */
     public function __construct() {
-        $this->plugin_name = 'wp-bsky-autoposter';
-        $this->version = WP_BSKY_AUTOPOSTER_VERSION;
         $this->load_dependencies();
         $this->define_admin_hooks();
         $this->define_public_hooks();

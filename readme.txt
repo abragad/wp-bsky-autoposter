@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.6.0
+Stable tag: 1.7.0
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -126,6 +126,14 @@ If you're using Yoast SEO News and have stock tickers configured (e.g., "NASDAQ:
 6. Log viewer
 
 == Changelog ==
+
+= 1.7.0 =
+* Code refactoring and improvements
+* Removed unused properties from main plugin class
+* Fixed PHP 8.2+ deprecation warnings for property visibility
+* Updated property type hints for better type safety
+* Improved code clarity with modern PHP syntax
+* Enhanced code documentation
 
 = 1.6.0 =
 * Added clickable cashtags for stock tickers from Yoast SEO News

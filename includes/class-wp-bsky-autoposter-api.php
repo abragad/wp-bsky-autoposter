@@ -22,7 +22,7 @@ class WP_BSky_AutoPoster_API {
      *
      * @since    1.0.0
      * @access   private
-     * @var      array    $session    The session data.
+     * @var      array|null    $session    The session data.
      */
     private $session = null;
 
@@ -137,7 +137,7 @@ class WP_BSky_AutoPoster_API {
 
         // Add authorization header
         $args['headers'] = array_merge(
-            isset($args['headers']) ? $args['headers'] : array(),
+            $args['headers'] ?? array(),
             array('Authorization' => 'Bearer ' . $this->session['accessJwt'])
         );
 
@@ -169,7 +169,7 @@ class WP_BSky_AutoPoster_API {
     private function write_log($message, $type) {
         // Get the configured log level
         $settings = get_option('wp_bsky_autoposter_settings');
-        $log_level = isset($settings['log_level']) ? $settings['log_level'] : 'error';
+        $log_level = $settings['log_level'] ?? 'error';
 
         // Define log level hierarchy
         $log_levels = array(
@@ -732,6 +732,7 @@ class WP_BSky_AutoPoster_API {
                         $max_retries,
                         $retry_delay
                     ));
+                    // Note: sleep() blocks execution, but this is acceptable here as post publication is already a blocking operation
                     sleep($retry_delay);
                     continue;
                 }
