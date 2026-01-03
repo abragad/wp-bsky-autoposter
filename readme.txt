@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.4.4
+Stable tag: 1.6.0
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -20,6 +20,7 @@ WP AutoPoster to Bluesky is a WordPress plugin that automatically shares your ne
 * Supports customizable post templates with placeholders
 * Includes rich link previews with post title, description, and featured image
 * Automatically includes post tags as hashtags
+* Clickable cashtags for stock tickers from Yoast SEO News
 * Secure authentication using Bluesky App Password
 * Easy to use settings page
 * Connection testing functionality
@@ -44,6 +45,10 @@ The plugin automatically converts WordPress post tags into Bluesky hashtags. Whe
 * The output will be: `#market-analysis #investments`
 
 The hashtags are generated from the tag slugs, ensuring they are properly formatted for Bluesky (lowercase, with hyphens instead of spaces).
+
+= Cashtag Support =
+
+The plugin also supports cashtags for stock tickers from Yoast SEO News. When you have stock tickers configured in Yoast SEO News (e.g., "NASDAQ:AAPL, NYSE:GOOGL"), they are automatically converted to clickable cashtags on Bluesky (e.g., "$AAPL $GOOGL"). These cashtags are processed with proper facets for Bluesky's AT Protocol, making them clickable and searchable.
 
 = Link Tracking =
 
@@ -107,6 +112,10 @@ The plugin includes a built-in log viewer that you can access from the settings 
 * Set a custom log file location
 * Choose the minimum log level to record
 
+= How do cashtags work with stock tickers? =
+
+If you're using Yoast SEO News and have stock tickers configured (e.g., "NASDAQ:AAPL, NYSE:GOOGL"), the plugin automatically converts them to clickable cashtags on Bluesky (e.g., "$AAPL $GOOGL"). These cashtags are processed with proper facets for Bluesky's AT Protocol, making them clickable and searchable.
+
 == Screenshots ==
 
 1. Plugin settings page
@@ -117,6 +126,16 @@ The plugin includes a built-in log viewer that you can access from the settings 
 6. Log viewer
 
 == Changelog ==
+
+= 1.6.0 =
+* Added clickable cashtags for stock tickers from Yoast SEO News
+* Stock tickers from `_yoast_wpseo_newssitemap-stocktickers` are now converted to clickable cashtags on Bluesky
+* Cashtags are processed with proper facets for Bluesky's AT Protocol
+* Enhanced inline hashtag processing to handle cashtags
+* Added debug logging for cashtag processing and facet creation
+
+= 1.5 =
+* Use Yoast SEO metadata for post previews, if available
 
 = 1.4.2 =
 * Better check for inline hashtags
