@@ -1,17 +1,17 @@
-# Copyright (C) 2025 Alessio Bragadini <alessio@techartconsulting.it>
+# Copyright (C) 2026 Alessio Bragadini <alessio@techartconsulting.it>
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WP AutoPoster to Bluesky 1.2.0\n"
+"Project-Id-Version: WP AutoPoster to Bluesky 1.6.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-bsky-autoposter\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-05-24T13:12:23+02:00\n"
+"POT-Creation-Date: 2026-01-03T14:06:28+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.11.0\n"
+"X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wp-bsky-autoposter\n"
 
 #. Plugin Name of the plugin
@@ -19,18 +19,35 @@ msgstr ""
 msgid "WP AutoPoster to Bluesky"
 msgstr ""
 
+#. Plugin URI of the plugin
+#: wp-bsky-autoposter.php
+msgid "https://github.com/abragad/wp-bsky-autoposter"
+msgstr ""
+
 #. Description of the plugin
 #: wp-bsky-autoposter.php
 msgid "Automatically posts new WordPress posts to Bluesky with rich link previews."
 msgstr ""
 
+#. Author of the plugin
+#: wp-bsky-autoposter.php
+msgid "Alessio Bragadini <alessio@techartconsulting.it>"
+msgstr ""
+
+#. Author URI of the plugin
+#: wp-bsky-autoposter.php
+msgid "https://techartconsulting.it/alessio-bragadini"
+msgstr ""
+
 #. translators: %s: Error message
 #: includes/class-wp-bsky-autoposter-api.php:63
+#, php-format
 msgid "Authentication failed: %s"
 msgstr ""
 
 #. translators: %s: Bluesky handle
 #: includes/class-wp-bsky-autoposter-api.php:77
+#, php-format
 msgid "Successfully authenticated with Bluesky as %s"
 msgstr ""
 
@@ -40,6 +57,7 @@ msgstr ""
 
 #. translators: %s: Error message
 #: includes/class-wp-bsky-autoposter-api.php:105
+#, php-format
 msgid "Token refresh failed: %s"
 msgstr ""
 
@@ -53,25 +71,30 @@ msgstr ""
 
 #. translators: %s: Image URL, %s: Error message
 #: includes/class-wp-bsky-autoposter-api.php:250
+#, php-format
 msgid "Failed to download image at %1$s: %2$s"
 msgstr ""
 
 #. translators: %s: MIME type
 #: includes/class-wp-bsky-autoposter-api.php:272
+#, php-format
 msgid "Determined image type from extension: %s"
 msgstr ""
 
 #. translators: %s: File extension
 #: includes/class-wp-bsky-autoposter-api.php:275
+#, php-format
 msgid "Could not determine image type from extension: %s"
 msgstr ""
 
 #. translators: %s: MIME type
 #: includes/class-wp-bsky-autoposter-api.php:284
+#, php-format
 msgid "Invalid image type: %s"
 msgstr ""
 
 #: includes/class-wp-bsky-autoposter-api.php:295
+#, php-format
 msgid "Image too large (%1$.2f MB), attempting to compress... Original size: %2$d bytes"
 msgstr ""
 
@@ -80,10 +103,12 @@ msgid "Failed to create image resource for compression"
 msgstr ""
 
 #: includes/class-wp-bsky-autoposter-api.php:314
+#, php-format
 msgid "Original dimensions: %1$dx%2$d pixels (ratio: %3$.2f)"
 msgstr ""
 
 #: includes/class-wp-bsky-autoposter-api.php:326
+#, php-format
 msgid "New dimensions: %1$dx%2$d pixels (80%% of original)"
 msgstr ""
 
@@ -104,14 +129,17 @@ msgid "Applied WebP compression with 85% quality"
 msgstr ""
 
 #: includes/class-wp-bsky-autoposter-api.php:367
+#, php-format
 msgid "Compression results: %1$.2f MB -> %2$.2f MB (%3$.1f%% reduction)"
 msgstr ""
 
 #: includes/class-wp-bsky-autoposter-api.php:377
+#, php-format
 msgid "Image still too large after compression (%1$.2f MB > %2$.2f MB limit)"
 msgstr ""
 
 #: includes/class-wp-bsky-autoposter-api.php:387
+#, php-format
 msgid "Successfully compressed image to %1$.2f MB (%2$.1f%% of original size)"
 msgstr ""
 
@@ -119,46 +147,69 @@ msgstr ""
 #. translators: %s: Error response
 #: includes/class-wp-bsky-autoposter-api.php:403
 #: includes/class-wp-bsky-autoposter-api.php:413
+#, php-format
 msgid "Failed to upload image: %s"
 msgstr ""
 
 #. translators: 1: Post ID, 2: Post URI
-#: includes/class-wp-bsky-autoposter-api.php:532
+#: includes/class-wp-bsky-autoposter-api.php:537
+#, php-format
 msgid "Posting article %1$d at %2$s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:549
+#: includes/class-wp-bsky-autoposter-api.php:554
 msgid "Successfully uploaded image"
 msgstr ""
 
+#: includes/class-wp-bsky-autoposter-api.php:610
+#, php-format
+msgid "Processing Yoast SEO News stock tickers for post %1$d: %2$s"
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter-api.php:645
+#, php-format
+msgid "Added cashtag facet for post %1$d: %2$s at position %3$d"
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter-api.php:653
+#, php-format
+msgid "Cashtag %2$s not found in message for post %1$d"
+msgstr ""
+
 #. translators: %s: Post data JSON
-#: includes/class-wp-bsky-autoposter-api.php:623
+#: includes/class-wp-bsky-autoposter-api.php:690
+#, php-format
 msgid "Attempting to post with data: %s"
 msgstr ""
 
 #. translators: 1: Post ID, 2: Error message
-#: includes/class-wp-bsky-autoposter-api.php:643
+#: includes/class-wp-bsky-autoposter-api.php:710
+#, php-format
 msgid "Failed to post article %1$d to Bluesky: %2$s"
 msgstr ""
 
 #. translators: 1: Post ID, 2: Post URI
-#: includes/class-wp-bsky-autoposter-api.php:653
+#: includes/class-wp-bsky-autoposter-api.php:720
+#, php-format
 msgid "Successfully posted article %1$d to Bluesky: %2$s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:662
+#: includes/class-wp-bsky-autoposter-api.php:729
+#, php-format
 msgid "Received 5XX error (HTTP %1$d) on attempt %2$d/%3$d. Retrying in %4$d seconds..."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:674
+#: includes/class-wp-bsky-autoposter-api.php:741
 msgid "Unknown error"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:684
+#: includes/class-wp-bsky-autoposter-api.php:751
+#, php-format
 msgid "Failed to post to Bluesky (HTTP %1$d): %2$s. Response: %3$s"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-api.php:695
+#: includes/class-wp-bsky-autoposter-api.php:762
+#, php-format
 msgid "Failed to post to Bluesky after %d attempts with 5XX errors"
 msgstr ""
 
@@ -171,7 +222,7 @@ msgid "Bluesky AutoPoster"
 msgstr ""
 
 #: includes/class-wp-bsky-autoposter-settings.php:46
-#: includes/class-wp-bsky-autoposter-settings.php:709
+#: includes/class-wp-bsky-autoposter-settings.php:775
 msgid "Bluesky AutoPoster Logs"
 msgstr ""
 
@@ -204,7 +255,7 @@ msgid "App Password"
 msgstr ""
 
 #: includes/class-wp-bsky-autoposter-settings.php:122
-#: includes/class-wp-bsky-autoposter-settings.php:300
+#: includes/class-wp-bsky-autoposter-settings.php:327
 msgid "Test Connection"
 msgstr ""
 
@@ -221,184 +272,254 @@ msgid "Inline Hashtags"
 msgstr ""
 
 #: includes/class-wp-bsky-autoposter-settings.php:155
+msgid "Base URL"
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter-settings.php:164
 msgid "Enable Link Tracking"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:163
+#: includes/class-wp-bsky-autoposter-settings.php:172
 msgid "UTM Source"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:171
+#: includes/class-wp-bsky-autoposter-settings.php:180
 msgid "UTM Medium"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:179
+#: includes/class-wp-bsky-autoposter-settings.php:188
 msgid "UTM Campaign"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:187
+#: includes/class-wp-bsky-autoposter-settings.php:196
 msgid "UTM Term"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:195
+#: includes/class-wp-bsky-autoposter-settings.php:204
 msgid "UTM Content"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:204
+#: includes/class-wp-bsky-autoposter-settings.php:213
 msgid "Log Level"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:212
+#: includes/class-wp-bsky-autoposter-settings.php:221
 msgid "Log File Location"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:220
+#: includes/class-wp-bsky-autoposter-settings.php:229
 msgid "Custom Log Path"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:237
-msgid "Enter your Bluesky account details and customize how posts are formatted."
+#: includes/class-wp-bsky-autoposter-settings.php:239
+msgid "Yoast SEO Metadata"
 msgstr ""
 
 #: includes/class-wp-bsky-autoposter-settings.php:246
+msgid "Use Yoast SEO Metadata"
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter-settings.php:264
+msgid "Enter your Bluesky account details and customize how posts are formatted."
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter-settings.php:273
 msgid "Configure UTM parameters for link tracking. You can use {id} and {slug} placeholders in the values."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:255
+#: includes/class-wp-bsky-autoposter-settings.php:282
 msgid "Configure logging settings for the plugin."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:270
+#: includes/class-wp-bsky-autoposter-settings.php:297
 msgid "Enter your Bluesky handle (e.g., username.bsky.social) or DID. The @ symbol is optional."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:287
+#: includes/class-wp-bsky-autoposter-settings.php:314
 msgid "Enter your Bluesky App Password. You can generate this in your Bluesky account settings."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:304
+#: includes/class-wp-bsky-autoposter-settings.php:331
 msgid "Test your Bluesky credentials before saving."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:338
+#: includes/class-wp-bsky-autoposter-settings.php:365
 msgid "Connection test failed. Please try again."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:377
+#: includes/class-wp-bsky-autoposter-settings.php:404
 msgid "Text to use when post excerpt is empty. Supports {title}, {link}, and {hashtags} placeholders."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:394
+#: includes/class-wp-bsky-autoposter-settings.php:421
 msgid "Move matching hashtags into the main text (experimental). Only affects single-word hashtags that appear as whole words in the text."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:411
+#: includes/class-wp-bsky-autoposter-settings.php:438
+msgid "Host part to replace the one exposed in your feed, if for any reason it is not correct or you want to redirect to a different site."
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter-settings.php:455
 msgid "Enable UTM parameter tracking for links posted to Bluesky."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:428
+#: includes/class-wp-bsky-autoposter-settings.php:472
 msgid "Suggested: bsky"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:445
+#: includes/class-wp-bsky-autoposter-settings.php:489
 msgid "Suggested: social"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:462
+#: includes/class-wp-bsky-autoposter-settings.php:506
 msgid "Suggested: feed"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:479
-#: includes/class-wp-bsky-autoposter-settings.php:496
+#: includes/class-wp-bsky-autoposter-settings.php:523
+#: includes/class-wp-bsky-autoposter-settings.php:540
 msgid "Optional. You can use {id} and {slug} placeholders."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:511
+#: includes/class-wp-bsky-autoposter-settings.php:555
 msgid "Error Only"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:512
+#: includes/class-wp-bsky-autoposter-settings.php:556
 msgid "Warning and Above"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:513
+#: includes/class-wp-bsky-autoposter-settings.php:557
 msgid "Success and Above"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:514
+#: includes/class-wp-bsky-autoposter-settings.php:558
 msgid "Debug (All Messages)"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:517
+#: includes/class-wp-bsky-autoposter-settings.php:561
 msgid "Choose the minimum level of messages to be logged. Messages below this level will not be written to the log file."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:535
+#: includes/class-wp-bsky-autoposter-settings.php:579
 msgid "View Log File"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:539
+#: includes/class-wp-bsky-autoposter-settings.php:583
 msgid "The log file is stored in your WordPress uploads directory."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:560
+#: includes/class-wp-bsky-autoposter-settings.php:604
 msgid "Leave empty to use the default location in the WordPress uploads directory. The path must be writable by the web server."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:584
+#: includes/class-wp-bsky-autoposter-settings.php:628
 msgid "Invalid Bluesky handle format. Please enter a valid handle (e.g., username.bsky.social) or DID."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:625
+#: includes/class-wp-bsky-autoposter-settings.php:657
+msgid "The Base URL must be a valid URL (including http:// or https://)."
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter-settings.php:691
 msgid "The specified log directory is not writable. Please choose a different location."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:643
-#: includes/class-wp-bsky-autoposter-settings.php:803
+#: includes/class-wp-bsky-autoposter-settings.php:709
+#: includes/class-wp-bsky-autoposter-settings.php:869
 msgid "Security check failed."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:648
-#: includes/class-wp-bsky-autoposter-settings.php:808
+#: includes/class-wp-bsky-autoposter-settings.php:714
+#: includes/class-wp-bsky-autoposter-settings.php:874
 msgid "You do not have permission to perform this action."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:656
+#: includes/class-wp-bsky-autoposter-settings.php:722
 msgid "Please enter both Bluesky handle and app password."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:667
+#: includes/class-wp-bsky-autoposter-settings.php:733
+#, php-format
 msgid "Connection successful! Authenticated as %s."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:673
+#: includes/class-wp-bsky-autoposter-settings.php:739
 msgid "Connection failed. Please check your credentials and try again."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:699
+#: includes/class-wp-bsky-autoposter-settings.php:765
 msgid "Error reading log file."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:702
+#: includes/class-wp-bsky-autoposter-settings.php:768
 msgid "Log file does not exist."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:713
+#: includes/class-wp-bsky-autoposter-settings.php:779
 msgid "Refresh"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:716
+#: includes/class-wp-bsky-autoposter-settings.php:782
 msgid "Clear Logs"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:776
+#: includes/class-wp-bsky-autoposter-settings.php:842
 msgid "Are you sure you want to clear all logs?"
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:820
+#: includes/class-wp-bsky-autoposter-settings.php:886
 msgid "Failed to clear log file."
 msgstr ""
 
-#: includes/class-wp-bsky-autoposter-settings.php:824
+#: includes/class-wp-bsky-autoposter-settings.php:890
 msgid "Logs cleared successfully."
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter-settings.php:932
+msgid "If activated, we will check for post excerpt and other information in Yoast SEO metadata."
+msgstr ""
+
+#. translators: %s: Link to Yoast SEO settings
+#: includes/class-wp-bsky-autoposter-settings.php:935
+msgid "Configure Yoast SEO Settings"
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter.php:218
+#, php-format
+msgid "Using Yoast SEO Twitter title for post %1$d (length: %2$d characters)"
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter.php:231
+#, php-format
+msgid "Using Yoast SEO title for post %1$d (length: %2$d characters)"
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter.php:271
+#, php-format
+msgid "Using Yoast SEO Twitter description for post %1$d (length: %2$d characters)"
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter.php:284
+#, php-format
+msgid "Using Yoast SEO meta description for post %1$d (length: %2$d characters)"
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter.php:380
+#, php-format
+msgid "Using Yoast SEO canonical URL for post %1$d: %2$s"
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter.php:485
+#, php-format
+msgid "Using Yoast SEO Twitter image for post %1$d: %2$s"
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter.php:498
+#, php-format
+msgid "Using Yoast SEO Facebook Open Graph image for post %1$d: %2$s"
+msgstr ""
+
+#: includes/class-wp-bsky-autoposter.php:604
+#, php-format
+msgid "Using Yoast SEO News stock tickers for post %1$d: %2$s"
 msgstr ""
