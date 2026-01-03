@@ -930,6 +930,9 @@ class WP_BSky_AutoPoster_Settings {
      */
     public function yoast_section_callback() {
         echo '<p>' . __('If activated, we will check for post excerpt and other information in Yoast SEO metadata.', 'wp-bsky-autoposter') . '</p>';
+        $yoast_settings_url = admin_url('admin.php?page=wpseo_page_settings#/post-type/posts');
+        /* translators: %s: Link to Yoast SEO settings */
+        echo '<p><a href="' . esc_url($yoast_settings_url) . '" target="_blank" class="button button-secondary">' . __('Configure Yoast SEO Settings', 'wp-bsky-autoposter') . '</a></p>';
     }
 
     /**
@@ -943,9 +946,6 @@ class WP_BSky_AutoPoster_Settings {
         ?>
         <input type="checkbox" id="use_yoast_metadata" name="wp_bsky_autoposter_settings[use_yoast_metadata]" 
                value="1" <?php checked(1, $value); ?>>
-        <p class="description">
-            <?php _e('If activated, we will check for post excerpt and other information in Yoast SEO metadata.', 'wp-bsky-autoposter'); ?>
-        </p>
         <?php
     }
 } 

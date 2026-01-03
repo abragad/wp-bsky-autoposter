@@ -13,10 +13,12 @@ When Yoast SEO is active and the integration is enabled, the plugin will automat
 The plugin automatically detects if Yoast SEO is active on your WordPress site:
 
 ```php
-function is_yoast_seo_active() {
+private function is_yoast_seo_active() {
     return function_exists('YoastSEO') || class_exists('WPSEO_Admin');
 }
 ```
+
+This method is used throughout the plugin to conditionally enable Yoast SEO features and is checked both in the settings page (to show/hide the Yoast SEO section) and when processing posts (to use Yoast SEO metadata).
 
 ### 2. Settings Integration
 
@@ -111,6 +113,11 @@ For sites using Yoast SEO News plugin, the plugin automatically converts stock t
 - **Input**: `NASD:AAPL, NYSE:IBM, NASDAQ:MSFT`
 - **Output**: `$AAPL $IBM $MSFT`
 
+#### Integration:
+- Cashtags are automatically added to the hashtags string and included in the post message
+- Cashtags are converted to clickable facets on Bluesky for better engagement
+- If inline hashtags are enabled, cashtags can be moved into the main text when the ticker symbol appears as a whole word
+
 #### Implementation:
 ```php
 $stock_tickers = get_post_meta($post_id, '_yoast_wpseo_newssitemap-stocktickers', true);
@@ -123,13 +130,16 @@ if (!empty($stock_tickers)) {
         $exchange_ticker = array_map('trim', explode(':', $part));
         if (count($exchange_ticker) >= 2) {
             $ticker = trim($exchange_ticker[1]);
+            // Only add if ticker is not empty and contains valid characters
             if (!empty($ticker) && preg_match('/^[A-Z0-9.]+$/', $ticker)) {
                 $tickers[] = '$' . $ticker;
             }
         }
     }
     
-    return implode(' ', $tickers);
+    if (!empty($tickers)) {
+        return implode(' ', $tickers);
+    }
 }
 ```
 
@@ -148,6 +158,12 @@ The Yoast SEO settings appear in a dedicated section:
 - **Section**: "Yoast SEO Metadata"
 - **Field**: "Use Yoast SEO Metadata"
 - **Description**: "If activated, we will check for post excerpt and other information in Yoast SEO metadata."
+- **Metadata Fields Used**: When enabled, the plugin checks for:
+  - Post titles (Twitter title, SEO title)
+  - Post descriptions/excerpts (Twitter description, meta description)
+  - Featured images (Twitter image, Open Graph image)
+  - Canonical URLs
+  - Stock tickers (converted to cashtags)
 
 ## Debug Logging
 
@@ -179,6 +195,7 @@ Using Yoast SEO canonical URL for post 123: https://example.com/custom-canonical
 ### Stock Ticker Logging
 ```
 Using Yoast SEO News stock tickers for post 123: $AAPL $IBM $MSFT
+Added cashtag facet for post 123: $AAPL at position 45
 ```
 
 ## Benefits
@@ -230,6 +247,12 @@ All Yoast SEO fields follow a consistent priority system:
 1. Platform-specific fields (Twitter, Facebook)
 2. General SEO fields
 3. WordPress default fields
+
+### Caching
+The plugin implements a caching mechanism to avoid redundant database calls:
+- Post data (title, excerpt, URL, image, hashtags, cashtags) is cached per post ID
+- Cache is cleared when a new post is published
+- This improves performance when processing multiple metadata fields for the same post
 
 ## Compatibility
 
