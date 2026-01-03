@@ -35,7 +35,7 @@ jobs:
           wp i18n make-pot . languages/wp-bsky-autoposter.pot --slug=wp-bsky-autoposter
 
       - name: Commit and create PR
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.PAT_FOR_ACTIONS }}
           commit-message: "Update .pot file automatically"
