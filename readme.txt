@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -127,6 +127,9 @@ If you're using Yoast SEO News and have stock tickers configured (e.g., "NASDAQ:
 
 == Changelog ==
 
+= 1.7.1 =
+* Fixed featured image download failing on servers with self-signed or expired SSL certificates
+
 = 1.7.0 =
 * Code refactoring and improvements
 * Removed unused properties from main plugin class
@@ -211,6 +214,9 @@ If you're using Yoast SEO News and have stock tickers configured (e.g., "NASDAQ:
 * Scheduled post support
 
 == Upgrade Notice ==
+
+= 1.7.1 =
+Fixed featured image download on servers with self-signed or expired SSL certificates.
 
 = 1.4.1 =
 Added Italian translation for better localization support.

@@ -243,8 +243,10 @@ class WP_BSky_AutoPoster_API {
      * @return   array|null              The image reference or null if upload failed.
      */
     private function upload_image($image_url) {
-        // Download the image
-        $response = wp_remote_get($image_url);
+        // Download the image (sslverify false for self-signed certificates)
+        $response = wp_remote_get($image_url, array(
+            'sslverify' => false,
+        ));
         if (is_wp_error($response)) {
             /* translators: %s: Image URL, %s: Error message */
             $this->log_warning(sprintf(__('Failed to download image at %1$s: %2$s', 'wp-bsky-autoposter'), $image_url, $response->get_error_message()));

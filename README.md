@@ -110,6 +110,9 @@ Developed by [Alessio Bragadini](https://techartconsulting.it/alessio-bragadini/
 
 ## Changelog
 
+### 1.7.1
+- Fixed featured image download failing on servers with self-signed or expired SSL certificates
+
 ### 1.6.0
 - Added clickable cashtags for stock tickers from Yoast SEO News
 - Enhanced inline hashtag processing to handle cashtags
