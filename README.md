@@ -65,6 +65,8 @@ The plugin automatically converts WordPress post tags into Bluesky hashtags. Whe
 
 The hashtags are generated from the tag slugs, ensuring they are properly formatted for Bluesky (lowercase, with hyphens instead of spaces).
 
+You can also add fixed hashtags in the template itself (for example `{title} {hashtags} #brand`). Any hashtag that appears in the final text receives a Bluesky tag facet, not only tags from `{hashtags}`.
+
 ## Yoast SEO Integration
 
 The plugin includes comprehensive integration with Yoast SEO to enhance your Bluesky posts with optimized metadata. When Yoast SEO is active and the integration is enabled, the plugin automatically uses Yoast SEO's social media and SEO metadata (titles, descriptions, images, URLs) instead of default WordPress content. For sites using Yoast SEO News, stock tickers are automatically converted to clickable cashtags on Bluesky. See the [Yoast SEO Integration documentation](yoast.md) for complete details on this feature.
@@ -109,6 +111,9 @@ This plugin is licensed under the GPL v2 or later.
 Developed by [Alessio Bragadini](https://techartconsulting.it/alessio-bragadini/)
 
 ## Changelog
+
+### 1.7.2
+- Fixed hashtags in the post template (outside `{hashtags}`) not being clickable on Bluesky; facets are now derived from the full message text as well as WordPress tags
 
 ### 1.7.1
 - Fixed featured image download failing on servers with self-signed or expired SSL certificates

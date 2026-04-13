@@ -526,6 +526,127 @@ class WP_BSky_AutoPoster_API {
     }
 
     /**
+     * Parse hashtag facets from post text (e.g. template literals outside {hashtags}).
+     *
+     * Detection follows the Bluesky rich-text reference (boundaries, trailing punctuation,
+     * UTF-8 byte offsets). @see https://docs.bsky.app/docs/advanced-guides/post-richtext
+     *
+     * @since    1.7.2
+     * @param    string $message UTF-8 post text.
+     * @return   array  Facet structures with byteStart/byteEnd into $message.
+     */
+    private function parse_hashtag_facets_from_message($message) {
+        if ($message === '' || $message === null) {
+            return array();
+        }
+
+        $facets = array();
+        if (!preg_match_all('/(?:^|\s)(#[^\d\s]\S*)/u', $message, $regexp_matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
+            return $facets;
+        }
+
+        foreach ($regexp_matches as $match) {
+            if (empty($match[1]) || !isset($match[1][0])) {
+                continue;
+            }
+            $raw = $match[1][0];
+            $byte_pos = (int) $match[1][1];
+            if ($raw === '') {
+                continue;
+            }
+
+            $tag = preg_replace('/\p{P}+$/u', '', $raw);
+            if ($tag === '' || strpos($tag, '#') !== 0) {
+                continue;
+            }
+            if (strlen($tag) > 66) {
+                continue;
+            }
+
+            $byte_end = $byte_pos + strlen($tag);
+            if ($byte_end > strlen($message)) {
+                continue;
+            }
+
+            $slug = substr($tag, 1);
+            if ($slug === '') {
+                continue;
+            }
+
+            $facets[] = array(
+                'index' => array(
+                    'byteStart' => $byte_pos,
+                    'byteEnd' => $byte_end,
+                ),
+                'features' => array(
+                    array(
+                        '$type' => 'app.bsky.richtext.facet#tag',
+                        'tag' => strtolower($slug),
+                    ),
+                ),
+            );
+        }
+
+        return $facets;
+    }
+
+    /**
+     * Sort facets by start offset and drop overlaps and exact duplicates.
+     *
+     * Bluesky recommends non-overlapping facets; keep the first facet in sort order
+     * (earlier byteStart; longer span when start ties).
+     *
+     * @since    1.7.2
+     * @param    array $facets Facet structures with index.byteStart / index.byteEnd.
+     * @return   array Merged facets.
+     */
+    private function merge_facets_remove_overlaps($facets) {
+        if (empty($facets)) {
+            return array();
+        }
+
+        usort(
+            $facets,
+            function ($a, $b) {
+                $s1 = $a['index']['byteStart'];
+                $s2 = $b['index']['byteStart'];
+                if ($s1 !== $s2) {
+                    return $s1 <=> $s2;
+                }
+                return $b['index']['byteEnd'] <=> $a['index']['byteEnd'];
+            }
+        );
+
+        $merged = array();
+        foreach ($facets as $f) {
+            if (empty($f['index']) || !isset($f['index']['byteStart'], $f['index']['byteEnd'])) {
+                continue;
+            }
+            $s = (int) $f['index']['byteStart'];
+            $e = (int) $f['index']['byteEnd'];
+            if ($e <= $s) {
+                continue;
+            }
+            if (empty($merged)) {
+                $merged[] = $f;
+                continue;
+            }
+            $prev = $merged[count($merged) - 1];
+            $ps = (int) $prev['index']['byteStart'];
+            $pe = (int) $prev['index']['byteEnd'];
+            if ($s === $ps && $e === $pe) {
+                continue;
+            }
+            if ($s >= $pe) {
+                $merged[] = $f;
+                continue;
+            }
+        }
+
+        return $merged;
+    }
+
+    /**
      * Post to Bluesky.
      *
      * @since    1.0.0
@@ -662,7 +783,11 @@ class WP_BSky_AutoPoster_API {
                 }
             }
         }
-        
+
+        $message_hashtag_facets = $this->parse_hashtag_facets_from_message($message);
+        $facets = array_merge($facets, $message_hashtag_facets);
+        $facets = $this->merge_facets_remove_overlaps($facets);
+
         if (!empty($facets)) {
             $post_data['record']['facets'] = $facets;
         }
