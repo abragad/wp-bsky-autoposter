@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.7.1
+Stable tag: 1.7.2
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -127,6 +127,9 @@ If you're using Yoast SEO News and have stock tickers configured (e.g., "NASDAQ:
 
 == Changelog ==
 
+= 1.7.2 =
+* Fixed hashtags added directly in the post template (not only via the {hashtags} placeholder) not being clickable on Bluesky
+
 = 1.7.1 =
 * Fixed featured image download failing on servers with self-signed or expired SSL certificates
 
@@ -214,6 +217,9 @@ If you're using Yoast SEO News and have stock tickers configured (e.g., "NASDAQ:
 * Scheduled post support
 
 == Upgrade Notice ==
+
+= 1.7.2 =
+Template hashtags outside the {hashtags} placeholder are now clickable on Bluesky.
 
 = 1.7.1 =
 Fixed featured image download on servers with self-signed or expired SSL certificates.
