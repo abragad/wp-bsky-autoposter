@@ -647,6 +647,153 @@ class WP_BSky_AutoPoster_API {
     }
 
     /**
+     * Parse an AT URI for an app.bsky.feed.post record into DID and record key.
+     *
+     * @since    1.7.3
+     * @param    string $at_uri AT URI from createRecord (e.g. at://did:plc:.../app.bsky.feed.post/rkey).
+     * @return   array|null Array with keys did, rkey, or null if not a feed post URI.
+     */
+    private function parse_feed_post_at_uri($at_uri) {
+        if (!is_string($at_uri) || $at_uri === '') {
+            return null;
+        }
+        if (!preg_match('#^at://([^/]+)/app\.bsky\.feed\.post/([^/]+)$#', $at_uri, $matches)) {
+            return null;
+        }
+        return array(
+            'did' => $matches[1],
+            'rkey' => $matches[2],
+        );
+    }
+
+    /**
+     * Fetch a handle from the PLC directory document (alsoKnownAs).
+     *
+     * @since    1.7.3
+     * @param    string $did PLC DID (did:plc:...).
+     * @return   string Handle without leading @, or empty string.
+     */
+    private function fetch_handle_from_plc_directory($did) {
+        $url      = 'https://plc.directory/' . $did;
+        $response = wp_remote_get(
+            $url,
+            array(
+                'timeout' => 15,
+            )
+        );
+        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+            return '';
+        }
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+        if (empty($body['alsoKnownAs']) || !is_array($body['alsoKnownAs'])) {
+            return '';
+        }
+        foreach ($body['alsoKnownAs'] as $aka) {
+            if (!is_string($aka) || strpos($aka, 'at://') !== 0) {
+                continue;
+            }
+            $handle = substr($aka, strlen('at://'));
+            $handle = trim($handle);
+            if ($handle !== '') {
+                return ltrim($handle, '@');
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Resolve a DID to a handle via the public Bluesky API (app.bsky.actor.getProfile).
+     *
+     * @since    1.7.3
+     * @param    string $did AT Protocol DID.
+     * @return   string Handle without leading @, or empty string.
+     */
+    private function fetch_handle_from_bluesky_profile($did) {
+        $url = add_query_arg(
+            'actor',
+            $did,
+            'https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile'
+        );
+        $response = wp_remote_get(
+            $url,
+            array(
+                'timeout' => 15,
+            )
+        );
+        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+            return '';
+        }
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+        if (empty($body['handle']) || !is_string($body['handle'])) {
+            return '';
+        }
+        return ltrim(trim($body['handle']), '@');
+    }
+
+    /**
+     * Resolve a DID to a Bluesky handle with session, transient cache, PLC, and public API fallback.
+     *
+     * @since    1.7.3
+     * @param    string $did AT Protocol DID.
+     * @return   string Handle without leading @, or empty string if resolution fails.
+     */
+    private function resolve_handle_for_did($did) {
+        $did = trim((string) $did);
+        if ($did === '') {
+            return '';
+        }
+
+        $cache_key = 'wpbsky_did_handle_' . md5($did);
+        $cached    = get_transient($cache_key);
+        if (is_string($cached) && $cached !== '') {
+            return $cached;
+        }
+
+        if (!empty($this->session['did']) && $this->session['did'] === $did && !empty($this->session['handle'])) {
+            $handle = ltrim(trim($this->session['handle']), '@');
+            if ($handle !== '') {
+                set_transient($cache_key, $handle, WEEK_IN_SECONDS);
+                return $handle;
+            }
+        }
+
+        $handle = '';
+        if (strpos($did, 'did:plc:') === 0) {
+            $handle = $this->fetch_handle_from_plc_directory($did);
+        }
+        if ($handle === '') {
+            $handle = $this->fetch_handle_from_bluesky_profile($did);
+        }
+        if ($handle !== '') {
+            set_transient($cache_key, $handle, WEEK_IN_SECONDS);
+        }
+        return $handle;
+    }
+
+    /**
+     * Build the canonical Bluesky web URL for a feed post AT URI.
+     *
+     * @since    1.7.3
+     * @param    string $at_uri AT URI returned by com.atproto.repo.createRecord.
+     * @return   string URL or empty string if the URI cannot be converted.
+     */
+    private function get_bluesky_post_web_url($at_uri) {
+        $parsed = $this->parse_feed_post_at_uri($at_uri);
+        if ($parsed === null) {
+            return '';
+        }
+        $handle = $this->resolve_handle_for_did($parsed['did']);
+        if ($handle === '') {
+            return '';
+        }
+        return sprintf(
+            'https://bsky.app/profile/%s/post/%s',
+            rawurlencode($handle),
+            rawurlencode($parsed['rkey'])
+        );
+    }
+
+    /**
      * Post to Bluesky.
      *
      * @since    1.0.0
@@ -843,8 +990,18 @@ class WP_BSky_AutoPoster_API {
 
             // Success case
             if (isset($body['uri'])) {
-                /* translators: 1: Post ID, 2: Post URI */
-                $this->log_success(sprintf(__('Successfully posted article %1$d to Bluesky: %2$s', 'wp-bsky-autoposter'), $post_id, $body['uri']));
+                /* translators: 1: Post ID, 2: Post AT URI */
+                $success_msg = sprintf(
+                    __('Successfully posted article %1$d to Bluesky: %2$s', 'wp-bsky-autoposter'),
+                    $post_id,
+                    $body['uri']
+                );
+                $web_url = $this->get_bluesky_post_web_url($body['uri']);
+                if ($web_url !== '') {
+                    /* translators: %s: Bluesky web URL (bsky.app profile post link) */
+                    $success_msg .= ' ' . sprintf(__('Bluesky post URL: %s', 'wp-bsky-autoposter'), $web_url);
+                }
+                $this->log_success($success_msg);
                 return true;
             }
 

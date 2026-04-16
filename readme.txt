@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.7.2
+Stable tag: 1.7.3
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -66,6 +66,7 @@ The plugin includes a comprehensive logging system:
 * Set custom log file path
 * Access built-in log viewer with color-coded entries
 * Clear logs when needed
+* Success entries include the Bluesky web post URL (bsky.app/profile/…/post/…) when the handle can be resolved
 
 == Installation ==
 
@@ -126,6 +127,9 @@ If you're using Yoast SEO News and have stock tickers configured (e.g., "NASDAQ:
 6. Log viewer
 
 == Changelog ==
+
+= 1.7.3 =
+* Success logs now include the Bluesky post web URL when possible (handle resolved via session, PLC directory, or public API, with caching)
 
 = 1.7.2 =
 * Fixed hashtags added directly in the post template (not only via the {hashtags} placeholder) not being clickable on Bluesky

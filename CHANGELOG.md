@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.3] - 2026-04-16
+
+### Added
+- Success logs include the Bluesky web post URL (`https://bsky.app/profile/{handle}/post/{rkey}`) when the AT URI can be parsed and the handle resolved (session, PLC directory for `did:plc`, or public `app.bsky.actor.getProfile` fallback), with weekly transient caching per DID
+
 ## [1.7.2] - 2026-04-13
 
 ### Fixed
