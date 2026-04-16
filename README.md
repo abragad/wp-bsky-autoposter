@@ -112,6 +112,9 @@ Developed by [Alessio Bragadini](https://techartconsulting.it/alessio-bragadini/
 
 ## Changelog
 
+### 1.7.3
+- Success logs include the Bluesky web post URL when the handle can be resolved (cached DID→handle lookups via PLC directory and public API fallback)
+
 ### 1.7.2
 - Fixed hashtags in the post template (outside `{hashtags}`) not being clickable on Bluesky; facets are now derived from the full message text as well as WordPress tags
 
