@@ -106,7 +106,7 @@ jobs:
           cd ..
       
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: build/wp-bsky-autoposter-${{ steps.get_version.outputs.VERSION }}.zip
           generate_release_notes: true
