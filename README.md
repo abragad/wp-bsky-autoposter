@@ -21,6 +21,24 @@ A WordPress plugin that automatically posts new WordPress posts to Bluesky with 
   - Custom log file location
   - Built-in log viewer with color-coded entries
   - Log management (view, refresh, clear)
+- On WordPress 6.9 and newer, four [Abilities](https://developer.wordpress.org/apis/abilities-api/) that other plugins, the REST API, and AI agents can discover. See [WordPress Abilities](#wordpress-abilities)
+
+## WordPress Abilities
+
+WordPress 6.9 added the Abilities API. This plugin registers its actions only when `wp_register_ability()` exists, so sites on older WordPress keep the publish hook and the settings screen.
+
+Category: `bluesky`.
+
+| Ability | What it does | Who can run it |
+| --- | --- | --- |
+| `wp-bsky-autoposter/preview-post` | Builds the skeet text and link card for a post. Does not call Bluesky. Input: `post_id`. | `edit_post` for that post |
+| `wp-bsky-autoposter/share-post` | Publishes one published post using the stored App Password. Input: `post_id`, optional `force` (default false). Without `force`, a post that was already shared is refused. | `edit_post` for that post and `publish_posts` |
+| `wp-bsky-autoposter/get-status` | Reports whether credentials are stored, plus link tracking and Yoast metadata. No input. | `manage_options` |
+| `wp-bsky-autoposter/test-connection` | Authenticates with the stored App Password. No input. | `manage_options` |
+
+None of these abilities accept a handle or App Password, and none of them return the password. They are exposed on the REST API for an authenticated user (`meta.show_in_rest`). Read-only abilities use GET; `share-post` and `test-connection` use POST:
+
+`POST /wp-json/wp-abilities/v1/wp-bsky-autoposter/share-post/run` with body `{"input":{"post_id":123}}`
 
 ## Installation
 
@@ -111,6 +129,10 @@ This plugin is licensed under the GPL v2 or later.
 Developed by [Alessio Bragadini](https://techartconsulting.it/alessio-bragadini/)
 
 ## Changelog
+
+### 1.8.0
+- Register WordPress Abilities (`preview-post`, `share-post`, `get-status`, `test-connection`) on WordPress 6.9 and newer
+- Return the Bluesky AT URI and web URL from a successful share, and do not mark a post as shared when the request fails
 
 ### 1.7.3
 - Success logs include the Bluesky web post URL when the handle can be resolved (cached DID→handle lookups via PLC directory and public API fallback)
