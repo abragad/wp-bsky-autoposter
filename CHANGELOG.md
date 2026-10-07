@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-10-02
+
+### Added
+- WordPress Abilities API support on WordPress 6.9 and newer: `wp-bsky-autoposter/preview-post`, `wp-bsky-autoposter/share-post`, `wp-bsky-autoposter/get-status`, and `wp-bsky-autoposter/test-connection`. Older WordPress versions keep working; registration is skipped when `wp_register_ability()` is missing
+- `post_to_bluesky()` now returns the AT URI and public web URL on success, or a `WP_Error` on failure
+
+### Fixed
+- A failed share no longer marks the post as already sent, so a later attempt can retry
+
 ## [1.7.3] - 2026-04-16
 
 ### Added

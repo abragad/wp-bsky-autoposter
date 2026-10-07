@@ -58,6 +58,9 @@ class WP_BSky_AutoPoster {
         
         // Load API class
         $this->api = new WP_BSky_AutoPoster_API();
+
+        // Abilities register themselves when WordPress 6.9+ provides the API.
+        new WP_BSky_AutoPoster_Abilities($this);
     }
 
     /**
@@ -121,23 +124,195 @@ class WP_BSky_AutoPoster {
             return;
         }
 
-        // Get plugin settings
-        $settings = get_option('wp_bsky_autoposter_settings');
-        if (empty($settings['bluesky_handle']) || empty($settings['app_password'])) {
+        $result = $this->send_post_to_bluesky($post);
+        if (is_wp_error($result)) {
             return;
         }
 
-        // Format the post content
-        $message = $this->format_post_message($post, $settings['post_template']);
+        // Update the previous status only after a successful share.
+        update_post_meta($post_id, '_wp_bsky_previous_status', $post_status);
+    }
 
-        // Get post metadata for rich preview
+    /**
+     * Build the skeet text and link card for a post without calling Bluesky.
+     *
+     * @since    1.8.0
+     * @param    int    $post_id    The post ID.
+     * @return   array|WP_Error     Preview fields, or an error when the post does not exist.
+     */
+    public function get_share_preview($post_id) {
+        $post = get_post($post_id);
+        if (!$post instanceof WP_Post) {
+            return new WP_Error(
+                'wp_bsky_post_not_found',
+                __('The specified post does not exist.', 'wp-bsky-autoposter')
+            );
+        }
+
+        $settings = $this->get_plugin_settings();
+        $this->post_data_cache[$post->ID] = array();
+        $preview = $this->get_post_preview_data($post);
+
+        return array(
+            'message' => $this->format_post_message($post, $this->get_post_template($settings)),
+            'uri' => isset($preview['uri']) ? $preview['uri'] : '',
+            'title' => isset($preview['title']) ? $preview['title'] : '',
+            'description' => isset($preview['description']) ? $preview['description'] : '',
+            'thumb' => !empty($preview['thumb']) ? $preview['thumb'] : null,
+            'hashtags' => $this->get_hashtags($post->ID),
+        );
+    }
+
+    /**
+     * Share one published post to Bluesky using the stored App Password.
+     *
+     * @since    1.8.0
+     * @param    int     $post_id    The post ID.
+     * @param    bool    $force      Whether to share again when this post was already shared.
+     * @return   array|WP_Error      Success payload with uri and url, or an error.
+     */
+    public function share_post($post_id, $force = false) {
+        $post = get_post($post_id);
+        if (!$post instanceof WP_Post) {
+            return new WP_Error(
+                'wp_bsky_post_not_found',
+                __('The specified post does not exist.', 'wp-bsky-autoposter')
+            );
+        }
+
+        if (wp_is_post_revision($post_id) || wp_is_post_autosave($post_id)) {
+            return new WP_Error(
+                'wp_bsky_post_not_shareable',
+                __('Revisions and autosaves cannot be shared to Bluesky.', 'wp-bsky-autoposter')
+            );
+        }
+
+        if (get_post_status($post_id) !== 'publish') {
+            return new WP_Error(
+                'wp_bsky_post_not_published',
+                __('Only published posts can be shared to Bluesky.', 'wp-bsky-autoposter')
+            );
+        }
+
+        $settings = $this->get_plugin_settings();
+        if (empty($settings['bluesky_handle']) || empty($settings['app_password'])) {
+            return new WP_Error(
+                'wp_bsky_missing_credentials',
+                __('Bluesky credentials are not configured.', 'wp-bsky-autoposter')
+            );
+        }
+
+        $previous_status = get_post_meta($post_id, '_wp_bsky_previous_status', true);
+        if (!$force && $previous_status === 'publish') {
+            return new WP_Error(
+                'wp_bsky_already_shared',
+                __('This post was already shared to Bluesky. Pass force to share it again.', 'wp-bsky-autoposter')
+            );
+        }
+
+        $result = $this->send_post_to_bluesky($post);
+        if (is_wp_error($result)) {
+            return $result;
+        }
+
+        update_post_meta($post_id, '_wp_bsky_previous_status', 'publish');
+        return $result;
+    }
+
+    /**
+     * Report whether the plugin can post, without revealing the App Password.
+     *
+     * @since    1.8.0
+     * @return   array    Status fields safe to expose.
+     */
+    public function get_connection_status() {
+        $settings = $this->get_plugin_settings();
+        $handle = isset($settings['bluesky_handle']) ? ltrim((string) $settings['bluesky_handle'], '@') : '';
+
+        return array(
+            'configured' => ($handle !== '' && !empty($settings['app_password'])),
+            'handle' => $handle,
+            'link_tracking' => !empty($settings['enable_link_tracking']),
+            'yoast_metadata' => !empty($settings['use_yoast_metadata']),
+        );
+    }
+
+    /**
+     * Authenticate with the App Password stored in settings.
+     *
+     * @since    1.8.0
+     * @return   array|WP_Error    Success payload, or an error. Never includes the password.
+     */
+    public function test_stored_connection() {
+        $settings = $this->get_plugin_settings();
+        $handle = isset($settings['bluesky_handle']) ? ltrim((string) $settings['bluesky_handle'], '@') : '';
+
+        if ($handle === '' || empty($settings['app_password'])) {
+            return new WP_Error(
+                'wp_bsky_missing_credentials',
+                __('Bluesky credentials are not configured.', 'wp-bsky-autoposter')
+            );
+        }
+
+        if (!$this->api->authenticate($handle, $settings['app_password'])) {
+            return new WP_Error(
+                'wp_bsky_connection_failed',
+                __('Connection failed. Please check your credentials and try again.', 'wp-bsky-autoposter')
+            );
+        }
+
+        return array(
+            'success' => true,
+            'handle' => $handle,
+        );
+    }
+
+    /**
+     * Read plugin settings as an array.
+     *
+     * @since    1.8.0
+     * @return   array    Plugin settings.
+     */
+    private function get_plugin_settings() {
+        $settings = get_option('wp_bsky_autoposter_settings');
+        return is_array($settings) ? $settings : array();
+    }
+
+    /**
+     * Post template, falling back to the settings default.
+     *
+     * @since    1.8.0
+     * @param    array    $settings    Plugin settings.
+     * @return   string                The post template.
+     */
+    private function get_post_template($settings) {
+        if (!empty($settings['post_template'])) {
+            return $settings['post_template'];
+        }
+        return '{title} - {excerpt}';
+    }
+
+    /**
+     * Format a post and send it to Bluesky.
+     *
+     * @since    1.8.0
+     * @param    WP_Post    $post    The post object.
+     * @return   array|WP_Error      Success payload from the API, or an error.
+     */
+    private function send_post_to_bluesky($post) {
+        $settings = $this->get_plugin_settings();
+        if (empty($settings['bluesky_handle']) || empty($settings['app_password'])) {
+            return new WP_Error(
+                'wp_bsky_missing_credentials',
+                __('Bluesky credentials are not configured.', 'wp-bsky-autoposter')
+            );
+        }
+
+        $this->post_data_cache[$post->ID] = array();
+        $message = $this->format_post_message($post, $this->get_post_template($settings));
         $preview_data = $this->get_post_preview_data($post);
 
-        // Send to Bluesky
-        $this->api->post_to_bluesky($message, $preview_data, $post_id);
-        
-        // Update the previous status
-        update_post_meta($post_id, '_wp_bsky_previous_status', $post_status);
+        return $this->api->post_to_bluesky($message, $preview_data, $post->ID);
     }
 
     /**

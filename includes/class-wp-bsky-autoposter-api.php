@@ -800,7 +800,13 @@ class WP_BSky_AutoPoster_API {
      * @param    string    $message        The message to post.
      * @param    array     $preview_data   The preview data for the post.
      * @param    int       $post_id        The WordPress post ID.
-     * @return   bool      True if the post was successful.
+     * @return   array|WP_Error {
+     *     Success payload, or an error. The App Password is never included.
+     *
+     *     @type bool   $success Always true on success.
+     *     @type string $uri     AT URI of the created post.
+     *     @type string $url     Bluesky web URL, or an empty string when the handle cannot be resolved.
+     * }
      */
     public function post_to_bluesky($message, $preview_data, $post_id) {
         /* translators: 1: Post ID, 2: Post URI */
@@ -811,8 +817,13 @@ class WP_BSky_AutoPoster_API {
 
         if (empty($this->session)) {
             $settings = get_option('wp_bsky_autoposter_settings');
-            if (!$this->authenticate($settings['bluesky_handle'], $settings['app_password'])) {
-                return false;
+            $handle = is_array($settings) && isset($settings['bluesky_handle']) ? $settings['bluesky_handle'] : '';
+            $password = is_array($settings) && isset($settings['app_password']) ? $settings['app_password'] : '';
+            if ($handle === '' || $password === '' || !$this->authenticate($handle, $password)) {
+                return new WP_Error(
+                    'wp_bsky_auth_failed',
+                    __('Could not authenticate with Bluesky.', 'wp-bsky-autoposter')
+                );
             }
         }
 
@@ -982,7 +993,7 @@ class WP_BSky_AutoPoster_API {
             if (is_wp_error($response)) {
                 /* translators: 1: Post ID, 2: Error message */
                 $this->log_error(sprintf(__('Failed to post article %1$d to Bluesky: %2$s', 'wp-bsky-autoposter'), $post_id, $response->get_error_message()));
-                return false;
+                return $response;
             }
 
             $body = json_decode(wp_remote_retrieve_body($response), true);
@@ -1002,7 +1013,11 @@ class WP_BSky_AutoPoster_API {
                     $success_msg .= ' ' . sprintf(__('Bluesky post URL: %s', 'wp-bsky-autoposter'), $web_url);
                 }
                 $this->log_success($success_msg);
-                return true;
+                return array(
+                    'success' => true,
+                    'uri' => $body['uri'],
+                    'url' => $web_url,
+                );
             }
 
             // Check if it's a 5XX error
@@ -1039,7 +1054,15 @@ class WP_BSky_AutoPoster_API {
                 wp_json_encode($body)
             ));
 
-            return false;
+            return new WP_Error(
+                'wp_bsky_post_failed',
+                sprintf(
+                    /* translators: 1: HTTP status code, 2: Error message */
+                    __('Failed to post to Bluesky (HTTP %1$d): %2$s', 'wp-bsky-autoposter'),
+                    $response_code,
+                    $error_message
+                )
+            );
         }
 
         /* translators: %d: Number of retry attempts */
@@ -1047,7 +1070,14 @@ class WP_BSky_AutoPoster_API {
             __('Failed to post to Bluesky after %d attempts with 5XX errors', 'wp-bsky-autoposter'),
             $max_retries
         ));
-        return false;
+        return new WP_Error(
+            'wp_bsky_post_failed',
+            sprintf(
+                /* translators: %d: Number of retry attempts */
+                __('Failed to post to Bluesky after %d attempts with 5XX errors', 'wp-bsky-autoposter'),
+                $max_retries
+            )
+        );
     }
 
     /**

@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.7.3
+Stable tag: 1.8.0
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -27,6 +27,18 @@ WP AutoPoster to Bluesky is a WordPress plugin that automatically shares your ne
 * Support for scheduled posts
 * UTM parameter tracking for analytics
 * Optional Base URL override for post links (replace the host part of the post URL before adding UTM parameters)
+* On WordPress 6.9 and newer, Abilities API actions to preview a post, share it, read plugin status, and test the stored connection
+
+= WordPress Abilities =
+
+On WordPress 6.9 and newer the plugin registers four abilities in the `bluesky` category. Sites on older WordPress are unchanged.
+
+* `wp-bsky-autoposter/preview-post` builds the skeet text and link card. Input: `post_id`. Requires `edit_post` for that post. Does not call Bluesky.
+* `wp-bsky-autoposter/share-post` publishes one published post with the stored App Password. Input: `post_id` and optional `force` (default false). Requires `edit_post` for that post and `publish_posts`. Without `force`, a post that was already shared is refused.
+* `wp-bsky-autoposter/get-status` reports whether credentials are stored, and whether link tracking and Yoast metadata are enabled. Requires `manage_options`.
+* `wp-bsky-autoposter/test-connection` authenticates with the stored App Password. Requires `manage_options`.
+
+The abilities do not accept a handle or App Password, and they never return the password. Authenticated REST clients can run them under `/wp-json/wp-abilities/v1/`. Read-only abilities use GET. `share-post` and `test-connection` use POST, for example `POST /wp-json/wp-abilities/v1/wp-bsky-autoposter/share-post/run` with body `{"input":{"post_id":123}}`.
 
 = Post Template =
 
@@ -128,6 +140,11 @@ If you're using Yoast SEO News and have stock tickers configured (e.g., "NASDAQ:
 
 == Changelog ==
 
+= 1.8.0 =
+* Register WordPress Abilities (preview-post, share-post, get-status, test-connection) on WordPress 6.9 and newer
+* A successful share now returns the Bluesky AT URI and web URL
+* A failed share no longer marks the post as already sent
+
 = 1.7.3 =
 * Success logs now include the Bluesky post web URL when possible (handle resolved via session, PLC directory, or public API, with caching)
 
@@ -221,6 +238,9 @@ If you're using Yoast SEO News and have stock tickers configured (e.g., "NASDAQ:
 * Scheduled post support
 
 == Upgrade Notice ==
+
+= 1.8.0 =
+On WordPress 6.9 and newer, preview, share, status, and connection test are available as Abilities. The App Password is never accepted or returned by those abilities.
 
 = 1.7.2 =
 Template hashtags outside the {hashtags} placeholder are now clickable on Bluesky.
