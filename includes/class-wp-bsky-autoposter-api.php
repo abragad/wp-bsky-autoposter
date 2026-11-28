@@ -9,6 +9,22 @@
 class WP_BSky_AutoPoster_API {
 
     /**
+     * Maximum graphemes allowed in app.bsky.feed.post text.
+     *
+     * @since    1.8.1
+     * @var      int
+     */
+    const MAX_POST_GRAPHEMES = 300;
+
+    /**
+     * Maximum UTF-8 bytes allowed in app.bsky.feed.post text.
+     *
+     * @since    1.8.1
+     * @var      int
+     */
+    const MAX_POST_UTF8_BYTES = 3000;
+
+    /**
      * The Bluesky API endpoint.
      *
      * @since    1.0.0
@@ -417,17 +433,232 @@ class WP_BSky_AutoPoster_API {
     }
 
     /**
-     * Process hashtags for inline placement.
+     * Apply inline tags, then drop whole trailing tags that do not fit.
      *
-     * @since    1.3.0
-     * @param    string    $message    The message to process.
-     * @return   string    The processed message with inline hashtags.
+     * Bluesky rejects app.bsky.feed.post text over 300 graphemes or 3000 UTF-8 bytes.
+     * Length is measured after inline hashtag and cashtag placement, which changes it.
+     *
+     * @since    1.8.1
+     * @param    string    $message    Skeet text, before inline tag placement.
+     * @return   string    Text safe to store on the post record.
      */
-    private function process_inline_hashtags($message) {
+    public function prepare_post_message($message) {
+        $separated = $this->separate_inline_tags($message);
+        if ($separated === null) {
+            return $this->fit_message_to_bluesky_limit($message);
+        }
+
+        // Folded tags stay in the body. Only tags inline placement left at the end can be dropped.
+        return $this->fit_body_and_tags($separated[0], $separated[1]);
+    }
+
+    /**
+     * Ellipsize text to the Bluesky post limit, without removing tags as tokens.
+     *
+     * Used for link-card descriptions. Skeet text goes through prepare_post_message()
+     * so a hashtag is dropped whole instead of being sliced.
+     *
+     * @since    1.8.1
+     * @param    string    $text    Plain text.
+     * @return   string    Text within the grapheme and byte limits.
+     */
+    public function truncate_to_bluesky_limit($text) {
+        return $this->ellipsize_to_bluesky_limit($text);
+    }
+
+    /**
+     * Keep the body, then as many trailing hashtags and cashtags as fit.
+     *
+     * @since    1.8.1
+     * @param    string    $message    Text after inline tag placement.
+     * @return   string    Text within the Bluesky post limit.
+     */
+    private function fit_message_to_bluesky_limit($message) {
+        $message = trim((string) $message);
+        if ($message === '') {
+            return '';
+        }
+
+        $parts = $this->split_trailing_tags($message);
+        return $this->fit_body_and_tags($parts[0], $parts[1]);
+    }
+
+    /**
+     * Ellipsize the body if needed, then append trailing tags while the limit holds.
+     *
+     * @since    1.8.1
+     * @param    string    $body    Text that is kept, including tags folded into the sentence.
+     * @param    array     $tags    Trailing tag tokens, earliest first.
+     * @return   string    Text within the Bluesky post limit.
+     */
+    private function fit_body_and_tags($body, $tags) {
+        $body = trim((string) $body);
+        if (!is_array($tags)) {
+            $tags = array();
+        }
+
+        if ($body !== '' && $this->exceeds_bluesky_post_limit($body)) {
+            $body = $this->ellipsize_to_bluesky_limit($body);
+        }
+
+        $result = $body;
+        $kept = 0;
+        foreach ($tags as $tag) {
+            if (!is_string($tag) || $tag === '') {
+                continue;
+            }
+            $candidate = ($result === '') ? $tag : $result . ' ' . $tag;
+            if ($this->exceeds_bluesky_post_limit($candidate)) {
+                break;
+            }
+            $result = $candidate;
+            $kept++;
+        }
+
+        $dropped = count($tags) - $kept;
+        if ($dropped > 0) {
+            /* translators: 1: number of omitted tags, 2: space-separated tags */
+            $this->log_debug(sprintf(
+                __('Omitted %1$d trailing tags so the Bluesky post stays within the length limit: %2$s', 'wp-bsky-autoposter'),
+                $dropped,
+                implode(' ', array_slice($tags, $kept))
+            ));
+        }
+
+        return $result;
+    }
+
+    /**
+     * Split a trailing run of hashtag and cashtag tokens from the body.
+     *
+     * Tags earlier in the sentence stay in the body. Only the uninterrupted
+     * run at the end is eligible to be dropped.
+     *
+     * @since    1.8.1
+     * @param    string    $message    Post text.
+     * @return   array     Body string and a list of trailing tag tokens.
+     */
+    private function split_trailing_tags($message) {
+        if (!preg_match('/[#$]/', $message)) {
+            return array($message, array());
+        }
+
+        $pattern = '/^(.*?)(?:\s+)?((?:[#$][^\s]+)(?:\s+[#$][^\s]+)*)\s*$/u';
+        if (!preg_match($pattern, $message, $matches) || $matches[2] === '') {
+            return array($message, array());
+        }
+
+        $tags = preg_split('/\s+/u', trim($matches[2]));
+        if (!is_array($tags)) {
+            return array($message, array());
+        }
+
+        return array($matches[1], $tags);
+    }
+
+    /**
+     * Whether text exceeds either Bluesky post-text limit.
+     *
+     * @since    1.8.1
+     * @param    string    $text    Post text.
+     * @return   bool      True when the text is too long.
+     */
+    private function exceeds_bluesky_post_limit($text) {
+        if ($this->grapheme_length($text) > self::MAX_POST_GRAPHEMES) {
+            return true;
+        }
+        return strlen($text) > self::MAX_POST_UTF8_BYTES;
+    }
+
+    /**
+     * Shorten text with an ellipsis until both limits hold.
+     *
+     * @since    1.8.1
+     * @param    string    $text    Post text.
+     * @return   string    Truncated text.
+     */
+    private function ellipsize_to_bluesky_limit($text) {
+        if (!$this->exceeds_bluesky_post_limit($text)) {
+            return $text;
+        }
+
+        $ellipsis = '...';
+        $ellipsis_length = $this->grapheme_length($ellipsis);
+        $max = $this->grapheme_length($text);
+        $grapheme_budget = self::MAX_POST_GRAPHEMES - $ellipsis_length;
+        if ($max > $grapheme_budget) {
+            $max = $grapheme_budget;
+        }
+
+        while ($max > 0) {
+            $candidate = $this->grapheme_prefix($text, $max) . $ellipsis;
+            if (!$this->exceeds_bluesky_post_limit($candidate)) {
+                return $candidate;
+            }
+            $max--;
+        }
+
+        if (!$this->exceeds_bluesky_post_limit($ellipsis)) {
+            return $ellipsis;
+        }
+
+        return '';
+    }
+
+    /**
+     * Count grapheme clusters, falling back to Unicode code points.
+     *
+     * @since    1.8.1
+     * @param    string    $text    UTF-8 text.
+     * @return   int       Grapheme count, or code-point count when intl is unavailable.
+     */
+    private function grapheme_length($text) {
+        if (function_exists('grapheme_strlen')) {
+            $length = grapheme_strlen($text);
+            if (is_int($length)) {
+                return $length;
+            }
+        }
+        return mb_strlen($text, 'UTF-8');
+    }
+
+    /**
+     * First $length graphemes of $text.
+     *
+     * @since    1.8.1
+     * @param    string    $text      UTF-8 text.
+     * @param    int       $length    Number of graphemes to keep.
+     * @return   string    The prefix.
+     */
+    private function grapheme_prefix($text, $length) {
+        if ($length <= 0) {
+            return '';
+        }
+        if (function_exists('grapheme_substr')) {
+            $prefix = grapheme_substr($text, 0, $length);
+            if (is_string($prefix)) {
+                return $prefix;
+            }
+        }
+        return mb_substr($text, 0, $length, 'UTF-8');
+    }
+
+    /**
+     * Split inline hashtag placement into body text and tags still at the end.
+     *
+     * Returns null when inline placement is disabled, so the caller can fit the
+     * original string. Otherwise the body includes tags that were folded into
+     * matching words, and the list is only the tags that stayed trailing.
+     *
+     * @since    1.8.1
+     * @param    string    $message    The message to process.
+     * @return   array|null    Body and trailing tags, or null when inline placement is off.
+     */
+    private function separate_inline_tags($message) {
         // Get settings
         $settings = get_option('wp_bsky_autoposter_settings');
-        if (empty($settings['inline_hashtags'])) {
-            return $message;
+        if (!is_array($settings) || empty($settings['inline_hashtags'])) {
+            return null;
         }
 
         // Extract hashtags and cashtags from the end of the message
@@ -457,9 +688,9 @@ class WP_BSky_AutoPoster_API {
             }
         }
 
-        // If no tags found, return original message
+        // If no tags found, the whole message is body text.
         if (empty($hashtags) && empty($cashtags)) {
-            return $message;
+            return array($message, array());
         }
 
         // Process each hashtag
@@ -515,14 +746,7 @@ class WP_BSky_AutoPoster_API {
             }
         }
 
-        // Combine main text with remaining tags
-        $result = trim($main_text_str);
-        $remaining_tags = array_merge($processed_hashtags, $processed_cashtags);
-        if (!empty($remaining_tags)) {
-            $result .= ' ' . implode(' ', $remaining_tags);
-        }
-
-        return $result;
+        return array(trim($main_text_str), array_merge($processed_hashtags, $processed_cashtags));
     }
 
     /**
@@ -812,8 +1036,9 @@ class WP_BSky_AutoPoster_API {
         /* translators: 1: Post ID, 2: Post URI */
         $this->log_debug(sprintf(__('Posting article %1$d at %2$s', 'wp-bsky-autoposter'), $post_id, $preview_data['uri']));
 
-        // Process inline hashtags if enabled
-        $message = $this->process_inline_hashtags($message);
+        // Inline tags are applied in prepare_post_message(). Fit again so a caller
+        // that skipped that step still cannot publish past the lexicon limit.
+        $message = $this->fit_message_to_bluesky_limit($message);
 
         if (empty($this->session)) {
             $settings = get_option('wp_bsky_autoposter_settings');

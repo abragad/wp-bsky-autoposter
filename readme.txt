@@ -3,7 +3,7 @@ Contributors: abragad
 Tags: bluesky, social media, automation, at protocol
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 1.8.0
+Stable tag: 1.8.1
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -56,7 +56,7 @@ The plugin automatically converts WordPress post tags into Bluesky hashtags. Whe
 * And your template includes `{hashtags}`
 * The output will be: `#market-analysis #investments`
 
-The hashtags are generated from the tag slugs, ensuring they are properly formatted for Bluesky (lowercase, with hyphens instead of spaces).
+The hashtags are generated from the tag slugs, ensuring they are properly formatted for Bluesky (lowercase, with hyphens instead of spaces). If the finished post would pass Bluesky's limit of 300 graphemes or 3000 UTF-8 bytes, trailing hashtags and cashtags are left off whole instead of being cut mid-tag.
 
 = Cashtag Support =
 
@@ -139,6 +139,9 @@ If you're using Yoast SEO News and have stock tickers configured (e.g., "NASDAQ:
 6. Log viewer
 
 == Changelog ==
+
+= 1.8.1 =
+* Posts that do not fit in Bluesky's 300-grapheme (and 3000-byte) limit drop trailing hashtags and cashtags whole, after inline tag placement, instead of cutting through a tag
 
 = 1.8.0 =
 * Register WordPress Abilities (preview-post, share-post, get-status, test-connection) on WordPress 6.9 and newer
@@ -238,6 +241,9 @@ If you're using Yoast SEO News and have stock tickers configured (e.g., "NASDAQ:
 * Scheduled post support
 
 == Upgrade Notice ==
+
+= 1.8.1 =
+Long hashtag lists are trimmed to Bluesky's post length by dropping whole tags, so a tag is no longer cut off mid-word.
 
 = 1.8.0 =
 On WordPress 6.9 and newer, preview, share, status, and connection test are available as Abilities. The App Password is never accepted or returned by those abilities.

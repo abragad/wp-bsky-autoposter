@@ -81,7 +81,7 @@ The plugin automatically converts WordPress post tags into Bluesky hashtags. Whe
 - And your template includes `{hashtags}`
 - The output will be: `#market-analysis #investments`
 
-The hashtags are generated from the tag slugs, ensuring they are properly formatted for Bluesky (lowercase, with hyphens instead of spaces).
+The hashtags are generated from the tag slugs, ensuring they are properly formatted for Bluesky (lowercase, with hyphens instead of spaces). If the finished post would pass Bluesky's limit of 300 graphemes or 3000 UTF-8 bytes, trailing hashtags and cashtags are left off whole instead of being cut mid-tag.
 
 You can also add fixed hashtags in the template itself (for example `{title} {hashtags} #brand`). Any hashtag that appears in the final text receives a Bluesky tag facet, not only tags from `{hashtags}`.
 
@@ -129,6 +129,9 @@ This plugin is licensed under the GPL v2 or later.
 Developed by [Alessio Bragadini](https://techartconsulting.it/alessio-bragadini/)
 
 ## Changelog
+
+### 1.8.1
+- Posts that do not fit in Bluesky's 300-grapheme (and 3000-byte) limit drop trailing hashtags and cashtags whole, after inline tag placement, instead of cutting through a tag
 
 ### 1.8.0
 - Register WordPress Abilities (`preview-post`, `share-post`, `get-status`, `test-connection`) on WordPress 6.9 and newer
