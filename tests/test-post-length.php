@@ -104,6 +104,13 @@ $within = function ( $text ) use ( $graphemes ) {
 $short = 'Hello #boats';
 $assert( $short === $api->prepare_post_message( $short ), 'short post is unchanged' );
 
+// All-tags messages still split; glued # fragments (URL hashes) do not.
+$assert( '#a #b' === $api->prepare_post_message( '#a #b' ), 'all-tags message is unchanged' );
+$url_hash = 'https://example.com/page#section';
+$assert( $url_hash === $api->prepare_post_message( $url_hash ), 'URL fragment is not split into a trailing tag' );
+$glued = 'See https://example.com/page#section #boats';
+$assert( $glued === $api->prepare_post_message( $glued ), 'glued fragment stays attached while a spaced tag remains trailing' );
+
 // Body under the limit, trailing tags dropped whole. A later short tag is not skipped ahead.
 $body  = str_repeat( 'a', 290 );
 $long  = '#' . str_repeat( 'b', 20 );

@@ -543,7 +543,8 @@ class WP_BSky_AutoPoster_API {
             return array($message, array());
         }
 
-        $pattern = '/^(.*?)(?:\s+)?((?:[#$][^\s]+)(?:\s+[#$][^\s]+)*)\s*$/u';
+        // First tag must start at a token boundary (start of string or whitespace).
+        $pattern = '/^(.*?)(?:^|\s+)((?:[#$][^\s]+)(?:\s+[#$][^\s]+)*)\s*$/u';
         if (!preg_match($pattern, $message, $matches) || $matches[2] === '') {
             return array($message, array());
         }
