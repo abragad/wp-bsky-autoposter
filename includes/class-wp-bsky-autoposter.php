@@ -316,7 +316,10 @@ class WP_BSky_AutoPoster {
     }
 
     /**
-     * Truncate text to fit within AT Protocol's 300 graphemes limit.
+     * Ellipsize text to Bluesky's post limit (300 graphemes and 3000 UTF-8 bytes).
+     *
+     * Link-card descriptions use this. Skeet text is fitted in prepare_post_message(),
+     * which drops trailing hashtags and cashtags whole instead of slicing them.
      *
      * @since    1.1.0
      * @param    string    $text    The text to truncate.
@@ -326,16 +329,8 @@ class WP_BSky_AutoPoster {
         // Remove HTML tags and decode entities
         $text = wp_strip_all_tags($text);
         $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        
-        // Count graphemes (characters that may be composed of multiple code points)
-        $grapheme_count = mb_strlen($text, 'UTF-8');
-        
-        if ($grapheme_count <= 300) {
-            return $text;
-        }
-        
-        // Truncate to 297 characters and add ellipsis
-        return mb_substr($text, 0, 297, 'UTF-8') . '...';
+
+        return $this->api->truncate_to_bluesky_limit($text);
     }
 
     /**
@@ -484,9 +479,6 @@ class WP_BSky_AutoPoster {
             $excerpt = str_replace(array_keys($fallback_replacements), array_values($fallback_replacements), $settings['fallback_text']);
         }
 
-        // Truncate excerpt if needed
-        $excerpt = $this->truncate_for_at_protocol($excerpt);
-
         $replacements = array(
             '{title}' => html_entity_decode($this->get_post_title($post), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
             '{excerpt}' => $excerpt,
@@ -495,9 +487,11 @@ class WP_BSky_AutoPoster {
         );
 
         $message = str_replace(array_keys($replacements), array_values($replacements), $template);
+        $message = wp_strip_all_tags($message);
+        $message = html_entity_decode($message, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-        // Ensure the final message doesn't exceed the limit
-        return $this->truncate_for_at_protocol($message);
+        // Inline tags first, then drop whole trailing tags that do not fit.
+        return $this->api->prepare_post_message($message);
     }
 
     /**

@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.1] - 2026-11-28
+
+### Fixed
+- Skeet text that exceeds Bluesky's limit (300 graphemes or 3000 UTF-8 bytes) now drops trailing hashtags and cashtags as whole tokens after inline tag placement, instead of cutting the post mid-tag and appending `...`
+
 ## [1.8.0] - 2026-10-02
 
 ### Added
